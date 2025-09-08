@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+
 @Getter
 @ConfigurationProperties(prefix = "constants.jwt")
 @RequiredArgsConstructor

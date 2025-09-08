@@ -1,7 +1,7 @@
 package com.otd.otd_user.configuration.security;
 
-import com.otd.onetoday_user.configuration.enumcode.AbstractEnumCodeConverter;
-import com.otd.onetoday_user.configuration.enumcode.EnumMapperType;
+import com.otd.otd_user.configuration.enumcode.AbstractEnumCodeConverter;
+import com.otd.otd_user.configuration.enumcode.EnumMapperType;
 import jakarta.persistence.Converter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

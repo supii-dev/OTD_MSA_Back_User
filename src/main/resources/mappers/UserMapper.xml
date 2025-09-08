@@ -3,8 +3,8 @@
 <mapper namespace="com.otd.onetoday_user.application.user.UserMapper">
 
     <select id="findProfileByUserId"
-            parameterType="com.otd.onetoday_user.application.user.model.UserProfileGetDto"
-            resultType="com.otd.onetoday_user.application.user.model.UserProfileGetRes">
+            parameterType="com.otd.otd_user.application.user.model.UserProfileGetDto"
+            resultType="com.otd.otd_user.application.user.model.UserProfileGetRes">
         SELECT
         user_id as userId,
         pic,
