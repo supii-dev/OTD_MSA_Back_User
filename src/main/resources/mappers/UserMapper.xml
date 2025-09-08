@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.otd.onetoday_user.application.user.UserMapper">
+
+    <select id="findProfileByUserId"
+            parameterType="com.otd.onetoday_user.application.user.model.UserProfileGetDto"
+            resultType="com.otd.onetoday_user.application.user.model.UserProfileGetRes">
+        SELECT
+        user_id as userId,
+        pic,
+        created_at as createdAt,
+        uid,
+        nick_name as nickName
+        FROM user
+        WHERE user_id = #{profileUserId}
+    </select>
+</mapper>
