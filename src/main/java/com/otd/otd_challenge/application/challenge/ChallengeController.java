@@ -20,6 +20,8 @@ public class ChallengeController {
 
     @GetMapping
     public ChallengeDto getChallengeList() {
+        log.info("getChallengeList");
+
         return challengeService.getChallengeList();
     }
 }
