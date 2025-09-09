@@ -3,6 +3,7 @@ package com.otd.otd_challenge.application.challenge;
 import com.otd.otd_challenge.application.challenge.model.ChallengeGetRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,13 +12,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.stream;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChallengeService {
     private final ChallengeMapper challengeMapper;
+    @Value("${constants.file.challenge-pic}")
+    private String imgPath;
 
     public  Map<String, Object> getChallengeList() {
         List<ChallengeGetRes> res = challengeMapper.findAll();
@@ -27,6 +29,8 @@ public class ChallengeService {
         List<ChallengeGetRes> monthly = new ArrayList<>();
 
         for (ChallengeGetRes challengeGetRes : res) {
+            // 파일명 변경
+            challengeGetRes.setImage(imgPath + "/" + challengeGetRes.getImage());
             switch (challengeGetRes.getPeriod()) {
                 case "daily" -> daily.add(challengeGetRes);
                 case "weekly" -> weekly.add(challengeGetRes);
