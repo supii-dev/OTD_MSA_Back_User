@@ -1,6 +1,7 @@
 constants:
   file:
-    upload-directory: C:/Users/숩인/Desktop/hsb/backand/upload
+    upload-directory: D:\kjh\project_2\upload
+    challenge-pic: /challenge
     profile-pic: /profile
   comment:
     start-index: 0
