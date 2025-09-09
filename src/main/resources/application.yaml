@@ -1,6 +1,6 @@
 constants:
   file:
-    upload-directory: D:\kjh\project_2\upload
+    upload-directory: D:/kjh/project_2/upload/
     challenge-pic: /challenge
     profile-pic: /profile
   comment:
@@ -145,15 +145,15 @@ spring:
     init:
       mode: always
 
-eureka:
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://localhost:8881/eureka
+#eureka:
+#  client:
+#    fetch-registry: true
+#    register-with-eureka: true
+#    service-url:
+#      defaultZone: http://localhost:8881/eureka
 
 server:
-  port: 8082
+  port: 8080
   servlet:
     encoding:
       charset: UTF-8
