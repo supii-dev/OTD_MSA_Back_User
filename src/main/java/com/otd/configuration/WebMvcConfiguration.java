@@ -24,9 +24,6 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/pic/**")
                 .addResourceLocations("file:" + uploadDirectory);
-
-        registry.addResourceHandler("/challenge/**")
-                .addResourceLocations("file:" + uploadDirectory + "challenge/");
     }
 
     @Override

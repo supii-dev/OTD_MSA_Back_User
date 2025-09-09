@@ -30,7 +30,7 @@ public class ChallengeService {
 
         for (ChallengeGetRes challengeGetRes : res) {
             // 파일명 변경
-            challengeGetRes.setImage(imgPath + "/" + challengeGetRes.getImage());
+            challengeGetRes.setImage(imgPath + challengeGetRes.getImage());
             switch (challengeGetRes.getPeriod()) {
                 case "daily" -> daily.add(challengeGetRes);
                 case "weekly" -> weekly.add(challengeGetRes);
