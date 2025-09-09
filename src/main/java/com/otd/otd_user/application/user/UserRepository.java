@@ -1,6 +1,6 @@
 package com.otd.otd_user.application.user;
 
-import com.otd.otd_user.configuration.security.SignInProviderType;
+import com.otd.configuration.security.SignInProviderType;
 import com.otd.otd_user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,9 +1,9 @@
 package com.otd.otd_user.application.user;
 
 import com.otd.otd_user.application.user.model.*;
-import com.otd.otd_user.configuration.jwt.JwtTokenManager;
-import com.otd.otd_user.configuration.model.ResultResponse;
-import com.otd.otd_user.configuration.model.UserPrincipal;
+import com.otd.configuration.jwt.JwtTokenManager;
+import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.model.UserPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

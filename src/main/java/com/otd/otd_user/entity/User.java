@@ -1,8 +1,8 @@
 
 package com.otd.otd_user.entity;
 
-import com.otd.otd_user.configuration.enumcode.model.EnumUserRole;
-import com.otd.otd_user.configuration.security.SignInProviderType;
+import com.otd.configuration.enumcode.model.EnumUserRole;
+import com.otd.configuration.security.SignInProviderType;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

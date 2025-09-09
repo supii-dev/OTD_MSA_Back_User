@@ -1,10 +1,10 @@
 package com.otd.otd_user.application.user;
 
 import com.otd.otd_user.application.user.model.*;
-import com.otd.otd_user.configuration.enumcode.model.EnumUserRole;
-import com.otd.otd_user.configuration.model.JwtUser;
-import com.otd.otd_user.configuration.security.SignInProviderType;
-import com.otd.otd_user.configuration.util.ImgUploadManager;
+import com.otd.configuration.enumcode.model.EnumUserRole;
+import com.otd.configuration.model.JwtUser;
+import com.otd.configuration.security.SignInProviderType;
+import com.otd.configuration.util.ImgUploadManager;
 import com.otd.otd_user.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
