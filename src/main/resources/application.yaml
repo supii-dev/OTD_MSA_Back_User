@@ -1,7 +1,7 @@
 constants:
   file:
     upload-directory: D:/dkjh/project/2rd/upload/
-    challenge-pic: /pic/
+    challenge-pic: /files/
     profile-pic: /profile
   comment:
     start-index: 0
