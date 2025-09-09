@@ -1,6 +1,6 @@
 package com.otd.otd_user.application.user.model;
 
-import com.otd.otd_user.configuration.enumcode.model.EnumUserRole;
+import com.otd.configuration.enumcode.model.EnumUserRole;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;

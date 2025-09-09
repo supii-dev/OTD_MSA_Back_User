@@ -10,7 +10,8 @@ constants:
     bearer-format: JWT
 
     claim-key: signedUser
-    secret-key: DaeguGreenArtAcademyClass502MsaClassFightingkkkkkk
+    header-key : Authorization
+    secret-key: DaeguGreenArtAcademyClass502RoomForProjectOneTwoDayFighting
 
     access-token-cookie-name: access-token
     access-token-cookie-path: / #모든 경로에서 access-token값이 넘어온다.
@@ -45,6 +46,8 @@ constants:
         secret-key: DEV0A2C37B3D5C593158404BA2DEF241C594D526 #테스트용 secretKey
 
 spring:
+  application:
+    name: OTD_USER
   data:
     redis:
       host: localhost
@@ -64,8 +67,6 @@ spring:
           starttls:
             enable: true
     default-encoding: UTF-8
-  application:
-    name: otd
   datasource:
     url: jdbc:log4jdbc:mariadb://localhost/otd
     username: root
@@ -143,7 +144,20 @@ spring:
     init:
       mode: always
 
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8881/eureka
 
+server:
+  port: 8082
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 mybatis:
   configuration:

@@ -6,7 +6,7 @@ import com.otd.otd_user.application.pay.model.KakaoPayApproveFeignReq;
 import com.otd.otd_user.application.pay.model.KakaoPayApproveRes;
 import com.otd.otd_user.application.pay.model.KakaoPayReadyFeignReq;
 import com.otd.otd_user.application.pay.model.KakaoPayReadyRes;
-import com.otd.otd_user.configuration.feignclient.KakaoPayClientConfiguration;
+import com.otd.configuration.feignclient.KakaoPayClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

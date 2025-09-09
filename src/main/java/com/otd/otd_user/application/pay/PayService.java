@@ -1,8 +1,8 @@
 package com.otd.otd_user.application.pay;
 
 import com.otd.otd_user.application.pay.model.*;
-import com.otd.otd_user.configuration.constants.ConstKakaoPay;
-import com.otd.otd_user.configuration.util.SessionUtils;
+import com.otd.configuration.constants.ConstKakaoPay;
+import com.otd.configuration.util.SessionUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
