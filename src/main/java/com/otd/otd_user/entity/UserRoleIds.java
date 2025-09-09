@@ -1,6 +1,6 @@
 package com.otd.otd_user.entity;
 
-import com.otd.otd_user.configuration.enumcode.model.EnumUserRole;
+import com.otd.configuration.enumcode.model.EnumUserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;

@@ -1,6 +1,6 @@
 package com.otd.otd_user.application.user.model;
 
-import com.otd.otd_user.configuration.model.JwtUser;
+import com.otd.configuration.model.JwtUser;
 import lombok.Builder;
 import lombok.Getter;
 

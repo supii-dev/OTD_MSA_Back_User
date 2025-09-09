@@ -3,7 +3,7 @@ package com.otd.otd_user.application.pay;
 import com.otd.otd_user.application.pay.model.KakaoPayApproveReq;
 import com.otd.otd_user.application.pay.model.KakaoPayApproveRes;
 import com.otd.otd_user.application.pay.model.KakaoPayReadyRes;
-import com.otd.otd_user.configuration.model.ResultResponse;
+import com.otd.configuration.model.ResultResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
