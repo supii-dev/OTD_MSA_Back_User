@@ -6,10 +6,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ChallengeGetRes {
-    private Long cdId;
-    private int cdGoal;
-    private String cdImage;
-    private String cdName;
-    private String cdPeriod;
-    private int cdReward;
+    private Long id;
+    private int goal;
+    private String image;
+    private String name;
+    private String period;
+    private int reward;
 }
