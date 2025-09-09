@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.otd.otd_challenge.application.challenge.ChallengeMapper">
+    <select id="findAll">
+        SELECT cd_id AS id, cd_goal AS goal, cd_image AS image,
+               cd_name AS name, cd_period AS period, cd_reward AS reward
+        FROM challenge_definition
+    </select>
+</mapper>

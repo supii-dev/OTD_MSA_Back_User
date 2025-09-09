@@ -13,5 +13,4 @@ public class OtdMsaBackApplication {
     public static void main(String[] args) {
         SpringApplication.run(OtdMsaBackApplication.class, args);
     }
-
 }

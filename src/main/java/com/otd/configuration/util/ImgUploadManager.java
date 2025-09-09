@@ -21,7 +21,7 @@ public class ImgUploadManager {
 
     public List<String> saveFeedPics(long feedId, List<MultipartFile> pics) {
         //폴더 생성
-        String directory = String.format("%s/%s/%d", constFile.getUploadDirectory(), constFile.getFeedPic(), feedId);
+        String directory = String.format("%s/%s/%d", constFile.getUploadDirectory(), constFile.getChallengePic(), feedId);
         myFileUtils.makeFolders(directory);
 
         List<String> randomFileNames = new ArrayList<>(pics.size());
@@ -51,7 +51,7 @@ public class ImgUploadManager {
     }
 
     private String makeFeedDirectoryPath(long feedId) {
-        return String.format("%s/%s/%d",  constFile.getUploadDirectory(), constFile.getFeedPic(), feedId);
+        return String.format("%s/%s/%d",  constFile.getUploadDirectory(), constFile.getChallengePic(), feedId);
     }
 
     //피드 폴더 삭제
