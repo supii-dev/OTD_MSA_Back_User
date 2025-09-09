@@ -1,6 +1,5 @@
-package com.otd.otd_user;
+package com.otd;
 
-import com.otd.otd_user.configuration.constants.ConstJwt;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -14,5 +13,4 @@ public class OtdMsaBackApplication {
     public static void main(String[] args) {
         SpringApplication.run(OtdMsaBackApplication.class, args);
     }
-
 }

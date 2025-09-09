@@ -54,6 +54,7 @@ public class WebSecurityConfiguration {
                                                       , "/api/user/follow"
                                                       , "/api/user/profile"
                                                       , "/api/user/profile/pic").authenticated()
+//                                       .requestMatchers("/api/OTD/challenge").permitAll()
                                        .anyRequest().permitAll()
                    )
                    //.addFilterBefore(tokenAuthenticationFilter, LogoutFilter.class)

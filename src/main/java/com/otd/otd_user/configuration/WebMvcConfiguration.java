@@ -16,8 +16,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     private final String uploadDirectory;
 
     public WebMvcConfiguration(@Value("${constants.file.upload-directory}") String uploadDirectory) {
-        this.uploadDirectory = uploadDirectory;
         log.info("Upload Path: {}", uploadDirectory);
+        this.uploadDirectory = uploadDirectory;
     }
 
     @Override
