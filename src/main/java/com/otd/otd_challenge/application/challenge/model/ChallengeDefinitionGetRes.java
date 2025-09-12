@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ChallengeGetRes {
+public class ChallengeDefinitionGetRes {
     private int id;
     private int goal;
     private String image;

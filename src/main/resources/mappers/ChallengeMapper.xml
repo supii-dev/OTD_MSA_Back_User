@@ -6,4 +6,14 @@
                cd_name AS name, cd_period AS period, cd_reward AS reward
         FROM challenge_definition
     </select>
+    <select id="findAllProgressFromUserId">
+        SELECT cp.user_id AS userId, cp.cp_id AS cpId, cp.cd_id AS cdId,
+               cp.start_date, cp.end_date, cp.`record`, cd.cd_image AS image,
+               cd.cd_period AS period, cd.cd_name AS `name`,
+               cd.cd_reward AS reward
+        FROM challenge_progress cp
+        INNER JOIN challenge_definition cd
+        ON cd.cd_id = cp.cd_id
+        WHERE cp.user_id = #{userId}
+    </select>
 </mapper>
