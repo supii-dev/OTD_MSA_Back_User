@@ -7,4 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface UserMapper {
     UserProfileGetRes findProfileByUserId(UserProfileGetDto dto);
+    int countByUid(String uid);
+    int countByNickname(String nickname);
+    int countByCi(String ci);
+    int countByDi(String di);
 }

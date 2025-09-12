@@ -95,7 +95,7 @@ public class JwtTokenManager {
         setAccessTokenInCookie(response, accessToken);
     }
 
-    public void signOut(HttpServletResponse response) {
+    public void logout(HttpServletResponse response) {
         deleteAccessTokenInCookie(response);
         deleteRefreshTokenInCookie(response);
         deleteSocialLogin(response);
