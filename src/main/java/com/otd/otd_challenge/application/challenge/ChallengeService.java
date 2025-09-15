@@ -35,10 +35,10 @@ public class ChallengeService {
         for (ChallengeDefinitionGetRes challengeDefinitionGetRes : res) {
             // 파일명 변경
             challengeDefinitionGetRes.setImage(imgPath + challengeDefinitionGetRes.getImage());
-            switch (challengeDefinitionGetRes.getPeriod()) {
-                case "daily" -> personal.add(challengeDefinitionGetRes);
+            switch (challengeDefinitionGetRes.getType()) {
+                case "personal" -> personal.add(challengeDefinitionGetRes);
                 case "weekly" -> weekly.add(challengeDefinitionGetRes);
-                case "monthly" -> competition.add(challengeDefinitionGetRes);
+                case "competition" -> competition.add(challengeDefinitionGetRes);
             }
         }
         Map<String, List<ChallengeDefinitionGetRes>> grouping = competition.stream()
@@ -63,10 +63,10 @@ public class ChallengeService {
 
         for (ChallengeProgressGetRes challengeProgressGetRes : res) {
             challengeProgressGetRes.setImage(imgPath + challengeProgressGetRes.getImage());
-            switch (challengeProgressGetRes.getPeriod()) {
-                case "daily" -> personal.add(challengeProgressGetRes);
+            switch (challengeProgressGetRes.getType()) {
+                case "personal" -> personal.add(challengeProgressGetRes);
                 case "weekly" -> weekly.add(challengeProgressGetRes);
-                case "monthly" -> competition.add(challengeProgressGetRes);
+                case "competition" -> competition.add(challengeProgressGetRes);
             }
         }
         Map<String, List<ChallengeProgressGetRes>> dto = new HashMap<>();
@@ -79,7 +79,7 @@ public class ChallengeService {
         return dto;
     }
 
-    public List<ChallengeDefinition> getChallenge(String keyword) {
-        return challengeDefinitionRepository.findByCdPeriod(keyword);
+    public List<ChallengeDefinitionGetRes> getChallenge(ChallengeProgressGetReq req) {
+        return challengeMapper.findByType(req);
     }
 }

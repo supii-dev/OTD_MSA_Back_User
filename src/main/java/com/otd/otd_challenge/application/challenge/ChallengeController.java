@@ -20,7 +20,7 @@ public class ChallengeController {
 
     private final ChallengeService challengeService;
 
-    @GetMapping
+    @GetMapping("/list")
     public Map<String, Object> getChallengeList() {
         return challengeService.getChallengeList();
     }
@@ -32,8 +32,9 @@ public class ChallengeController {
         return result;
     }
 
-    @GetMapping("list")
-    public List<ChallengeDefinition> getChallenge(@RequestParam String keyword) {
-        return challengeService.getChallenge(keyword);
+    @GetMapping("/addlist")
+    public List<ChallengeDefinitionGetRes> getChallenge(@ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getChallenge(req);
     }
+
 }

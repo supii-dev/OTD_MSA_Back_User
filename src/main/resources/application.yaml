@@ -154,7 +154,7 @@ spring:
 #      defaultZone: http://localhost:8881/eureka
 
 server:
-  port: 8082
+  port: 8080
   servlet:
     encoding:
       charset: UTF-8
