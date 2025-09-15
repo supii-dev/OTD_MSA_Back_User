@@ -47,16 +47,12 @@ public class WebSecurityConfiguration {
                                                         // 세션을 이용한 공격이다. 세션을 어차피 안 쓰니까 비활성화
                    .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource())) // ⭐️⭐️⭐️
                    .authorizeHttpRequests(req -> req
-                                       .requestMatchers(HttpMethod.POST, "/api/feed").hasAnyRole(EnumUserRole.USER.name())
-                                       .requestMatchers("/api/feed"
-                                                      , "/api/feed/like"
-                                                      , "/api/feed/comment"
-                                                      , "/api/user/follow"
-                                                      , "/api/user/profile"
+                           .requestMatchers(HttpMethod.POST, "/api/OTD/user/logout").authenticated()
+                                       .requestMatchers("/api/user/profile"
                                                       , "/api/user/profile/pic").authenticated()
                                        .anyRequest().permitAll()
                    )
-                   //.addFilterBefore(tokenAuthenticationFilter, LogoutFilter.class)
+                   .logout(logout -> logout.disable())
                    .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                    .oauth2Login(oauth2 -> oauth2.authorizationEndpoint( auth -> auth.baseUri(constOAuth2.baseUri)
                                                                                     .authorizationRequestRepository(repository)
@@ -67,7 +63,6 @@ public class WebSecurityConfiguration {
                                           .failureHandler( authenticationFailureHandler )
                    )
                    .addFilterBefore(new Oauth2AuthenticationCheckRedirectUriFilter(constOAuth2), OAuth2AuthorizationRequestRedirectFilter.class)
-                   //.logout(logout -> logout.logoutUrl("/api/user/sign-out").deleteCookies("JSESSIONID", "Authorization", "RefreshToken"))
                    .exceptionHandling(e -> e.authenticationEntryPoint(tokenAuthenticationEntryPoint))
                    .build();
     }

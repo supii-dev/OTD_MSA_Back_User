@@ -38,7 +38,7 @@ constants:
     cookie-expiry-seconds: 180
     authorized-redirect-uris:
       - http://localhost:5173/fe/redirect
-      - http://localhost:5174/fe/redirect
+      - http://localhost:5175/fe/redirect
       - http://112.222.157.157:5174/fe/redirect
   pay:
     kakao:
@@ -150,13 +150,6 @@ spring:
   sql:
     init:
       mode: always
-
-#eureka:
-#  client:
-#    fetch-registry: true
-#    register-with-eureka: true
-#    service-url:
-#      defaultZone: http://localhost:8881/eureka
 
 server:
   port: 8080
