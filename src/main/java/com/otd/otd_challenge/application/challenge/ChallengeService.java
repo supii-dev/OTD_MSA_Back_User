@@ -1,6 +1,7 @@
 package com.otd.otd_challenge.application.challenge;
 
 import com.otd.otd_challenge.application.challenge.model.ChallengeDefinitionGetRes;
+import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetReq;
 import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetRes;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import lombok.RequiredArgsConstructor;
@@ -27,52 +28,52 @@ public class ChallengeService {
     public Map<String, Object> getChallengeList() {
         List<ChallengeDefinitionGetRes> res = challengeMapper.findAll();
 
-        List<ChallengeDefinitionGetRes> daily = new ArrayList<>();
+        List<ChallengeDefinitionGetRes> personal = new ArrayList<>();
         List<ChallengeDefinitionGetRes> weekly = new ArrayList<>();
-        List<ChallengeDefinitionGetRes> monthly = new ArrayList<>();
+        List<ChallengeDefinitionGetRes> competition = new ArrayList<>();
 
         for (ChallengeDefinitionGetRes challengeDefinitionGetRes : res) {
             // 파일명 변경
             challengeDefinitionGetRes.setImage(imgPath + challengeDefinitionGetRes.getImage());
             switch (challengeDefinitionGetRes.getPeriod()) {
-                case "daily" -> daily.add(challengeDefinitionGetRes);
+                case "daily" -> personal.add(challengeDefinitionGetRes);
                 case "weekly" -> weekly.add(challengeDefinitionGetRes);
-                case "monthly" -> monthly.add(challengeDefinitionGetRes);
+                case "monthly" -> competition.add(challengeDefinitionGetRes);
             }
         }
-        Map<String, List<ChallengeDefinitionGetRes>> grouping = monthly.stream()
+        Map<String, List<ChallengeDefinitionGetRes>> grouping = competition.stream()
                 .collect(Collectors.groupingBy(ChallengeDefinitionGetRes::getName));
 
         Map<String, Object> dto = new HashMap<>();
 
-        dto.put("dailyChallenge", daily);
+        dto.put("personalChallenge", personal);
         dto.put("weeklyChallenge", weekly);
-        dto.put("monthlyChallenge", grouping);
+        dto.put("competitionChallenge", grouping);
 
         log.info("ChallengeService getChallengeList dto: {}", dto);
         return dto;
     }
 
-    public Map<String, List<ChallengeProgressGetRes>> getSelectedList(Long userId) {
-        List<ChallengeProgressGetRes> res = challengeMapper.findAllProgressFromUserId(userId);
+    public Map<String, List<ChallengeProgressGetRes>> getSelectedList(ChallengeProgressGetReq req) {
+        List<ChallengeProgressGetRes> res = challengeMapper.findAllProgressFromUserId(req);
 
-        List<ChallengeProgressGetRes> daily = new ArrayList<>();
+        List<ChallengeProgressGetRes> personal = new ArrayList<>();
         List<ChallengeProgressGetRes> weekly = new ArrayList<>();
-        List<ChallengeProgressGetRes> monthly = new ArrayList<>();
+        List<ChallengeProgressGetRes> competition = new ArrayList<>();
 
         for (ChallengeProgressGetRes challengeProgressGetRes : res) {
             challengeProgressGetRes.setImage(imgPath + challengeProgressGetRes.getImage());
             switch (challengeProgressGetRes.getPeriod()) {
-                case "daily" -> daily.add(challengeProgressGetRes);
+                case "daily" -> personal.add(challengeProgressGetRes);
                 case "weekly" -> weekly.add(challengeProgressGetRes);
-                case "monthly" -> monthly.add(challengeProgressGetRes);
+                case "monthly" -> competition.add(challengeProgressGetRes);
             }
         }
         Map<String, List<ChallengeProgressGetRes>> dto = new HashMap<>();
 
-        dto.put("dailyChallenge", daily);
+        dto.put("personalChallenge", personal);
         dto.put("weeklyChallenge", weekly);
-        dto.put("monthlyChallenge", monthly);
+        dto.put("competitionChallenge", competition);
 
         log.info(" dto: {}", dto);
         return dto;
