@@ -20,14 +20,32 @@ import java.io.IOException;
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenManager jwtTokenManager;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("request.getRequestURI(): {}", request.getRequestURI());
-        //토큰 처리
-        Authentication authentication = jwtTokenManager.getAuthentication(request);
-        if (authentication != null) {
-            SecurityContextHolder.getContext().setAuthentication(authentication); //인증 처리
-        }
-        filterChain.doFilter(request, response); //다음 필터에게 req, res 넘기기
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+//        log.info("request.getRequestURI(): {}", request.getRequestURI());
+//        //토큰 처리
+//        Authentication authentication = jwtTokenManager.getAuthentication(request);
+//        if (authentication != null) {
+//            SecurityContextHolder.getContext().setAuthentication(authentication); //인증 처리
+//        }
+//        filterChain.doFilter(request, response); //다음 필터에게 req, res 넘기기
+//    }
+@Override
+protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    log.info("request.getRequestURI(): {}", request.getRequestURI());
+
+    // 로그아웃 요청은 토큰 없어도 통과
+    if (request.getRequestURI().equals("/api/OTD/user/logout")) {
+        filterChain.doFilter(request, response);
+        return;
     }
+
+    Authentication authentication = jwtTokenManager.getAuthentication(request);
+    if (authentication != null) {
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    filterChain.doFilter(request, response);
+}
+
 }
