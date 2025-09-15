@@ -47,13 +47,9 @@ public class WebSecurityConfiguration {
                                                         // 세션을 이용한 공격이다. 세션을 어차피 안 쓰니까 비활성화
                    .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource())) // ⭐️⭐️⭐️
                    .authorizeHttpRequests(req -> req
-                                       .requestMatchers(HttpMethod.POST, "/api/OTD/feed").hasAnyRole(EnumUserRole.USER.name())
-                                       .requestMatchers("/api/OTD/feed"
-                                                      , "/api/OTD/feed/like"
-                                                      , "/api/OTD/feed/comment"
-                                                      , "/api/OTD/user/follow"
-                                                      , "/api/OTD/user/profile"
-                                                      , "/api/OTD/user/profile/pic","/api/OTD/meal").authenticated()
+                           .requestMatchers(HttpMethod.POST, "/api/OTD/user/logout").authenticated()
+                                       .requestMatchers("/api/user/profile"
+                                                      , "/api/user/profile/pic").authenticated()
                                        .anyRequest().permitAll()
                    )
                    //.addFilterBefore(tokenAuthenticationFilter, LogoutFilter.class)

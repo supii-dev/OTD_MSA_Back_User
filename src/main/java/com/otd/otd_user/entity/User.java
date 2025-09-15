@@ -24,12 +24,6 @@ public class User extends UpdatedAt{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(length = 100)
-    private String accessToken;
-
-    @Column(nullable = false, length = 2)
-    private SignInProviderType providerType;
-
     @Column(nullable = false, length = 50)
     private String uid;
 
@@ -42,28 +36,33 @@ public class User extends UpdatedAt{
     @Column(length = 100)
     private String pic;
 
-    // 추가된 필드들
-    @Column(nullable = false)
+    @Column(length = 30)
     private String name;
 
-    @Column(nullable = false,name = "birth_date")
+    @Column(name = "birth_date")
     private LocalDate birthDate; // 생년월일
 
-    @Column(nullable = false,length = 1)
+    @Column(length = 1)
     private String gender; // 성별 (M: 남성, F: 여성)
 
     @Column(length = 100, unique = true)
     private String email; // 이메일 (고유값으로 설정)
 
-    @Column(length = 11)
+    @Column(length = 30)
     private String phoneNumber; // 휴대폰번호
 
-    // 본인인증 관련 필드 추가
-    @Column(length = 88, name = "ci")
-    private String ci; // 연계정보 (Connecting Information)
+    @Column(length = 100)
+    private String accessToken;
 
-    @Column(length = 64, name = "di")
-    private String di; // 중복가입확인정보 (Duplication Information)
+    @Column(length = 2)
+    private SignInProviderType providerType;
+
+    // 본인인증 관련 필드 추가
+//    @Column(length = 88, name = "ci")
+//    private String ci; // 연계정보 (Connecting Information)
+//
+//    @Column(length = 64, name = "di")
+//    private String di; // 중복가입확인정보 (Duplication Information)
 
     //cascade는 자식과 나랑 모든 연결 (내가 영속성되면 자식도 영속성되고, 내가 삭제되면 자식도 삭제 된다. 등등)
     //ohphanRemoval은 userRoles에서 자식을 하나 제거함. 그러면 DB에도 뺀 자식은 삭제처리가 된다.
