@@ -146,15 +146,20 @@ spring:
     init:
       mode: always
 
-#eureka:
-#  client:
-#    fetch-registry: true
-#    register-with-eureka: true
-#    service-url:
-#      defaultZone: http://localhost:8881/eureka
-
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8081/eureka
+#   status 이름 변경 부분
+  instance:
+    prefer-ip-address: true
+    ip-address: ${server.address}
+    instance-id: ${server.address}:${server.port}
 server:
   port: 8082
+  address: localhost
   servlet:
     encoding:
       charset: UTF-8

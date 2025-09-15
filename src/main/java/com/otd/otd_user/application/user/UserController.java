@@ -25,6 +25,11 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenManager jwtTokenManager;
 
+    @GetMapping("/")
+    public String healthCheck() {
+        return "Hello from OTD-USER Service!";
+    }
+
     @PostMapping("/join")
     public ResultResponse<?> join(@Valid @RequestPart UserJoinReq req
             , @RequestPart(required = false) MultipartFile pic) {
