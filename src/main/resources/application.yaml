@@ -1,6 +1,7 @@
 constants:
   file:
-    upload-directory: C:/Users/숩인/Desktop/hsb/backand/upload
+    upload-directory: D:/kjh/project_2/upload/challenge
+    challenge-pic: /files/
     profile-pic: /profile
   comment:
     start-index: 0
@@ -32,6 +33,7 @@ constants:
     cookie-expiry-seconds: 180
     authorized-redirect-uris:
       - http://localhost:5173/fe/redirect
+      - http://localhost:5174/fe/redirect
       - http://112.222.157.157:5174/fe/redirect
   pay:
     kakao:
@@ -110,8 +112,8 @@ spring:
               - profile
           kakao:
             client-name: Kakao
-            client-id: 23cc7564b5c5007c60f5088a24f32fbe
-            client-secret: UsaYUJvlEy5yNfOMKNrgXbbes6WCYfod
+            client-id: ea7335b63181c9ea13d1e2ca858e03f8
+            client-secret: ZXQ6kO4UeooM0Nauxmqb5shOafur5cf4
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
@@ -125,8 +127,8 @@ spring:
             #       http://localhost8080/login/oauth2/code/kakao
           naver:
             client-name: Naver
-            client-id: k7L3R4HdmuHmqYCldZDW
-            client-secret: TY8EYMdwKs
+            client-id: P72KoAqAMzH5sNgVCdYF
+            client-secret: 82rDV1lZi5
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
@@ -144,12 +146,12 @@ spring:
     init:
       mode: always
 
-eureka:
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://localhost:8881/eureka
+#eureka:
+#  client:
+#    fetch-registry: true
+#    register-with-eureka: true
+#    service-url:
+#      defaultZone: http://localhost:8881/eureka
 
 server:
   port: 8082

@@ -2,7 +2,18 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.otd.otd_challenge.application.challenge.ChallengeMapper">
     <select id="findAll">
-        SELECT cd_id, cd_goal, cd_image, cd_name, cd_period, cd_reward
-        WHERE challenge_definition
+        SELECT cd_id AS id, cd_goal AS goal, cd_image AS image,
+               cd_name AS name, cd_period AS period, cd_reward AS reward
+        FROM challenge_definition
+    </select>
+    <select id="findAllProgressFromUserId">
+        SELECT cp.user_id AS userId, cp.cp_id AS cpId, cp.cd_id AS cdId,
+               cp.start_date, cp.end_date, cp.`record`, cd.cd_image AS image,
+               cd.cd_period AS period, cd.cd_name AS `name`,
+               cd.cd_reward AS reward
+        FROM challenge_progress cp
+        INNER JOIN challenge_definition cd
+        ON cd.cd_id = cp.cd_id
+        WHERE cp.user_id = #{userId}
     </select>
 </mapper>

@@ -19,9 +19,17 @@ public class ChallengeController {
     private final ChallengeService challengeService;
 
     @GetMapping
-    public ChallengeDto getChallengeList() {
-        log.info("getChallengeList");
-
+    public Map<String, Object> getChallengeList() {
         return challengeService.getChallengeList();
+    }
+
+    @GetMapping("/selected")
+    public Map<String, List<ChallengeProgressGetRes>> getSelectedList(@RequestParam Long userId) {
+        return challengeService.getSelectedList(userId);
+    }
+
+    @GetMapping("list")
+    public List<ChallengeDefinition> getChallenge(@RequestParam String keyword) {
+        return challengeService.getChallenge(keyword);
     }
 }

@@ -7,7 +7,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class UserSignInReq {
+public class UserLoginReq {
     @NotNull(message = "아이디는 필수로 입력하셔야 합니다.")
     @Pattern(regexp = "^[A-Za-z0-9_]{4,50}$", message = "아이디는 영어, 숫자, 언더바로만 구성되어야 하며 4~50자까지 작성할 수 있습니다.")
     private String uid;

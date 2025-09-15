@@ -1,4 +1,4 @@
-package com.otd.otd_user.application.user.model;
+package com.otd.otd_user.application.email.model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
