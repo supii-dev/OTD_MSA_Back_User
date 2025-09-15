@@ -15,7 +15,7 @@ public class ChallengeProgressGetRes {
     private LocalDate endDate;
     private Double record;
     private String image;
-    private String period;
+    private String type;
     private String name;
     private int reward;
 }

@@ -25,20 +25,32 @@ public class ChallengeService {
     @Value("${constants.file.challenge-pic}")
     private String imgPath;
 
+    private void addImgPath(List<?> list) {
+        for (Object o : list) {
+            if (o instanceof ChallengeDefinitionGetRes cd) {
+                cd.setImage(imgPath + cd.getImage());
+            } else if (o instanceof ChallengeProgressGetRes cp) {
+                cp.setImage(imgPath + cp.getImage());
+            }
+        }
+    }
     public Map<String, Object> getChallengeList() {
         List<ChallengeDefinitionGetRes> res = challengeMapper.findAll();
 
         List<ChallengeDefinitionGetRes> personal = new ArrayList<>();
         List<ChallengeDefinitionGetRes> weekly = new ArrayList<>();
         List<ChallengeDefinitionGetRes> competition = new ArrayList<>();
+        List<ChallengeDefinitionGetRes> daily = new ArrayList<>();
 
+        addImgPath(res);
         for (ChallengeDefinitionGetRes challengeDefinitionGetRes : res) {
             // 파일명 변경
-            challengeDefinitionGetRes.setImage(imgPath + challengeDefinitionGetRes.getImage());
-            switch (challengeDefinitionGetRes.getPeriod()) {
-                case "daily" -> personal.add(challengeDefinitionGetRes);
+
+            switch (challengeDefinitionGetRes.getType()) {
+                case "personal" -> personal.add(challengeDefinitionGetRes);
                 case "weekly" -> weekly.add(challengeDefinitionGetRes);
-                case "monthly" -> competition.add(challengeDefinitionGetRes);
+                case "competition" -> competition.add(challengeDefinitionGetRes);
+                case "daily" -> daily.add(challengeDefinitionGetRes);
             }
         }
         Map<String, List<ChallengeDefinitionGetRes>> grouping = competition.stream()
@@ -49,6 +61,7 @@ public class ChallengeService {
         dto.put("personalChallenge", personal);
         dto.put("weeklyChallenge", weekly);
         dto.put("competitionChallenge", grouping);
+        dto.put("dailyMission", daily);
 
         log.info("ChallengeService getChallengeList dto: {}", dto);
         return dto;
@@ -60,13 +73,16 @@ public class ChallengeService {
         List<ChallengeProgressGetRes> personal = new ArrayList<>();
         List<ChallengeProgressGetRes> weekly = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
+        List<ChallengeProgressGetRes> daily = new ArrayList<>();
 
+        addImgPath(res);
         for (ChallengeProgressGetRes challengeProgressGetRes : res) {
-            challengeProgressGetRes.setImage(imgPath + challengeProgressGetRes.getImage());
-            switch (challengeProgressGetRes.getPeriod()) {
-                case "daily" -> personal.add(challengeProgressGetRes);
+
+            switch (challengeProgressGetRes.getType()) {
+                case "personal" -> personal.add(challengeProgressGetRes);
                 case "weekly" -> weekly.add(challengeProgressGetRes);
-                case "monthly" -> competition.add(challengeProgressGetRes);
+                case "competition" -> competition.add(challengeProgressGetRes);
+                case "daily" -> daily.add(challengeProgressGetRes);
             }
         }
         Map<String, List<ChallengeProgressGetRes>> dto = new HashMap<>();
@@ -74,12 +90,13 @@ public class ChallengeService {
         dto.put("personalChallenge", personal);
         dto.put("weeklyChallenge", weekly);
         dto.put("competitionChallenge", competition);
+        dto.put("dailyMission", daily);
 
         log.info(" dto: {}", dto);
         return dto;
     }
 
     public List<ChallengeDefinition> getChallenge(String keyword) {
-        return challengeDefinitionRepository.findByCdPeriod(keyword);
+        return challengeDefinitionRepository.findByCdType(keyword);
     }
 }
