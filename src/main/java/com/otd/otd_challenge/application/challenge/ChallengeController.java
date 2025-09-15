@@ -37,4 +37,9 @@ public class ChallengeController {
         return challengeService.getChallenge(req);
     }
 
+    @GetMapping("/addCompetitionlist")
+    public Map<String, List<ChallengeDefinitionGetRes>> getMapChallenge(@ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getMapChallenge(req);
+    }
+
 }
