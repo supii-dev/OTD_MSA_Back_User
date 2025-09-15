@@ -2,6 +2,7 @@ package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_challenge.application.challenge.model.ChallengeDefinitionGetRes;
+import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetReq;
 import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetRes;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,10 @@ public class ChallengeController {
     }
 
     @GetMapping("/selected")
-    public Map<String, List<ChallengeProgressGetRes>> getSelectedList(@RequestParam Long userId) {
-        return challengeService.getSelectedList(userId);
+    public Map<String, List<ChallengeProgressGetRes>> getSelectedList(@ModelAttribute ChallengeProgressGetReq req) {
+        Map<String, List<ChallengeProgressGetRes>> result = challengeService.getSelectedList(req);
+        log.info("result={}", result);
+        return result;
     }
 
     @GetMapping("list")

@@ -15,5 +15,7 @@
         INNER JOIN challenge_definition cd
         ON cd.cd_id = cp.cd_id
         WHERE cp.user_id = #{userId}
+        AND Year(cp.start_date) = #{year}
+        AND Month(cp.start_date) = #{month}
     </select>
 </mapper>
