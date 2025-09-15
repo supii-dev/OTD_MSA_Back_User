@@ -82,10 +82,14 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResultResponse<?> logout(@AuthenticationPrincipal UserPrincipal userPrincipal
-            , HttpServletResponse response) {
+    public ResultResponse<?> logout(HttpServletResponse response) {
         jwtTokenManager.logout(response);
-        return new ResultResponse<>("로그아웃 성공", null);
+        return new ResultResponse<>("sign-out 성공", null);
+    }
+
+    @PostMapping("/test")
+    public String test() {
+        return "테스트 성공";
     }
 
     @PostMapping("/reissue")

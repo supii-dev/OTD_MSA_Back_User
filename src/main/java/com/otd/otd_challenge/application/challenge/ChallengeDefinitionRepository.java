@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface ChallengeDefinitionRepository extends JpaRepository<ChallengeDefinition, Long> {
 
-//    List<ChallengeDefinition> findByCdPeriod(String cdPeriod);
+    List<ChallengeDefinition> findByCdType(String cdPeriod);
 }

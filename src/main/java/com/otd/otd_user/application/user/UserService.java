@@ -61,8 +61,8 @@ public class UserService {
         user.setPhoneNumber(req.getPhone());
         user.setBirthDate(req.getBirthDate());
         user.setGender(req.getGender());
-        user.setCi(req.getCi());
-        user.setDi(req.getDi());
+//        user.setCi(req.getCi());
+//        user.setDi(req.getDi());
 
         // 기본 역할 설정
         if (req.getRoles() == null || req.getRoles().isEmpty()) {
