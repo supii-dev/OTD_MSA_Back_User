@@ -23,8 +23,8 @@ public class ChallengeDefinition {
     @Column(nullable = false)
     private Long cdReward;
 
-    @Column(nullable = false, length = 7)
-    private String cdPeriod;
+    @Column(nullable = false, length = 12)
+    private String cdType;
 
     @Column(nullable = false)
     private String cdImage;
