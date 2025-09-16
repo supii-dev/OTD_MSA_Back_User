@@ -29,6 +29,9 @@ public class ChallengeDefinition {
     @Column(nullable = false)
     private String cdImage;
 
-    @Column
+    @Column(nullable = false)
     private Long cdGoal;
+
+    @Column(nullable = false, length = 10)
+    private String cdUnit;
 }
