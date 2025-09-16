@@ -1,15 +1,14 @@
 package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
-import com.otd.otd_challenge.application.challenge.model.ChallengeDefinitionGetRes;
-import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetReq;
-import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetRes;
+import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -110,5 +109,18 @@ public class ChallengeService {
                     .collect(Collectors.groupingBy(ChallengeDefinitionGetRes::getName));
 
         return grouping;
+    }
+
+    public ChallengeDetailGetRes getDetail(Long cdId, ChallengeProgressGetReq req) {
+        ChallengeDetailGetRes res = challengeMapper.findProgressByUserIdAndCdId(cdId, req);
+        List<ChallengeRankGetRes> rank = challengeMapper.findRankingLimitFive(cdId, req);
+        if (res.getGoal() > res.getTotalRecord()) {
+            res.setPercent(((res.getTotalRecord() / res.getGoal()) * 100 ));
+        } else {
+            res.setPercent(100.0);
+        }
+        res.setRanking(rank);
+
+        return res;
     }
 }
