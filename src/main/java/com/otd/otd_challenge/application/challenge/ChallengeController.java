@@ -44,7 +44,7 @@ public class ChallengeController {
     }
 
     @GetMapping("/detail/{cdId}")
-    public ChallengeDetailGetRes getDetail(@PathVariable Long cdId, @RequestBody ChallengeProgressGetReq req) {
+    public ChallengeDetailGetRes getDetail(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
         return challengeService.getDetail(cdId, req);
     }
 }

@@ -11,6 +11,5 @@ public class ChallengeRankGetRes {
     private String nickName;
     private String pic;
     private Double totalRecord;
-    private int totalUser;
     private int rank;
 }

@@ -17,5 +17,7 @@ public class ChallengeDetailGetRes {
     private Double totalRecord;
     private Double goal;
     private Double percent;
+    private int totalUsers;
+    private int myRank;
     private List<ChallengeRankGetRes> ranking;
 }

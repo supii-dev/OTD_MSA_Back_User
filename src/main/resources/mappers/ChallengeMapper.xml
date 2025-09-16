@@ -41,28 +41,28 @@
         AND cd_type = #{type};
     </select>
     <select id="findProgressByUserIdAndCdId">
-        SELECT cp.total_record, cp.user_id AS user_id,
-               cd.cd_id AS cdId, cd.cd_goal AS goal,
-               cd.cd_name AS `name`, cd.`reward` AS reward
+        WITH ranking AS (
+        SELECT
+        cp.user_id,
+        cp.total_record,
+        RANK() OVER (ORDER BY cp.total_record DESC) AS my_rank
         FROM challenge_progress cp
+        WHERE cp.cd_id = #{cdId}
+        AND YEAR(cp.start_date) = #{year}
+        AND MONTH(cp.start_date) = #{month}
+        )
+        SELECT
+        cd.cd_id AS cdId, cd.cd_name AS `name`, r.user_id,cd.cd_goal AS goal,
+        r.total_record, cd.cd_reward AS reward, r.my_rank,
+        (SELECT COUNT(*) FROM ranking) AS total_users
+        FROM ranking r
         INNER JOIN challenge_definition cd
-        ON cp.cd_id = cd.cd_id
-        WHERE cp.user_id = #{userId}
-        AND cd.cd_id = #{cdId}
-        AND Year(cp.start_date) = #{year}
-        AND Month(cp.start_date) = #{month};
+        ON cd.cd_id = #{cdId}
+        WHERE r.user_id = #{userId}
     </select>
     <select id="findRankingLimitFive">
         SELECT u.nick_name, u.pic, cp.total_record,
-                (SELECT COUNT(DISTINCT u2.user_id)
-                FROM user u2
-                INNER JOIN challenge_progress cp2
-                ON u2.user_id = cp2.user_id
-                WHERE cp2.cd_id = #{cdId}
-                AND YEAR(cp2.start_date) = #{year}
-                AND MONTH(cp2.start_date) = #{month})
-                AS total_user
-                RANK() OVER(ORDER BY cp.total_record DESC) AS `rank`
+               RANK() OVER(ORDER BY cp.total_record DESC) AS `rank`
         FROM user u
         INNER JOIN challenge_progress cp
         ON u.user_id = cp.user_id
