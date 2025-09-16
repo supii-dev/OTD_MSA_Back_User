@@ -11,6 +11,6 @@ public interface ChallengeMapper {
     List<ChallengeProgressGetRes> findAllProgressFromUserId(ChallengeProgressGetReq req);
     List<ChallengeDefinitionGetRes> findByType(ChallengeProgressGetReq req);
     List<ChallengeDefinitionGetRes> findByTypeForCompetition(ChallengeProgressGetReq req);
-    ChallengeDetailGetRes findProgressByUserIdAndCdId(Long cdId, ChallengeProgressGetReq req);
-    List<ChallengeRankGetRes> findRankingLimitFive(Long cdId, ChallengeProgressGetReq req);
+    ChallengeDetailGetRes findProgressByUserIdAndCdId(ChallengeProgressGetReq req);
+    List<ChallengeRankGetRes> findRankingLimitFive(ChallengeProgressGetReq req);
 }
