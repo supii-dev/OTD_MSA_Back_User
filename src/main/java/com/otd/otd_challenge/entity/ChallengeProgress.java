@@ -38,6 +38,6 @@ public class ChallengeProgress {
     @Column
     private Double totalRecord;
 
-    @Column(columnDefinition = "0", nullable = false)
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 0", nullable = false)
     private boolean isSuccess;
 }
