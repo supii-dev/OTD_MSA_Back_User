@@ -11,6 +11,5 @@ public class ChallengeProgressGetReq {
   private Long userId;
   private String year;
   private String month;
-  private String cdId;
   private String type;
 }

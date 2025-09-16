@@ -43,8 +43,8 @@ public class ChallengeController {
         return challengeService.getMapChallenge(req);
     }
 
-    @GetMapping("/detail/${cdId}")
-    public ChallengeDetailGetRes getDetail(@ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getDetail(req);
+    @GetMapping("/detail/{cdId}")
+    public ChallengeDetailGetRes getDetail(@PathVariable Long cdId, @RequestBody ChallengeProgressGetReq req) {
+        return challengeService.getDetail(cdId, req);
     }
 }

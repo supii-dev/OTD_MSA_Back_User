@@ -111,9 +111,9 @@ public class ChallengeService {
         return grouping;
     }
 
-    public ChallengeDetailGetRes getDetail(ChallengeProgressGetReq req) {
-        ChallengeDetailGetRes res = challengeMapper.findProgressByUserIdAndCdId(req);
-        List<ChallengeRankGetRes> rank = challengeMapper.findRankingLimitFive(req);
+    public ChallengeDetailGetRes getDetail(Long cdId, ChallengeProgressGetReq req) {
+        ChallengeDetailGetRes res = challengeMapper.findProgressByUserIdAndCdId(cdId, req);
+        List<ChallengeRankGetRes> rank = challengeMapper.findRankingLimitFive(cdId, req);
         if (res.getGoal() > res.getTotalRecord()) {
             res.setPercent(((res.getTotalRecord() / res.getGoal()) * 100 ));
         } else {
