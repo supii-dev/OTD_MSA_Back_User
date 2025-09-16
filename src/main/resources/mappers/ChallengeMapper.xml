@@ -33,10 +33,11 @@
         FROM challenge_definition
         WHERE cd_name NOT IN(SELECT cd.cd_name
                             FROM challenge_definition cd
-                            LEFT JOIN challenge_progress cp
+                            INNER JOIN challenge_progress cp
                             ON cd.cd_id = cp.cd_id AND cd.cd_type = #{type}
                             WHERE cp.user_id = #{userId}
                             AND YEAR(cp.start_date) = #{year}
-                            AND MONTH(cp.start_date) = #{month});
+                            AND MONTH(cp.start_date) = #{month})
+        AND cd_type = #{type};
     </select>
 </mapper>
