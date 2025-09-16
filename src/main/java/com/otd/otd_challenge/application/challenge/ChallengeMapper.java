@@ -11,4 +11,7 @@ import java.util.List;
 public interface ChallengeMapper {
     List<ChallengeDefinitionGetRes> findAll();
     List<ChallengeProgressGetRes> findAllProgressFromUserId(ChallengeProgressGetReq req);
+    List<ChallengeDefinitionGetRes> findByType(ChallengeProgressGetReq req);
+    List<ChallengeDefinitionGetRes> findByTypeForCompetition(ChallengeProgressGetReq req);
+
 }

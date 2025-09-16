@@ -1,5 +1,6 @@
 package com.otd.otd_challenge.application.challenge;
 
+import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_challenge.application.challenge.model.ChallengeDefinitionGetRes;
 import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetReq;
 import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetRes;
@@ -43,8 +44,8 @@ public class ChallengeService {
         List<ChallengeDefinitionGetRes> daily = new ArrayList<>();
 
         addImgPath(res);
+
         for (ChallengeDefinitionGetRes challengeDefinitionGetRes : res) {
-            // 파일명 변경
 
             switch (challengeDefinitionGetRes.getType()) {
                 case "personal" -> personal.add(challengeDefinitionGetRes);
@@ -96,7 +97,18 @@ public class ChallengeService {
         return dto;
     }
 
-    public List<ChallengeDefinition> getChallenge(String keyword) {
-        return challengeDefinitionRepository.findByCdType(keyword);
+    public List<ChallengeDefinitionGetRes> getChallenge(ChallengeProgressGetReq req) {
+        List<ChallengeDefinitionGetRes> res = challengeMapper.findByType(req);
+        addImgPath(res);
+        return res;
+    }
+
+    public Map<String, List<ChallengeDefinitionGetRes>> getMapChallenge(ChallengeProgressGetReq req) {
+        List<ChallengeDefinitionGetRes> res = challengeMapper.findByTypeForCompetition(req);
+        addImgPath(res);
+        Map<String, List<ChallengeDefinitionGetRes>> grouping = res.stream()
+                    .collect(Collectors.groupingBy(ChallengeDefinitionGetRes::getName));
+
+        return grouping;
     }
 }

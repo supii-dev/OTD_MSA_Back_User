@@ -18,4 +18,26 @@
         AND Year(cp.start_date) = #{year}
         AND Month(cp.start_date) = #{month}
     </select>
+    <select id="findByType">
+        SELECT cd.cd_id AS id, cd.cd_goal AS goal, cd.cd_image AS image,
+        cd.cd_name AS name, cd.cd_type AS type, cd.cd_reward AS reward
+        FROM challenge_definition cd
+        WHERE cd.cd_id NOT IN(SELECT cp.cd_id FROM challenge_progress cp WHERE cp.user_id = #{userId}
+                                                                        AND YEAR(cp.start_date) = #{year}
+                                                                        AND MONTH(cp.start_date) = #{month})
+        AND cd.cd_type = #{type}
+    </select>
+    <select id="findByTypeForCompetition">
+        SELECT cd_id AS id, cd_goal AS goal, cd_image AS image,
+        cd_name AS name, cd_type AS type, cd_reward AS reward
+        FROM challenge_definition
+        WHERE cd_name NOT IN(SELECT cd.cd_name
+                            FROM challenge_definition cd
+                            INNER JOIN challenge_progress cp
+                            ON cd.cd_id = cp.cd_id AND cd.cd_type = #{type}
+                            WHERE cp.user_id = #{userId}
+                            AND YEAR(cp.start_date) = #{year}
+                            AND MONTH(cp.start_date) = #{month})
+        AND cd_type = #{type};
+    </select>
 </mapper>
