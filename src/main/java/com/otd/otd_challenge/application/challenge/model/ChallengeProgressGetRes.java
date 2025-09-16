@@ -13,7 +13,7 @@ public class ChallengeProgressGetRes {
     private int cdId;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Double record;
+    private Double totalRecord;
     private String image;
     private String type;
     private String name;
