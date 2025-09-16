@@ -2,6 +2,7 @@ package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_challenge.application.challenge.model.ChallengeDefinitionGetRes;
+import com.otd.otd_challenge.application.challenge.model.ChallengeDetailGetRes;
 import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetReq;
 import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetRes;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
@@ -42,4 +43,8 @@ public class ChallengeController {
         return challengeService.getMapChallenge(req);
     }
 
+    @GetMapping("/detail/${cdId}")
+    public ChallengeDetailGetRes getDetail(@ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getDetail(req);
+    }
 }
