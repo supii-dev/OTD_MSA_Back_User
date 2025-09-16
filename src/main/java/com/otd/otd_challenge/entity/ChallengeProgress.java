@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
@@ -35,5 +36,8 @@ public class ChallengeProgress {
     private LocalDate endDate;
 
     @Column
-    private Double record;
+    private Double totalRecord;
+
+    @Column(columnDefinition = "0", nullable = false)
+    private boolean isSuccess;
 }
