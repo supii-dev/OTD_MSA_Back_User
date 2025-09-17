@@ -3,6 +3,7 @@ package com.otd.otd_challenge.application.challenge;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class ChallengeService {
     private final ChallengeMapper challengeMapper;
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
+    private final ChallengeProgressRepository challengeProgressRepository;
     @Value("${constants.file.challenge-pic}")
     private String imgPath;
 
@@ -115,14 +117,42 @@ public class ChallengeService {
         req.setCdId(cdId);
         ChallengeDetailGetRes res = challengeMapper.findProgressByUserIdAndCdId(req);
         List<ChallengeRankGetRes> rank = challengeMapper.findRankingLimitFive(req);
-        if (res.getGoal() > res.getTotalRecord()) {
-            res.setPercent(((res.getTotalRecord() / res.getGoal()) * 100 ));
+        double goal = Double.parseDouble(res.getGoal());
+        double totalRecord = Double.parseDouble(res.getTotalRecord());
+        if (goal > totalRecord) {
+            double percentage = ((totalRecord / goal) * 100 );
+            res.setPercent(Math.round(percentage * 10 ) / 10.0);
         } else {
             res.setPercent(100.0);
         }
-
+        String formatted;
+        DecimalFormat df;
+        if (totalRecord % 1 == 0) {
+            df = new DecimalFormat("0");
+        } else {
+            df = new DecimalFormat("0.0");
+        }
+        formatted = df.format(totalRecord);
+        res.setTotalRecord(formatted + res.getUnit());
+        res.setGoal(res.getGoal() + res.getUnit());
         res.setRanking(rank);
+        for (ChallengeRankGetRes ranking : rank) {
+            double totalRecord2 = Double.parseDouble(ranking.getTotalRecord());
 
+            if (totalRecord2 % 1 == 0) {
+                df = new DecimalFormat("0");
+            } else {
+                df = new DecimalFormat("0.0");
+            }
+            formatted = df.format(totalRecord2);
+            ranking.setTotalRecord(formatted + res.getUnit());
+        }
         return res;
+    }
+
+    @Transactional
+    public ResultResponse<?> updateIsSuccess(Long cpId){
+        int result = challengeProgressRepository.updateIsSuccess(cpId);
+        return new ResultResponse<>("success", result);
     }
 }

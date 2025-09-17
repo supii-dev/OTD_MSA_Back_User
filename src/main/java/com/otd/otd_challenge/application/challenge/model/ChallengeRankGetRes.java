@@ -10,6 +10,6 @@ import lombok.ToString;
 public class ChallengeRankGetRes {
     private String nickName;
     private String pic;
-    private Double totalRecord;
+    private String totalRecord;
     private int rank;
 }

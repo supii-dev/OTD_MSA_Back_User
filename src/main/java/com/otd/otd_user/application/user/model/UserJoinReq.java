@@ -1,5 +1,6 @@
 package com.otd.otd_user.application.user.model;
 
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -36,4 +37,5 @@ public class UserJoinReq {
     private String di; // 중복가입확인정보
     private String authToken;
     private List<EnumUserRole> roles;
+    private int challengeSurvey; // 챌린지 설문 총 점수
 }

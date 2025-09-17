@@ -1,10 +1,7 @@
 package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
-import com.otd.otd_challenge.application.challenge.model.ChallengeDefinitionGetRes;
-import com.otd.otd_challenge.application.challenge.model.ChallengeDetailGetRes;
-import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetReq;
-import com.otd.otd_challenge.application.challenge.model.ChallengeProgressGetRes;
+import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,5 +43,10 @@ public class ChallengeController {
     @GetMapping("/detail/{cdId}")
     public ChallengeDetailGetRes getDetail(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
         return challengeService.getDetail(cdId, req);
+    }
+
+    @PutMapping("/success")
+    public ResultResponse<?> putSuccess(@RequestBody ChallengeSuccessPutReq req) {
+        return challengeService.updateIsSuccess(req.getCpId());
     }
 }

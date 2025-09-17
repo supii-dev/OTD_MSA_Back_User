@@ -18,7 +18,7 @@ public enum EnumUserRole implements EnumMapperType {
     private final String code;
     private final String value;
 
-    @Converter(autoApply = true)
+    @Converter(autoApply = false)
     public static class CodeConverter extends AbstractEnumCodeConverter<EnumUserRole> {
         public CodeConverter() { super(EnumUserRole.class, false); }
     }

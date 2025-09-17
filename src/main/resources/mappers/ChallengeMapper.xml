@@ -43,8 +43,10 @@
     <select id="findProgressByUserIdAndCdId">
         WITH ranking AS (
         SELECT
+        cp.cp_id,
         cp.user_id,
         cp.total_record,
+        cp.is_success,
         RANK() OVER (ORDER BY cp.total_record DESC) AS my_rank
         FROM challenge_progress cp
         WHERE cp.cd_id = #{cdId}
@@ -52,8 +54,9 @@
         AND MONTH(cp.start_date) = #{month}
         )
         SELECT
-        cd.cd_id AS cdId, cd.cd_name AS `name`, r.user_id,cd.cd_goal AS goal,
-        r.total_record, cd.cd_reward AS reward, r.my_rank,
+        r.cp_id, cd.cd_id AS cdId, cd.cd_name AS `name`, r.user_id,cd.cd_goal AS goal,
+        r.total_record, cd.cd_reward AS reward, r.my_rank, cd.cd_unit AS unit,
+        r.is_success,
         (SELECT COUNT(*) FROM ranking) AS total_users
         FROM ranking r
         INNER JOIN challenge_definition cd
