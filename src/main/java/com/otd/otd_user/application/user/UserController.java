@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/OTD/user")
+@RequestMapping("/OTD/user")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -31,7 +31,7 @@ public class UserController {
         log.info("req: {}", req);
         log.info("pic: {}", pic != null ? pic.getOriginalFilename() : pic);
         userService.join(req, pic);
-        return new ResultResponse<>("회원가입이 완료되었습니다.", 1);
+        return new ResultResponse<>("", 1);
     }
 
     @PostMapping("/login")
