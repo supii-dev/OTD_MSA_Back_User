@@ -87,10 +87,6 @@ public class UserController {
         return new ResultResponse<>("sign-out 성공", null);
     }
 
-    @PostMapping("/test")
-    public String test() {
-        return "테스트 성공";
-    }
 
     @PostMapping("/reissue")
     public ResultResponse<?> reissue(HttpServletResponse response, HttpServletRequest request) {
