@@ -43,25 +43,24 @@
     <select id="findProgressByUserIdAndCdId">
         WITH ranking AS (
         SELECT
-        cp.user_id,
-        cp.total_record,
+        cp.cp_id, cp.user_id, cp.total_record, cp.is_success,
         RANK() OVER (ORDER BY cp.total_record DESC) AS my_rank
         FROM challenge_progress cp
         WHERE cp.cd_id = #{cdId}
         AND YEAR(cp.start_date) = #{year}
-        AND MONTH(cp.start_date) = #{month}
-        )
+        AND MONTH(cp.start_date) = #{month} )
         SELECT
-        cd.cd_id AS cdId, cd.cd_name AS `name`, r.user_id,cd.cd_goal AS goal,
-        r.total_record, cd.cd_reward AS reward, r.my_rank,
+        r.cp_id, cd.cd_id AS cdId, cd.cd_name AS `name`, r.user_id,cd.cd_goal AS goal,
+        r.total_record, cd.cd_reward AS reward, r.my_rank, cd.cd_unit AS unit,
+        r.is_success,
         (SELECT COUNT(*) FROM ranking) AS total_users
         FROM ranking r
         INNER JOIN challenge_definition cd
         ON cd.cd_id = #{cdId}
         WHERE r.user_id = #{userId}
     </select>
-    <select id="findRankingLimitFive">
-        SELECT u.nick_name, u.pic, cp.total_record,
+    <select id="findTop5Ranking">
+        SELECT u.user_id, u.nick_name, u.pic, cp.total_record,
                RANK() OVER(ORDER BY cp.total_record DESC) AS `rank`
         FROM user u
         INNER JOIN challenge_progress cp
@@ -70,5 +69,25 @@
         AND Year(cp.start_date) = #{year}
         AND Month(cp.start_date) = #{month}
         LIMIT 5;
+    </select>
+    <select id="findAroundMyRank">
+        WITH ranking AS (
+        SELECT
+        u.nick_name, u.pic, cp.cp_id, cp.user_id, cp.total_record,
+        RANK() OVER (ORDER BY cp.total_record DESC) AS rank
+        FROM challenge_progress cp
+        INNER JOIN user u ON u.user_id = cp.user_id
+        WHERE cp.cd_id = #{cdId}
+        AND YEAR(cp.start_date) = #{year}
+        AND MONTH(cp.start_date) = #{month} )
+        SELECT
+        r.user_id, r.nick_name, r.pic, r.total_record, r.rank
+        FROM ranking r
+        WHERE r.rank BETWEEN
+        ((SELECT rank FROM ranking WHERE user_id = #{userId}) - 2)
+        AND
+        ((SELECT rank FROM ranking WHERE user_id = #{userId}) + 4)
+        ORDER BY r.rank
+        LIMIT 5
     </select>
 </mapper>

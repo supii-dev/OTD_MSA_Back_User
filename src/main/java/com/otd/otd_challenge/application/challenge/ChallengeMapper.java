@@ -12,5 +12,6 @@ public interface ChallengeMapper {
     List<ChallengeDefinitionGetRes> findByType(ChallengeProgressGetReq req);
     List<ChallengeDefinitionGetRes> findByTypeForCompetition(ChallengeProgressGetReq req);
     ChallengeDetailGetRes findProgressByUserIdAndCdId(ChallengeProgressGetReq req);
-    List<ChallengeRankGetRes> findRankingLimitFive(ChallengeProgressGetReq req);
+    List<ChallengeRankGetRes> findTop5Ranking(ChallengeProgressGetReq req);
+    List<ChallengeRankGetRes> findAroundMyRank(ChallengeProgressGetReq req);
 }

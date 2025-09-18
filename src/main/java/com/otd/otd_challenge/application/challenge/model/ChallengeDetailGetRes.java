@@ -10,14 +10,20 @@ import java.util.List;
 @ToString
 @Setter
 public class ChallengeDetailGetRes {
-    private Long userId;
-    private Long cdId;
+    private long userId;
+    private long cpId;
+    private long cdId;
     private String name;
     private int reward;
-    private Double totalRecord;
-    private Double goal;
+    private double totalRecord;
+    private double goal;
+    private String formattedTotalRecord; // unit과 합체
+//    private String formattedGoal; // unit과 합체
     private Double percent;
     private int totalUsers;
     private int myRank;
-    private List<ChallengeRankGetRes> ranking;
+    private String unit;
+    private List<ChallengeRankGetRes> topRanking;
+    private List<ChallengeRankGetRes> aroundRanking;
+    private boolean isSuccess;
 }
