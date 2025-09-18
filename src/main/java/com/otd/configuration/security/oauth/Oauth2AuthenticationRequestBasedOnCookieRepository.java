@@ -37,8 +37,8 @@ public class Oauth2AuthenticationRequestBasedOnCookieRepository
                             , constOAuth2.authorizationRequestCookieName
                             , authorizationRequest
                             , constOAuth2.cookieExpirySeconds
-                            , "/")
-        ,constJwt.getDomain();
+                            , "/",constJwt.getDomain())
+        ;
 
         //FE 요청한 redirect_uri 쿠키에 저장한다.
         String redirectUriAfterLogin = request.getParameter(constOAuth2.redirectUriParamCookieName);
@@ -46,7 +46,7 @@ public class Oauth2AuthenticationRequestBasedOnCookieRepository
                 , constOAuth2.redirectUriParamCookieName
                 , redirectUriAfterLogin
                 , constOAuth2.cookieExpirySeconds
-                , "/");
+                , "/",constJwt.getDomain());
     }
 
     @Override
