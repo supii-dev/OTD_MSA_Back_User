@@ -42,7 +42,6 @@ public class ChallengeService {
         List<ChallengeDefinitionGetRes> personal = new ArrayList<>();
         List<ChallengeDefinitionGetRes> weekly = new ArrayList<>();
         List<ChallengeDefinitionGetRes> competition = new ArrayList<>();
-        List<ChallengeDefinitionGetRes> daily = new ArrayList<>();
 
         addImgPath(res);
 
@@ -52,7 +51,6 @@ public class ChallengeService {
                 case "personal" -> personal.add(challengeDefinitionGetRes);
                 case "weekly" -> weekly.add(challengeDefinitionGetRes);
                 case "competition" -> competition.add(challengeDefinitionGetRes);
-                case "daily" -> daily.add(challengeDefinitionGetRes);
             }
         }
         Map<String, List<ChallengeDefinitionGetRes>> grouping = competition.stream()
@@ -63,7 +61,6 @@ public class ChallengeService {
         dto.put("personalChallenge", personal);
         dto.put("weeklyChallenge", weekly);
         dto.put("competitionChallenge", grouping);
-        dto.put("dailyMission", daily);
 
         log.info("ChallengeService getChallengeList dto: {}", dto);
         return dto;
@@ -71,11 +68,11 @@ public class ChallengeService {
 
     public Map<String, List<ChallengeProgressGetRes>> getSelectedList(ChallengeProgressGetReq req) {
         List<ChallengeProgressGetRes> res = challengeMapper.findAllProgressFromUserId(req);
+        List<ChallengeDefinition> daily = challengeDefinitionRepository.findByCdType("daily");
 
         List<ChallengeProgressGetRes> personal = new ArrayList<>();
         List<ChallengeProgressGetRes> weekly = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
-        List<ChallengeProgressGetRes> daily = new ArrayList<>();
 
         addImgPath(res);
         for (ChallengeProgressGetRes challengeProgressGetRes : res) {
@@ -84,7 +81,6 @@ public class ChallengeService {
                 case "personal" -> personal.add(challengeProgressGetRes);
                 case "weekly" -> weekly.add(challengeProgressGetRes);
                 case "competition" -> competition.add(challengeProgressGetRes);
-                case "daily" -> daily.add(challengeProgressGetRes);
             }
         }
         Map<String, List<ChallengeProgressGetRes>> dto = new HashMap<>();
@@ -92,7 +88,6 @@ public class ChallengeService {
         dto.put("personalChallenge", personal);
         dto.put("weeklyChallenge", weekly);
         dto.put("competitionChallenge", competition);
-        dto.put("dailyMission", daily);
 
         log.info(" dto: {}", dto);
         return dto;
@@ -113,40 +108,39 @@ public class ChallengeService {
         return grouping;
     }
 
+    private void formatRankingRecords(List<ChallengeRankGetRes> rankingList, String unit) {
+        for (ChallengeRankGetRes ranking : rankingList) {
+            DecimalFormat df = (ranking.getTotalRecord() % 1 == 0) ? new DecimalFormat("0") : new DecimalFormat("0.0");
+            ranking.setFormattedTotalRecord(df.format(ranking.getTotalRecord()) + unit);
+        }
+    }
+
     public ChallengeDetailGetRes getDetail(Long cdId, ChallengeProgressGetReq req) {
         req.setCdId(cdId);
+        // 상세정보
         ChallengeDetailGetRes res = challengeMapper.findProgressByUserIdAndCdId(req);
-        List<ChallengeRankGetRes> rank = challengeMapper.findRankingLimitFive(req);
-        double goal = Double.parseDouble(res.getGoal());
-        double totalRecord = Double.parseDouble(res.getTotalRecord());
-        if (goal > totalRecord) {
-            double percentage = ((totalRecord / goal) * 100 );
+        // top5
+        List<ChallengeRankGetRes> top5Ranking = challengeMapper.findTop5Ranking(req);
+        // 내 주위 랭킹
+        List<ChallengeRankGetRes> aroundRanking = challengeMapper.findAroundMyRank(req);
+
+
+
+        if (res.getGoal() > res.getTotalRecord()) {
+            double percentage = ((res.getTotalRecord() / res.getGoal()) * 100 );
             res.setPercent(Math.round(percentage * 10 ) / 10.0);
         } else {
             res.setPercent(100.0);
         }
-        String formatted;
-        DecimalFormat df;
-        if (totalRecord % 1 == 0) {
-            df = new DecimalFormat("0");
-        } else {
-            df = new DecimalFormat("0.0");
-        }
-        formatted = df.format(totalRecord);
-        res.setTotalRecord(formatted + res.getUnit());
-        res.setGoal(res.getGoal() + res.getUnit());
-        res.setRanking(rank);
-        for (ChallengeRankGetRes ranking : rank) {
-            double totalRecord2 = Double.parseDouble(ranking.getTotalRecord());
+        DecimalFormat df = (res.getTotalRecord() % 1 == 0) ? new DecimalFormat("0") : new DecimalFormat("0.0");
+        res.setFormattedTotalRecord(df.format(res.getTotalRecord()) + res.getUnit());
+//        res.setFormattedGoal(res.getGoal() + res.getUnit());
 
-            if (totalRecord2 % 1 == 0) {
-                df = new DecimalFormat("0");
-            } else {
-                df = new DecimalFormat("0.0");
-            }
-            formatted = df.format(totalRecord2);
-            ranking.setTotalRecord(formatted + res.getUnit());
-        }
+        formatRankingRecords(top5Ranking, res.getUnit());
+        formatRankingRecords(aroundRanking, res.getUnit());
+
+        res.setTopRanking(top5Ranking);
+        res.setAroundRanking(aroundRanking);
         return res;
     }
 

@@ -40,7 +40,7 @@ public class ChallengeController {
         return challengeService.getMapChallenge(req);
     }
 
-    @GetMapping("/detail/{cdId}")
+    @GetMapping("/detail/per/{cdId}")
     public ChallengeDetailGetRes getDetail(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
         return challengeService.getDetail(cdId, req);
     }

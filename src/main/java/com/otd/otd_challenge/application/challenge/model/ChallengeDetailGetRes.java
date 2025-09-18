@@ -15,12 +15,15 @@ public class ChallengeDetailGetRes {
     private long cdId;
     private String name;
     private int reward;
-    private String totalRecord; // unit과 합체
-    private String goal; // unit과 합체
+    private double totalRecord;
+    private double goal;
+    private String formattedTotalRecord; // unit과 합체
+//    private String formattedGoal; // unit과 합체
     private Double percent;
     private int totalUsers;
     private int myRank;
     private String unit;
-    private List<ChallengeRankGetRes> ranking;
+    private List<ChallengeRankGetRes> topRanking;
+    private List<ChallengeRankGetRes> aroundRanking;
     private boolean isSuccess;
 }
