@@ -3,16 +3,25 @@ package com.otd.configuration.util;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.util.SerializationUtils;
 
+import java.util.Arrays;
 import java.util.Base64;
 
 //쿠키에 데이터 담고 빼고 할 때 사용하는 객체
 @Slf4j
 @Component //빈등록
+@RequiredArgsConstructor
 public class CookieUtils {
+    private final Environment environment;
+
     /*
     response: 쿠키를 담을 때 필요함
     name: 쿠키에 담을 벨류의 레이블(키값)
@@ -20,27 +29,12 @@ public class CookieUtils {
     maxAge: 쿠키에 담긴 벨류의 유효 기간
     path: 설정한 경로에 요청이 갈 때만 쿠키가 전달된다.
      */
-    public void setCookie(HttpServletResponse response, String name, String value, int maxAge, String path) {
-        Cookie cookie = new Cookie(name, value);
-        if(path != null) {
-            cookie.setPath(path);
-        }
-        cookie.setMaxAge(maxAge);
-        cookie.setHttpOnly(true); //보안 쿠키 설정
-        response.addCookie(cookie);
-//        ResponseCookie cookie = ResponseCookie.from(name, value)
-//                .path(path)
-//                //.sameSite("None") //secure가 true일때 동작한다.
-//                .httpOnly(true)
-//                .secure(false) //https일 때만 쿠키 전송된다.
-//                .maxAge(maxAge)
-//                .build();
-//
-//        response.addHeader("Set-Cookie", cookie.toString());
+    public void setCookie(HttpServletResponse response, String name, String value, int maxAge, String path, String domain) {
+
     }
 
-    public void setCookie(HttpServletResponse res, String name, Object value, int maxAge, String path) {
-        this.setCookie(res, name, serializeObject(value), maxAge, path);
+    public void setCookie(HttpServletResponse res, String name, Object value, int maxAge, String path, String domain) {
+        this.setCookie(res, name, serializeObject(value), maxAge, path, domain);
     }
 
     public String getValue(HttpServletRequest request, String name) {
@@ -82,7 +76,10 @@ public class CookieUtils {
         return null;
     }
 
-    public void deleteCookie(HttpServletResponse response, String name, String path) {
-        setCookie(response, name, null, 0, path);
+    public void deleteCookie(HttpServletResponse response, String name, String path, String domain) {
+        setCookie(response, name, null, 0, path, domain);
+    }
+
+    public void setCookie(HttpServletResponse response, String accessTokenCookieName, String accessToken, int accessTokenCookieValiditySeconds, String accessTokenCookiePath) {
     }
 }

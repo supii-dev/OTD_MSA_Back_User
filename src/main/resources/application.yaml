@@ -19,6 +19,8 @@ constants:
     header-key : Authorization
     secret-key: DaeguGreenArtAcademyClass502RoomForProjectOneTwoDayFighting
 
+    domain: greenart.n-e.kr
+
     access-token-cookie-name: access-token
     access-token-cookie-path: / #모든 경로에서 access-token값이 넘어온다.
     access-token-cookie-validity-seconds: 900 # 15분 (s) 60 * 15

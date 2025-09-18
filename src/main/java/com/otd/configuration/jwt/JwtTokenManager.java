@@ -40,7 +40,8 @@ public class JwtTokenManager {
                             , constJwt.getAccessTokenCookieName()
                             , accessToken
                             , constJwt.getAccessTokenCookieValiditySeconds()
-                            , constJwt.getAccessTokenCookiePath());
+                            , constJwt.getAccessTokenCookiePath() ,constJwt.getDomain()
+                            );
     }
 
     public String getAccessTokenFromCookie(HttpServletRequest request) {
@@ -48,7 +49,7 @@ public class JwtTokenManager {
     }
 
     public void deleteAccessTokenInCookie(HttpServletResponse response) {
-        cookieUtils.deleteCookie(response, constJwt.getAccessTokenCookieName(), constJwt.getAccessTokenCookiePath());
+        cookieUtils.deleteCookie(response, constJwt.getAccessTokenCookieName(), constJwt.getAccessTokenCookiePath(), constJwt.getDomain());
     }
 
     public String generateRefreshToken(JwtUser jwtUser) {
@@ -64,7 +65,7 @@ public class JwtTokenManager {
     }
 
     public void deleteRefreshTokenInCookie(HttpServletResponse response) {
-        cookieUtils.deleteCookie(response, constJwt.getRefreshTokenCookieName(), constJwt.getRefreshTokenCookiePath());
+        cookieUtils.deleteCookie(response, constJwt.getRefreshTokenCookieName(), constJwt.getRefreshTokenCookiePath(),constJwt.getDomain());
     }
 
     public String getRefreshTokenFromCookie(HttpServletRequest request) {
@@ -76,9 +77,10 @@ public class JwtTokenManager {
     }
 
     private void deleteSocialLogin(HttpServletResponse response) {
-        cookieUtils.deleteCookie(response, "JSESSIONID", null);
-        cookieUtils.deleteCookie(response, "Authorization", null);
-        cookieUtils.deleteCookie(response, "RefreshToken", null);
+        cookieUtils.deleteCookie(response, "JSESSIONID", null, constJwt.getDomain());
+        cookieUtils.deleteCookie(response, "Authorization", null, constJwt.getDomain());
+        cookieUtils.deleteCookie(response, "RefreshToken", null, constJwt.getDomain());
+
     }
 
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
