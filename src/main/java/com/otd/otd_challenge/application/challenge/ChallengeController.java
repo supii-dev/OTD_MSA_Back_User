@@ -27,10 +27,8 @@ public class ChallengeController {
     }
 
     @GetMapping("/selected")
-    public Map<String, List<ChallengeProgressGetRes>> getSelectedList(@ModelAttribute ChallengeProgressGetReq req) {
-        Map<String, List<ChallengeProgressGetRes>> result = challengeService.getSelectedList(req);
-        log.info("result={}", result);
-        return result;
+    public ChallengeHomeGetRes getSelectedList(@ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getSelectedList(req);
     }
 
     @GetMapping("/addlist")

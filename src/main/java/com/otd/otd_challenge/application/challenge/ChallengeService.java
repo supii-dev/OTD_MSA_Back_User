@@ -3,6 +3,8 @@ package com.otd.otd_challenge.application.challenge;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
+import com.otd.otd_user.application.user.UserRepository;
+import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ public class ChallengeService {
     private final ChallengeMapper challengeMapper;
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
+    private final UserRepository userRepository;
     @Value("${constants.file.challenge-pic}")
     private String imgPath;
 
@@ -66,10 +69,10 @@ public class ChallengeService {
         return dto;
     }
 
-    public Map<String, List<ChallengeProgressGetRes>> getSelectedList(ChallengeProgressGetReq req) {
+    public ChallengeHomeGetRes getSelectedList(ChallengeProgressGetReq req) {
         List<ChallengeProgressGetRes> res = challengeMapper.findAllProgressFromUserId(req);
         List<ChallengeDefinition> daily = challengeDefinitionRepository.findByCdType("daily");
-
+        User userInfo = userRepository.findByUserId(req.getUserId());
         List<ChallengeProgressGetRes> personal = new ArrayList<>();
         List<ChallengeProgressGetRes> weekly = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
@@ -83,14 +86,23 @@ public class ChallengeService {
                 case "competition" -> competition.add(challengeProgressGetRes);
             }
         }
+
         Map<String, List<ChallengeProgressGetRes>> dto = new HashMap<>();
 
         dto.put("personalChallenge", personal);
         dto.put("weeklyChallenge", weekly);
         dto.put("competitionChallenge", competition);
 
+        ChallengeHomeGetRes result = ChallengeHomeGetRes.builder()
+                .user(userInfo)
+                .challengeDefinition(daily)
+                .weeklyChallenge(weekly)
+                .competitionChallenge(competition)
+                .personalChallenge(personal)
+                .build();
+
         log.info(" dto: {}", dto);
-        return dto;
+        return result;
     }
 
     public List<ChallengeDefinitionGetRes> getChallenge(ChallengeProgressGetReq req) {
