@@ -1,6 +1,5 @@
 package com.otd.configuration.security.oauth;
 
-import com.otd.configuration.constants.ConstJwt;
 import com.otd.configuration.constants.ConstOAuth2;
 import com.otd.configuration.util.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,13 +18,12 @@ public class Oauth2AuthenticationRequestBasedOnCookieRepository
 
     private final CookieUtils cookieUtils;
     private final ConstOAuth2 constOAuth2;
-    private final ConstJwt constJwt; //설정 내용(문자열)
 
     @Override
     public OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
         return cookieUtils.getValue(request
-                                  , constOAuth2.authorizationRequestCookieName
-                                  , OAuth2AuthorizationRequest.class);
+                , constOAuth2.authorizationRequestCookieName
+                , OAuth2AuthorizationRequest.class);
     }
 
     @Override
@@ -34,11 +32,10 @@ public class Oauth2AuthenticationRequestBasedOnCookieRepository
             this.removeAuthorizationCookies(response);
         }
         cookieUtils.setCookie(response
-                            , constOAuth2.authorizationRequestCookieName
-                            , authorizationRequest
-                            , constOAuth2.cookieExpirySeconds
-                            , "/",constJwt.getDomain())
-        ;
+                , constOAuth2.authorizationRequestCookieName
+                , authorizationRequest
+                , constOAuth2.cookieExpirySeconds
+                , "/");
 
         //FE 요청한 redirect_uri 쿠키에 저장한다.
         String redirectUriAfterLogin = request.getParameter(constOAuth2.redirectUriParamCookieName);
@@ -46,7 +43,7 @@ public class Oauth2AuthenticationRequestBasedOnCookieRepository
                 , constOAuth2.redirectUriParamCookieName
                 , redirectUriAfterLogin
                 , constOAuth2.cookieExpirySeconds
-                , "/",constJwt.getDomain());
+                , "/");
     }
 
     @Override
@@ -55,7 +52,7 @@ public class Oauth2AuthenticationRequestBasedOnCookieRepository
     }
 
     public void removeAuthorizationCookies(HttpServletResponse response) {
-        cookieUtils.deleteCookie(response, constOAuth2.authorizationRequestCookieName, "/",constJwt.getDomain());
-        cookieUtils.deleteCookie(response, constOAuth2.redirectUriParamCookieName, "/", constJwt.getDomain());
+        cookieUtils.deleteCookie(response, constOAuth2.authorizationRequestCookieName, "/");
+        cookieUtils.deleteCookie(response, constOAuth2.redirectUriParamCookieName, "/");
     }
 }

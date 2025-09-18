@@ -194,4 +194,5 @@ public class UserService {
         imgUploadManager.removeProfileDirectory(signedUserId);
         user.setPic(null);
     }
+
 }

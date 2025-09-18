@@ -57,6 +57,12 @@ public class User extends UpdatedAt{
     @Column(length = 2)
     private SignInProviderType providerType;
 
+    @Column(columnDefinition = "int DEFAULT 0", nullable = false)
+    private int point;
+
+    @Column(columnDefinition = "int DEFAULT 0", nullable = false)
+    private int level;
+
     // 본인인증 관련 필드 추가
 //    @Column(length = 88, name = "ci")
 //    private String ci; // 연계정보 (Connecting Information)

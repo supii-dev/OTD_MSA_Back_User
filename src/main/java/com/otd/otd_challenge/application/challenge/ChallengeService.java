@@ -3,6 +3,8 @@ package com.otd.otd_challenge.application.challenge;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
+import com.otd.otd_user.application.user.UserRepository;
+import com.otd.otd_user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 public class ChallengeService {
     private final ChallengeMapper challengeMapper;
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
+    private final UserRepository userRepository;
     @Value("${constants.file.challenge-pic}")
     private String imgPath;
 
@@ -34,6 +37,7 @@ public class ChallengeService {
             }
         }
     }
+
     public Map<String, Object> getChallengeList() {
         List<ChallengeDefinitionGetRes> res = challengeMapper.findAll();
 

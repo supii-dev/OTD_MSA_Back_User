@@ -37,11 +37,10 @@ public class JwtTokenManager {
 
     public void setAccessTokenInCookie(HttpServletResponse response, String accessToken) {
         cookieUtils.setCookie(response
-                            , constJwt.getAccessTokenCookieName()
-                            , accessToken
-                            , constJwt.getAccessTokenCookieValiditySeconds()
-                            , constJwt.getAccessTokenCookiePath() ,constJwt.getDomain()
-                            );
+                , constJwt.getAccessTokenCookieName()
+                , accessToken
+                , constJwt.getAccessTokenCookieValiditySeconds()
+                , constJwt.getAccessTokenCookiePath());
     }
 
     public String getAccessTokenFromCookie(HttpServletRequest request) {
@@ -49,7 +48,7 @@ public class JwtTokenManager {
     }
 
     public void deleteAccessTokenInCookie(HttpServletResponse response) {
-        cookieUtils.deleteCookie(response, constJwt.getAccessTokenCookieName(), constJwt.getAccessTokenCookiePath(), constJwt.getDomain());
+        cookieUtils.deleteCookie(response, constJwt.getAccessTokenCookieName(), constJwt.getAccessTokenCookiePath());
     }
 
     public String generateRefreshToken(JwtUser jwtUser) {
@@ -65,7 +64,7 @@ public class JwtTokenManager {
     }
 
     public void deleteRefreshTokenInCookie(HttpServletResponse response) {
-        cookieUtils.deleteCookie(response, constJwt.getRefreshTokenCookieName(), constJwt.getRefreshTokenCookiePath(),constJwt.getDomain());
+        cookieUtils.deleteCookie(response, constJwt.getRefreshTokenCookieName(), constJwt.getRefreshTokenCookiePath());
     }
 
     public String getRefreshTokenFromCookie(HttpServletRequest request) {
@@ -77,10 +76,9 @@ public class JwtTokenManager {
     }
 
     private void deleteSocialLogin(HttpServletResponse response) {
-        cookieUtils.deleteCookie(response, "JSESSIONID", null, constJwt.getDomain());
-        cookieUtils.deleteCookie(response, "Authorization", null, constJwt.getDomain());
-        cookieUtils.deleteCookie(response, "RefreshToken", null, constJwt.getDomain());
-
+        cookieUtils.deleteCookie(response, "JSESSIONID", null);
+        cookieUtils.deleteCookie(response, "Authorization", null);
+        cookieUtils.deleteCookie(response, "RefreshToken", null);
     }
 
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
