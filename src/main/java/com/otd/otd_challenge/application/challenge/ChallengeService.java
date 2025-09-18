@@ -122,7 +122,9 @@ public class ChallengeService {
 
     private void formatRankingRecords(List<ChallengeRankGetRes> rankingList, String unit) {
         for (ChallengeRankGetRes ranking : rankingList) {
-            DecimalFormat df = (ranking.getTotalRecord() % 1 == 0) ? new DecimalFormat("0") : new DecimalFormat("0.0");
+            DecimalFormat df = (ranking.getTotalRecord() % 1 == 0)
+                    ? new DecimalFormat("0")
+                    : new DecimalFormat("0.0");
             ranking.setFormattedTotalRecord(df.format(ranking.getTotalRecord()) + unit);
         }
     }
