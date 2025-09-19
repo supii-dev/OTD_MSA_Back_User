@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @ToString
 @Setter
-public class ChallengeDetailGetRes {
+public class ChallengeDetailPerGetRes {
     private long userId;
     private long cpId;
     private long cdId;

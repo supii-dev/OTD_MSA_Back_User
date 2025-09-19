@@ -2,10 +2,6 @@ package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_challenge.application.challenge.model.*;
-import com.otd.otd_challenge.entity.ChallengeDefinition;
-import com.otd.otd_user.application.user.UserRepository;
-import com.otd.otd_user.application.user.UserService;
-import com.otd.otd_user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -42,8 +38,13 @@ public class ChallengeController {
     }
 
     @GetMapping("/detail/per/{cdId}")
-    public ChallengeDetailGetRes getDetail(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
+    public ChallengeDetailPerGetRes getDetail(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
         return challengeService.getDetail(cdId, req);
+    }
+
+    @GetMapping("/detail/day/{cdId}")
+    public ChallengeDetailDayGetRes getDetailDay(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getDetailDay(cdId, req);
     }
 
     @PutMapping("/success")
