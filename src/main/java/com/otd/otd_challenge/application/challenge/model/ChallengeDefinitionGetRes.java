@@ -16,6 +16,7 @@ public class ChallengeDefinitionGetRes {
     private String name;
     private String type;
     private int reward;
+    private String unit;
 
 //    @Value("${constants.file.challenge-pic}")
 //    private String imgPath;
