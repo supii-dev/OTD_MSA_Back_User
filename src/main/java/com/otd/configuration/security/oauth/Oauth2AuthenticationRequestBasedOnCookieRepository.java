@@ -22,8 +22,8 @@ public class Oauth2AuthenticationRequestBasedOnCookieRepository
     @Override
     public OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
         return cookieUtils.getValue(request
-                                  , constOAuth2.authorizationRequestCookieName
-                                  , OAuth2AuthorizationRequest.class);
+                , constOAuth2.authorizationRequestCookieName
+                , OAuth2AuthorizationRequest.class);
     }
 
     @Override
@@ -32,10 +32,10 @@ public class Oauth2AuthenticationRequestBasedOnCookieRepository
             this.removeAuthorizationCookies(response);
         }
         cookieUtils.setCookie(response
-                            , constOAuth2.authorizationRequestCookieName
-                            , authorizationRequest
-                            , constOAuth2.cookieExpirySeconds
-                            , "/");
+                , constOAuth2.authorizationRequestCookieName
+                , authorizationRequest
+                , constOAuth2.cookieExpirySeconds
+                , "/");
 
         //FE 요청한 redirect_uri 쿠키에 저장한다.
         String redirectUriAfterLogin = request.getParameter(constOAuth2.redirectUriParamCookieName);

@@ -1,0 +1,35 @@
+constants:
+  file:
+    upload-directory: /home/download
+  jwt:
+    refresh-token-cookie-path: /otd-api/api/user/reissue
+
+eureka:
+  client:
+    enabled: false
+
+server:
+  port: 8080
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+spring:
+  cloud:
+    kubernetes:
+      discovery:
+        enabled: true
+      reload:
+        enabled: true
+        strategy: refresh
+  datasource:
+    url: jdbc:log4jdbc:mariadb://192.168.0.93/hsb
+  jpa:
+    hibernate:
+      ddl-auto: update

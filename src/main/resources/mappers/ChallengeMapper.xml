@@ -110,4 +110,11 @@
         FROM challenge_progress
         WHERE user_id = #{userId};
     </select>
+    <insert id="saveMissionRecordByUserIdAndCpId">
+        INSERT INTO challenge_mission
+        SET
+        user_id = #{userId},
+        cd_id = #{cdId},
+        success_date = CURRENT_DATE
+    </insert>
 </mapper>

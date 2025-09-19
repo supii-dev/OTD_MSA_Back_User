@@ -51,4 +51,9 @@ public class ChallengeController {
     public ResultResponse<?> putSuccess(@RequestBody ChallengeSuccessPutReq req) {
         return challengeService.updateIsSuccess(req.getCpId());
     }
+
+    @PostMapping("/record/mission")
+    public ResultResponse<?> postMissionRecord(@RequestBody ChallengeRecordMissionPostReq req){
+        return challengeService.saveMissionRecord(req);
+    }
 }

@@ -16,4 +16,5 @@ public interface ChallengeMapper {
     List<ChallengeRankGetRes> findAroundMyRank(ChallengeProgressGetReq req);
     List<ChallengeDetailDayGetRes> findDayByUserIdAndCdId(ChallengeProgressGetReq req);
     int findSuccessChallenge(Long userId);
+    int saveMissionRecordByUserIdAndCpId(ChallengeRecordMissionPostReq req);
 }

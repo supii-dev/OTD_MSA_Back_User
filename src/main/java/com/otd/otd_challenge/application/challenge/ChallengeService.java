@@ -82,6 +82,7 @@ public class ChallengeService {
 
         addImgPath(res);
         for (ChallengeProgressGetRes challengeProgressGetRes : res) {
+
             switch (challengeProgressGetRes.getType()) {
                 case "personal" -> personal.add(challengeProgressGetRes);
                 case "weekly" -> weekly.add(challengeProgressGetRes);
@@ -165,5 +166,10 @@ public class ChallengeService {
         List<Integer> record = res.stream().map(ChallengeDetailDayGetRes::getDate).collect(Collectors.toList());
         map.setRecDate(record);
         return map;
+    }
+
+    public ResultResponse<?> saveMissionRecord(ChallengeRecordMissionPostReq req){
+        int result = challengeMapper.saveMissionRecordByUserIdAndCpId(req);
+        return new ResultResponse<>("success", result);
     }
 }
