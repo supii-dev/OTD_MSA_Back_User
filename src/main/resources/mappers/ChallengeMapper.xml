@@ -117,4 +117,10 @@
         cd_id = #{cdId},
         success_date = CURRENT_DATE
     </insert>
+    <select id="findByUserIdAndMissionComplete">
+        SELECT user_id, cd_id, success_date
+        FROM challenge_mission
+        WHERE user_id = #{userId}
+        AND success_date = CURRENT_DATE;
+    </select>
 </mapper>

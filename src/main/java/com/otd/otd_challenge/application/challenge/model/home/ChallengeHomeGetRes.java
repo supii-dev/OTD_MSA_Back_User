@@ -1,5 +1,6 @@
-package com.otd.otd_challenge.application.challenge.model;
+package com.otd.otd_challenge.application.challenge.model.home;
 
+import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgressGetRes;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_user.entity.User;
 import lombok.*;
@@ -19,4 +20,5 @@ public class ChallengeHomeGetRes {
     private List<ChallengeProgressGetRes> competitionChallenge;
 
     private List<ChallengeDefinition> dailyMission;
+    private List<ChallengeMissionCompleteGetRes> missionComplete;
 }
