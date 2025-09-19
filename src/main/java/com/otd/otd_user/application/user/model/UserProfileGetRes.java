@@ -18,7 +18,7 @@ public class UserProfileGetRes {
     private String nickName;
     private String email;
     private String phone;
-    private LocalDate birthDate;
+    private String birthDate;
     private String gender;
     private LocalDateTime lastLoginAt;
 

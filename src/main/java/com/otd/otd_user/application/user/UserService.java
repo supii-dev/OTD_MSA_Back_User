@@ -1,6 +1,7 @@
 package com.otd.otd_user.application.user;
 
-import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.configuration.util.MyFileManager;
+import com.otd.configuration.util.MyFileUtils;
 import com.otd.otd_user.application.email.EmailService;
 import com.otd.otd_user.application.email.model.PasswordChangeReq;
 import com.otd.otd_user.application.email.model.PasswordResetReq;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -30,63 +32,36 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final ImgUploadManager imgUploadManager;
     private final EmailService emailService;
+    private final MyFileManager myFileManager;
 
 
     @Transactional
     public void join(UserJoinReq req, MultipartFile pic) {
-        // 1. 이메일 인증 확인 (EmailService 사용)
-        if (!emailService.isEmailVerified(req.getEmail())) {
-            throw new IllegalArgumentException("이메일 인증을 완료해주세요.");
-        }
-
-        // 2. 중복 검사들 (기존 메서드 사용)
-        if (!isUidAvailable(req.getUid())) {
-            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
-        }
-
-        if (req.getNickName() != null && !isNicknameAvailable(req.getNickName())) {
-            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
-        }
-
-        // 3. 비밀번호 해싱
         String hashedPassword = passwordEncoder.encode(req.getUpw());
 
-        // 4. User 엔티티 생성 및 저장
-        User user = new User();
-        user.setProviderType(SignInProviderType.LOCAL);
-        user.setUid(req.getUid());
-        user.setUpw(hashedPassword);
-        user.setNickName(req.getNickName());
-        user.setEmail(req.getEmail());
-        user.setName(req.getName());
-        user.setPhoneNumber(req.getPhone());
-        user.setBirthDate(req.getBirthDate());
-        user.setGender(req.getGender());
-//        user.setCi(req.getCi());
-//        user.setDi(req.getDi());
 
-        EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(req.getChallengeSurvey());
-        // 기본 역할 설정
-        if (req.getRoles() == null || req.getRoles().isEmpty()) {
-            user.addUserRoles(List.of(EnumUserRole.USER), challengeRole);
-        } else {
-            user.addUserRoles(req.getRoles(), challengeRole);
+        User user = User.builder()
+                .providerType(SignInProviderType.LOCAL)
+                .uid(req.getUid())
+                .upw(hashedPassword)
+                .nickName(req.getNickname())
+                .email(req.getEmail())
+                .name(req.getName())
+                .phone(req.getPhone())
+                .birthDate(req.getBirthDate())
+                .gender(req.getGender())
+                .build();
+
+        user.addUserRoles(req.getRoles());
+
+        userRepository.save(user);
+
+        if(pic != null) {
+            String savedFileName = myFileManager.saveProfilePic(user.getUserId(), pic);
+            user.setPic(savedFileName);
         }
-
-
-        User savedUser = userRepository.save(user);
-
-        // 5. 프로필 사진 처리
-        if (pic != null && !pic.isEmpty()) {
-            String savedFileName = imgUploadManager.saveProfilePic(savedUser.getUserId(), pic);
-            savedUser.setPic(savedFileName);
-        }
-
-        // 6. 이메일 인증 상태 삭제 (EmailService 사용)
-        emailService.removeEmailVerificationStatus(req.getEmail());
-
-        log.info("회원가입 완료: 사용자 ID {}", savedUser.getUserId());
     }
+
 
     public UserLoginDto login(UserLoginReq req) {
         User user = userRepository.findByUidAndProviderType(req.getUid(), SignInProviderType.LOCAL);
@@ -197,5 +172,4 @@ public class UserService {
         imgUploadManager.removeProfileDirectory(signedUserId);
         user.setPic(null);
     }
-
 }
