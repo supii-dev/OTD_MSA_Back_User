@@ -3,6 +3,11 @@ constants:
     upload-directory: D:/kjh/project_2/upload/challenge
     challenge-pic: /files/
     profile-pic: /profile
+  feign-client:
+    weather-api:
+      url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
+      service-key: fte7et4WjQ2QQTSP51SJ6VZ%2FXA3aDUYv054aZFUsGdrVOKFJxQnmrKJGh%2Box%2FcnwsvpeJmLazXr4je1K01Uoow%3D%3D
+      data-type: json
   comment:
     start-index: 0
     need-for-view-count: 3 #피드 리스트를 뿌릴 때 실제로 피드당 보여지는 댓글 수
@@ -13,6 +18,8 @@ constants:
     claim-key: signedUser
     header-key : Authorization
     secret-key: DaeguGreenArtAcademyClass502RoomForProjectOneTwoDayFighting
+
+    domain: greenart.n-e.kr
 
     access-token-cookie-name: access-token
     access-token-cookie-path: / #모든 경로에서 access-token값이 넘어온다.
