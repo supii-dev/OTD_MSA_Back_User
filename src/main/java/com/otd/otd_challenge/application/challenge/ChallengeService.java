@@ -74,36 +74,28 @@ public class ChallengeService {
         List<ChallengeProgressGetRes> res = challengeMapper.findAllProgressFromUserId(req);
         List<ChallengeDefinition> daily = challengeDefinitionRepository.findByCdType("daily");
         User userInfo = userRepository.findByUserId(req.getUserId());
+        int success = challengeMapper.findSuccessChallenge(req.getUserId());
+
         List<ChallengeProgressGetRes> personal = new ArrayList<>();
         List<ChallengeProgressGetRes> weekly = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
 
         addImgPath(res);
         for (ChallengeProgressGetRes challengeProgressGetRes : res) {
-
             switch (challengeProgressGetRes.getType()) {
                 case "personal" -> personal.add(challengeProgressGetRes);
                 case "weekly" -> weekly.add(challengeProgressGetRes);
                 case "competition" -> competition.add(challengeProgressGetRes);
             }
         }
-
-        Map<String, List<ChallengeProgressGetRes>> dto = new HashMap<>();
-
-        dto.put("personalChallenge", personal);
-        dto.put("weeklyChallenge", weekly);
-        dto.put("competitionChallenge", competition);
-
-        ChallengeHomeGetRes result = ChallengeHomeGetRes.builder()
+        return ChallengeHomeGetRes.builder()
                 .user(userInfo)
+                .success(success)
                 .dailyMission(daily)
                 .weeklyChallenge(weekly)
                 .competitionChallenge(competition)
                 .personalChallenge(personal)
                 .build();
-
-        log.info(" dto: {}", dto);
-        return result;
     }
 
     public List<ChallengeDefinitionGetRes> getChallenge(ChallengeProgressGetReq req) {

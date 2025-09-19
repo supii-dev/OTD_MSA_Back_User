@@ -105,4 +105,9 @@
         AND Year(cp.start_date) = #{year}
         AND Month(cp.start_date) = #{month};
     </select>
+    <select id="findSuccessChallenge">
+        SELECT SUM(is_success = TRUE) AS success
+        FROM challenge_progress
+        WHERE user_id = #{userId};
+    </select>
 </mapper>

@@ -12,6 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ChallengeHomeGetRes {
     private User user;
+    private int success;
+
     private List<ChallengeProgressGetRes> personalChallenge;
     private List<ChallengeProgressGetRes> weeklyChallenge;
     private List<ChallengeProgressGetRes> competitionChallenge;
