@@ -4,9 +4,7 @@ import lombok.Data;
 
 @Data
 public class PointPostReq {
-    private int pointId;
     private int pointScore;
     private String pointItemName;
     private String pointItemContent;
-    private String pointItemImage;
 }
