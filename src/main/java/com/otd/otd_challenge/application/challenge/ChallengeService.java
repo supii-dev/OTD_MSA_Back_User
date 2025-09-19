@@ -37,6 +37,8 @@ public class ChallengeService {
                 cd.setImage(imgPath + cd.getImage());
             } else if (o instanceof ChallengeProgressGetRes cp) {
                 cp.setImage(imgPath + cp.getImage());
+            } else if (o instanceof ChallengeDefinition ecd) {
+                ecd.setCdImage(imgPath + ecd.getCdImage());
             }
         }
     }
@@ -78,6 +80,7 @@ public class ChallengeService {
         List<ChallengeProgressGetRes> weekly = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
 
+        addImgPath(daily);
         addImgPath(res);
         for (ChallengeProgressGetRes challengeProgressGetRes : res) {
 
