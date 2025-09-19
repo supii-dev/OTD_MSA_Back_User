@@ -6,7 +6,6 @@ import com.otd.configuration.security.SignInProviderType;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class User extends UpdatedAt{
     private String name;
 
     @Column(name = "birth_date")
-    private LocalDate birthDate; // 생년월일
+    private String birthDate; // 생년월일
 
     @Column(length = 1)
     private String gender; // 성별 (M: 남성, F: 여성)
@@ -51,6 +50,8 @@ public class User extends UpdatedAt{
 
     @Column(length = 2)
     private SignInProviderType providerType;
+
+
 
 
     // 본인인증 관련 필드 추가

@@ -31,7 +31,7 @@ public class UserController {
         log.info("req: {}", req);
         log.info("pic: {}", pic != null ? pic.getOriginalFilename() : pic);
         userService.join(req, pic);
-        return new ResultResponse<>("", 1);
+        return new ResultResponse<>("회원가입이 완료되었습니다.", 1);
     }
 
     @PostMapping("/login")
@@ -42,7 +42,7 @@ public class UserController {
         return new ResultResponse<>("로그인 성공", userloginDto.getUserLoginRes());
     }
 
-   //이메일 인증후 비밀번호 변경
+    //이메일 인증후 비밀번호 변경
     @PostMapping("/reset-password")
     public ResultResponse<?> resetPassword(@Valid @RequestBody PasswordResetReq req) {
         log.info("비밀번호 재설정 요청: {}", req.getEmail());
@@ -87,6 +87,10 @@ public class UserController {
         return new ResultResponse<>("sign-out 성공", null);
     }
 
+    @PostMapping("/test")
+    public String test() {
+        return "테스트 성공";
+    }
 
     @PostMapping("/reissue")
     public ResultResponse<?> reissue(HttpServletResponse response, HttpServletRequest request) {

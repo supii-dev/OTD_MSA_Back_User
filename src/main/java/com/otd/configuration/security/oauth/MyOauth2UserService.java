@@ -66,7 +66,7 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
 
             //최초 소셜 로그인은 회원가입으로 권한은 USER_1 처리
             List<UserRole> userRoles = new ArrayList<>(1);
-            UserRoleIds ids = new UserRoleIds(user.getUserId(), EnumUserRole.USER);
+            UserRoleIds ids = new UserRoleIds(user.getUserId(), EnumUserRole.USER_2);
 
             UserRole userRole = new UserRole(ids, user);
             userRoles.add(userRole);
