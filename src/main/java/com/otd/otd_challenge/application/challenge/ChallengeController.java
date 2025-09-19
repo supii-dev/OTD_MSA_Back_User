@@ -2,6 +2,12 @@ package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_challenge.application.challenge.model.*;
+import com.otd.otd_challenge.application.challenge.model.detail.ChallengeDetailDayGetRes;
+import com.otd.otd_challenge.application.challenge.model.detail.ChallengeDetailPerGetRes;
+import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgressGetReq;
+import com.otd.otd_challenge.application.challenge.model.detail.ChallengeSuccessPutReq;
+import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
+import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;

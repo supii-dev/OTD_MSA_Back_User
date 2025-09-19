@@ -2,6 +2,10 @@ package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_challenge.application.challenge.model.*;
+import com.otd.otd_challenge.application.challenge.model.detail.*;
+import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
+import com.otd.otd_challenge.application.challenge.model.home.ChallengeMissionCompleteGetRes;
+import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
@@ -12,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,6 +79,9 @@ public class ChallengeService {
         List<ChallengeProgressGetRes> res = challengeMapper.findAllProgressFromUserId(req);
         List<ChallengeDefinition> daily = challengeDefinitionRepository.findByCdType("daily");
         User userInfo = userRepository.findByUserId(req.getUserId());
+        int success = challengeMapper.findSuccessChallenge(req.getUserId());
+        List<ChallengeMissionCompleteGetRes> missionComplete =
+                challengeMapper.findByUserIdAndMissionComplete(req.getUserId());
         List<ChallengeProgressGetRes> personal = new ArrayList<>();
         List<ChallengeProgressGetRes> weekly = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
@@ -90,13 +96,14 @@ public class ChallengeService {
                 case "competition" -> competition.add(challengeProgressGetRes);
             }
         }
-
         return ChallengeHomeGetRes.builder()
                 .user(userInfo)
+                .success(success)
                 .dailyMission(daily)
                 .weeklyChallenge(weekly)
                 .competitionChallenge(competition)
                 .personalChallenge(personal)
+                .missionComplete(missionComplete)
                 .build();
     }
 

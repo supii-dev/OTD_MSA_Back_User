@@ -105,6 +105,11 @@
         AND Year(cp.start_date) = #{year}
         AND Month(cp.start_date) = #{month};
     </select>
+    <select id="findSuccessChallenge">
+        SELECT SUM(is_success = TRUE) AS success
+        FROM challenge_progress
+        WHERE user_id = #{userId};
+    </select>
     <insert id="saveMissionRecordByUserIdAndCpId">
         INSERT INTO challenge_mission
         SET
@@ -112,4 +117,10 @@
         cd_id = #{cdId},
         success_date = CURRENT_DATE
     </insert>
+    <select id="findByUserIdAndMissionComplete">
+        SELECT user_id, cd_id, success_date
+        FROM challenge_mission
+        WHERE user_id = #{userId}
+        AND success_date = CURRENT_DATE;
+    </select>
 </mapper>

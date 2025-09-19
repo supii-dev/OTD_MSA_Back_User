@@ -1,4 +1,4 @@
-package com.otd.otd_challenge.application.challenge.model;
+package com.otd.otd_challenge.application.challenge.model.detail;
 
 import com.otd.otd_user.entity.User;
 import lombok.Getter;
