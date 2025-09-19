@@ -105,4 +105,11 @@
         AND Year(cp.start_date) = #{year}
         AND Month(cp.start_date) = #{month};
     </select>
+    <insert id="saveMissionRecordByUserIdAndCpId">
+        INSERT INTO challenge_mission
+        SET
+        user_id = #{userId},
+        cd_id = #{cdId},
+        success_date = CURRENT_DATE
+    </insert>
 </mapper>

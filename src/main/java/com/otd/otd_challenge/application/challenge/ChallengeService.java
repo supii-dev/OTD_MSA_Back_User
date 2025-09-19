@@ -88,22 +88,13 @@ public class ChallengeService {
             }
         }
 
-        Map<String, List<ChallengeProgressGetRes>> dto = new HashMap<>();
-
-        dto.put("personalChallenge", personal);
-        dto.put("weeklyChallenge", weekly);
-        dto.put("competitionChallenge", competition);
-
-        ChallengeHomeGetRes result = ChallengeHomeGetRes.builder()
+        return ChallengeHomeGetRes.builder()
                 .user(userInfo)
                 .dailyMission(daily)
                 .weeklyChallenge(weekly)
                 .competitionChallenge(competition)
                 .personalChallenge(personal)
                 .build();
-
-        log.info(" dto: {}", dto);
-        return result;
     }
 
     public List<ChallengeDefinitionGetRes> getChallenge(ChallengeProgressGetReq req) {
@@ -173,5 +164,10 @@ public class ChallengeService {
         List<Integer> record = res.stream().map(ChallengeDetailDayGetRes::getDate).collect(Collectors.toList());
         map.setRecDate(record);
         return map;
+    }
+
+    public ResultResponse<?> saveMissionRecord(ChallengeRecordMissionPostReq req){
+        int result = challengeMapper.saveMissionRecordByUserIdAndCpId(req);
+        return new ResultResponse<>("success", result);
     }
 }
