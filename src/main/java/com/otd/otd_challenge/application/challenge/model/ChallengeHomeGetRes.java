@@ -16,5 +16,5 @@ public class ChallengeHomeGetRes {
     private List<ChallengeProgressGetRes> weeklyChallenge;
     private List<ChallengeProgressGetRes> competitionChallenge;
 
-    private List<ChallengeDefinition> challengeDefinition;
+    private List<ChallengeDefinition> dailyMission;
 }

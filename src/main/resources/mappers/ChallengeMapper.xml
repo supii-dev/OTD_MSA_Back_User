@@ -90,4 +90,19 @@
         ORDER BY r.rank
         LIMIT 5
     </select>
+    <select id="findDayByUserIdAndCdId">
+        SELECT cd.cd_name AS name, cd.cd_unit AS unit, cp.cp_id,
+               cp.user_id, cp.cd_id, cd.cd_goal  AS goal,
+               DAY(cr.rec_date) AS date, cp.start_date, cp.end_date,
+               cd.cd_reward AS reward, cp.is_success
+        FROM challenge_progress cp
+        INNER JOIN challenge_record cr
+        ON cr.cp_id = cp.cp_id
+        INNER JOIN challenge_definition cd
+        ON cd.cd_id = cp.cd_id
+        WHERE cp.user_id = #{userId}
+        AND cp.cd_id = #{cdId}
+        AND Year(cp.start_date) = #{year}
+        AND Month(cp.start_date) = #{month};
+    </select>
 </mapper>

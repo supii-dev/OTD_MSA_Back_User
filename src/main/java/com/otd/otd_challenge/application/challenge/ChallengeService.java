@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +96,7 @@ public class ChallengeService {
 
         ChallengeHomeGetRes result = ChallengeHomeGetRes.builder()
                 .user(userInfo)
-                .challengeDefinition(daily)
+                .dailyMission(daily)
                 .weeklyChallenge(weekly)
                 .competitionChallenge(competition)
                 .personalChallenge(personal)
@@ -129,10 +130,10 @@ public class ChallengeService {
         }
     }
 
-    public ChallengeDetailGetRes getDetail(Long cdId, ChallengeProgressGetReq req) {
+    public ChallengeDetailPerGetRes getDetail(Long cdId, ChallengeProgressGetReq req) {
         req.setCdId(cdId);
         // 상세정보
-        ChallengeDetailGetRes res = challengeMapper.findProgressByUserIdAndCdId(req);
+        ChallengeDetailPerGetRes res = challengeMapper.findProgressByUserIdAndCdId(req);
         // top5
         List<ChallengeRankGetRes> top5Ranking = challengeMapper.findTop5Ranking(req);
         // 내 주위 랭킹
@@ -162,5 +163,15 @@ public class ChallengeService {
     public ResultResponse<?> updateIsSuccess(Long cpId){
         int result = challengeProgressRepository.updateIsSuccess(cpId);
         return new ResultResponse<>("success", result);
+    }
+
+    public ChallengeDetailDayGetRes getDetailDay(Long cdId, ChallengeProgressGetReq req) {
+        req.setCdId(cdId);
+        List<ChallengeDetailDayGetRes> res = challengeMapper.findDayByUserIdAndCdId(req);
+
+        ChallengeDetailDayGetRes map = res.get(0);
+        List<Integer> record = res.stream().map(ChallengeDetailDayGetRes::getDate).collect(Collectors.toList());
+        map.setRecDate(record);
+        return map;
     }
 }
