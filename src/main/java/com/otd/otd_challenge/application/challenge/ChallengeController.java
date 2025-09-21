@@ -62,4 +62,8 @@ public class ChallengeController {
     public ResultResponse<?> postMissionRecord(@RequestBody ChallengeRecordMissionPostReq req){
         return challengeService.saveMissionRecord(req);
     }
+    @PostMapping("/add")
+    public ResultResponse<?> postChallenge(@RequestBody ChallengePostReq req){
+        return challengeService.saveChallenge(req);
+    }
 }

@@ -29,7 +29,7 @@
     </select>
     <select id="findByTypeForCompetition">
         SELECT cd_id AS id, cd_goal AS goal, cd_image AS image,
-        cd_name AS name, cd_type AS type, cd_reward AS reward
+        cd_name AS name, cd_type AS type, cd_reward AS reward, cd_unit AS unit
         FROM challenge_definition
         WHERE cd_name NOT IN(SELECT cd.cd_name
                             FROM challenge_definition cd
