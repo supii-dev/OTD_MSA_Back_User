@@ -176,8 +176,13 @@ public class ChallengeService {
 
         ChallengeDetailDayGetRes map = res.get(0);
         List<Integer> record = res.stream().map(ChallengeDetailDayGetRes::getDate).collect(Collectors.toList());
+        if(map.getDate() == null){
+            map.setRecDate(new ArrayList<>());
+        }else{
         map.setRecDate(record);
+        }
         return map;
+
     }
 
     public ResultResponse<?> saveMissionRecord(ChallengeRecordMissionPostReq req){

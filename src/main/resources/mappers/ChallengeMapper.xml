@@ -96,7 +96,7 @@
                DAY(cr.rec_date) AS date, cp.start_date, cp.end_date,
                cd.cd_reward AS reward, cp.is_success
         FROM challenge_progress cp
-        INNER JOIN challenge_record cr
+        LEFT JOIN challenge_record cr
         ON cr.cp_id = cp.cp_id
         INNER JOIN challenge_definition cd
         ON cd.cd_id = cp.cd_id
