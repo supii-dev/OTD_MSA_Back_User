@@ -18,7 +18,7 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class Oauth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
-//    private final Oauth2AuthenticationRequestBasedOnCookieRepository repository;
+    private final Oauth2AuthenticationRequestBasedOnCookieRepository repository;
     private final CookieUtils cookieUtils;
     private final ConstOAuth2 constOAuth2;
 

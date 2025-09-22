@@ -30,7 +30,7 @@ public class WebSecurityConfiguration {
     private final TokenAuthenticationFilter tokenAuthenticationFilter;
     private final TokenAuthenticationEntryPoint tokenAuthenticationEntryPoint;
 
-//    private final Oauth2AuthenticationRequestBasedOnCookieRepository repository;
+    private final Oauth2AuthenticationRequestBasedOnCookieRepository repository;
     private final Oauth2AuthenticationSuccessHandler authenticationSuccessHandler;
     private final Oauth2AuthenticationFailureHandler authenticationFailureHandler;
     private final MyOauth2UserService myOauth2UserService;

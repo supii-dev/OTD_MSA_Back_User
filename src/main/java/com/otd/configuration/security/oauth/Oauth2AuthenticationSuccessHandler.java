@@ -23,7 +23,7 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class Oauth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-//    private final Oauth2AuthenticationRequestBasedOnCookieRepository repository;
+    private final Oauth2AuthenticationRequestBasedOnCookieRepository repository;
     private final JwtTokenManager jwtTokenManager;
     private final ConstOAuth2 constOAuth2;
     private final CookieUtils cookieUtils;
