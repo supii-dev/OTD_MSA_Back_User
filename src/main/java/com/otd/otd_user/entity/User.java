@@ -52,8 +52,11 @@ public class User extends UpdatedAt{
     @Column(length = 2)
     private SignInProviderType providerType;
 
+    @Column(columnDefinition = "int DEFAULT 0", nullable = false)
+    private int point;
 
-
+    @Column(columnDefinition = "int DEFAULT 0", nullable = false)
+    private int level;
 
     // 본인인증 관련 필드 추가
 //    @Column(length = 88, name = "ci")
@@ -68,9 +71,9 @@ public class User extends UpdatedAt{
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRole> userRoles = new ArrayList<>(1);
 
-    public void addUserRoles(List<EnumUserRole> enumUserRole) {
+    public void addUserRoles(List<EnumUserRole> enumUserRole, EnumChallengeRole enumChallengeRole) {
         for(EnumUserRole e : enumUserRole) {
-            UserRoleIds ids = new UserRoleIds(this.userId, e, EnumChallengeRole.fromCode(1));
+            UserRoleIds ids = new UserRoleIds(this.userId, e, enumChallengeRole);
             UserRole userRole = new UserRole(ids, this);
 
             this.userRoles.add(userRole);

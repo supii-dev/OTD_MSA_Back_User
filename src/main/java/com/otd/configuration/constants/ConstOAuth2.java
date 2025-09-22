@@ -1,10 +1,12 @@
 package com.otd.configuration.constants;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
+@Getter
 @RequiredArgsConstructor
 @ConfigurationProperties(prefix = "constants.oauth2")
 public class ConstOAuth2 {

@@ -7,6 +7,7 @@ import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRe
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeMissionCompleteGetRes;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
+import com.otd.otd_challenge.entity.ChallengeProgress;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
@@ -16,6 +17,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -179,5 +183,34 @@ public class ChallengeService {
     public ResultResponse<?> saveMissionRecord(ChallengeRecordMissionPostReq req){
         int result = challengeMapper.saveMissionRecordByUserIdAndCpId(req);
         return new ResultResponse<>("success", result);
+    }
+
+    public ResultResponse<?> saveChallenge(ChallengePostReq req){
+        User user = userRepository.findByUserId(req.getUserId());
+        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(req.getCdId());
+
+        LocalDate startDate = LocalDate.now();
+        YearMonth ym = YearMonth.from(startDate);
+        LocalDate endDate = ym.atEndOfMonth();
+
+        if ("weekly".equals(req.getType())){
+            endDate = startDate.with(DayOfWeek.SUNDAY);
+            if (startDate.getDayOfWeek() == DayOfWeek.SUNDAY){
+                endDate = startDate;
+            }
+        } else if ("competition".equals(req.getType())|| "personal".equals(req.getType())){
+            endDate = ym.atEndOfMonth();
+        }
+        ChallengeProgress challengeProgress = ChallengeProgress.builder()
+                .user(user)
+                .challengeDefinition(cd)
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+
+
+        challengeProgressRepository.save(challengeProgress);
+
+        return new ResultResponse<>("저장 되었습니다.",challengeProgress);
     }
 }
