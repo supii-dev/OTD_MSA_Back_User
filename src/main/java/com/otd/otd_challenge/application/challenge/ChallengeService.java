@@ -180,16 +180,21 @@ public class ChallengeService {
 
         ChallengeDetailDayGetRes map = res.get(0);
         List<Integer> record = res.stream().map(ChallengeDetailDayGetRes::getDate).collect(Collectors.toList());
-        map.setRecDate(record);
+        if (map.getDate() == null) {
+            map.setRecDate(new ArrayList<>());
+        } else {
+            map.setRecDate(record);
+        }
         return map;
     }
 
+    @Transactional
     public ResultResponse<?> saveMissionRecord(ChallengeRecordMissionPostReq req){
         int result = challengeMapper.saveMissionRecordByUserIdAndCpId(req);
-//        ChallengeDefinition point = challengeDefinitionRepository.findByCdId(req.getCdId());
-//        User user = userRepository.findByUserId(req.getUserId());
-
-//        updatePointByUserId(user.getPoint() + point.getCdReward(), req.getUserId());
+        ChallengeDefinition point = challengeDefinitionRepository.findByCdId(req.getCdId());
+        User user = userRepository.findByUserId(req.getUserId());
+        int newPoint = user.getPoint() + point.getCdReward();
+        userRepository.addPointByUserId(newPoint, req.getUserId());
         return new ResultResponse<>("success", result);
     }
 
