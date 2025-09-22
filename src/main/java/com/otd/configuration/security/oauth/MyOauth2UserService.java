@@ -1,5 +1,6 @@
 package com.otd.configuration.security.oauth;
 
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.model.JwtUser;
@@ -64,9 +65,9 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
             user.setNickName(oauth2UserInfo.getName());
             user.setPic(oauth2UserInfo.getProfileImageUrl());
 
-            //최초 소셜 로그인은 회원가입으로 권한은 USER_1 처리
+            //최초 소셜 로그인은 회원가입으로 권한은 USER_1 처리, 챌린지는 TBD 로 측정 TBD이면 설문창 강제적용
             List<UserRole> userRoles = new ArrayList<>(1);
-            UserRoleIds ids = new UserRoleIds(user.getUserId(), EnumUserRole.USER_2);
+            UserRoleIds ids = new UserRoleIds(user.getUserId(), EnumUserRole.USER_2, EnumChallengeRole.TBD);
 
             UserRole userRole = new UserRole(ids, user);
             userRoles.add(userRole);
@@ -85,5 +86,9 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
         return myUserDetails; //이 객체는 OAuth2AuthenticationSuccessHandler객체의 onAuthenticationSuccess메소드의 Authentication auth 매개변수로 전달된다.
     }
 }
+
+
+
+
 
 
