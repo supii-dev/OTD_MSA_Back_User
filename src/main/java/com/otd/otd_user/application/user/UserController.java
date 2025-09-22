@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/OTD/user")
+@RequestMapping("/OTD/user")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -47,7 +47,7 @@ public class UserController {
         return new ResultResponse<>("로그인 성공", userloginDto.getUserLoginRes());
     }
 
-   //이메일 인증후 비밀번호 변경
+    //이메일 인증후 비밀번호 변경
     @PostMapping("/reset-password")
     public ResultResponse<?> resetPassword(@Valid @RequestBody PasswordResetReq req) {
         log.info("비밀번호 재설정 요청: {}", req.getEmail());

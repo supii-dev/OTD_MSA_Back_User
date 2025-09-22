@@ -3,6 +3,11 @@ constants:
     upload-directory: D:/kjh/project_2/upload/challenge
     challenge-pic: /files/
     profile-pic: /profile
+  feign-client:
+    weather-api:
+      url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
+      service-key: fte7et4WjQ2QQTSP51SJ6VZ%2FXA3aDUYv054aZFUsGdrVOKFJxQnmrKJGh%2Box%2FcnwsvpeJmLazXr4je1K01Uoow%3D%3D
+      data-type: json
   comment:
     start-index: 0
     need-for-view-count: 3 #피드 리스트를 뿌릴 때 실제로 피드당 보여지는 댓글 수
@@ -13,6 +18,8 @@ constants:
     claim-key: signedUser
     header-key : Authorization
     secret-key: DaeguGreenArtAcademyClass502RoomForProjectOneTwoDayFighting
+
+    domain: greenart.n-e.kr
 
     access-token-cookie-name: access-token
     access-token-cookie-path: / #모든 경로에서 access-token값이 넘어온다.
@@ -46,26 +53,27 @@ constants:
         fail-url: http://localhost:5173/pay/fail
         kakao-pay-info-session-name: kakao-pay-info
         secret-key: DEV0A2C37B3D5C593158404BA2DEF241C594D526 #테스트용 secretKey
-#서버 포트랑 연결 설정 하는 부분
+
 spring:
   application:
-    name: OTD-USER
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: # Redis 비밀번호 (있는 경우)
+    name: OTD_USER
+  task:
+    scheduling:
+      enabled: true
+      pool:
+        size: 2
 
     # 이메일 설정
   mail:
     host: smtp.gmail.com
     port: 587
-    username: "hwangsubin93@gmail.com"
-    password:
+    username: hwangsubin93@gmail.com
+    password: dpdy fqcf kvgg fure
     properties:
       mail:
         smtp:
           auth: true
+          timeout: 5000
           starttls:
             enable: true
     default-encoding: UTF-8
@@ -146,20 +154,8 @@ spring:
     init:
       mode: always
 
-eureka:
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://localhost:8081/eureka
-#   status 이름 변경 부분
-  instance:
-    prefer-ip-address: true
-    ip-address: ${server.address}
-    instance-id: ${server.address}:${server.port}
 server:
-  port: 8082
-  address: localhost
+  port: 8080
   servlet:
     encoding:
       charset: UTF-8

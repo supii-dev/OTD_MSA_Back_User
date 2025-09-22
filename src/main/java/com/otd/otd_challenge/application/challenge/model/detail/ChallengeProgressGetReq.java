@@ -1,4 +1,4 @@
-package com.otd.otd_challenge.application.challenge.model;
+package com.otd.otd_challenge.application.challenge.model.detail;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,4 +11,6 @@ public class ChallengeProgressGetReq {
   private Long userId;
   private String year;
   private String month;
+  private Long cdId;
+  private String type;
 }

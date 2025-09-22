@@ -1,16 +1,19 @@
 package com.otd.otd_user.application.email;
 
 import com.otd.otd_user.application.user.UserRepository;
+import com.otd.otd_user.entity.EmailVerification;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Random;
 
 @Slf4j
@@ -18,24 +21,37 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender mailSender;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final EmailVerificationRepository emailVerificationRepository;
     private final UserRepository userRepository;
 
     private static final int CODE_EXPIRY_MINUTES = 5;
     private static final int VERIFICATION_STATUS_EXPIRY_MINUTES = 30;
+    private static final int PASSWORD_RESET_EXPIRY_MINUTES = 10;
 
     /**
      * 회원가입용 이메일 인증코드 발송
      */
+    @Transactional
     public void sendEmailVerificationCode(String email) {
         // 1. 이메일 중복 체크
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
-        // 2. 인증코드 생성 및 발송
+        // 2. 기존 인증 정보 삭제
+        emailVerificationRepository.deleteByEmailAndType(email, EmailVerification.VerificationType.SIGNUP);
+
+        // 3. 인증코드 생성 및 저장
         String verificationCode = generateRandomCode();
-        saveVerificationCode(email, verificationCode);
+        EmailVerification verification = new EmailVerification();
+        verification.setEmail(email);
+        verification.setCode(verificationCode);
+        verification.setType(EmailVerification.VerificationType.SIGNUP);
+        verification.setExpiresAt(LocalDateTime.now().plusMinutes(CODE_EXPIRY_MINUTES));
+
+        emailVerificationRepository.save(verification);
+
+        // 4. 이메일 발송
         sendVerificationEmail(email, verificationCode);
 
         log.info("회원가입용 이메일 인증코드 발송 완료: {}", email);
@@ -44,15 +60,27 @@ public class EmailService {
     /**
      * 비밀번호 재설정용 이메일 인증코드 발송
      */
+    @Transactional
     public void sendPasswordResetCode(String email) {
         // 1. 이메일 존재 여부 체크
         if (!userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("등록되지 않은 이메일입니다.");
         }
 
-        // 2. 인증코드 생성 및 발송
+        // 2. 기존 인증 정보 삭제
+        emailVerificationRepository.deleteByEmailAndType(email, EmailVerification.VerificationType.PASSWORD_RESET);
+
+        // 3. 인증코드 생성 및 저장
         String resetCode = generateRandomCode();
-        savePasswordResetCode(email, resetCode);
+        EmailVerification verification = new EmailVerification();
+        verification.setEmail(email);
+        verification.setCode(resetCode);
+        verification.setType(EmailVerification.VerificationType.PASSWORD_RESET);
+        verification.setExpiresAt(LocalDateTime.now().plusMinutes(CODE_EXPIRY_MINUTES));
+
+        emailVerificationRepository.save(verification);
+
+        // 4. 이메일 발송
         sendPasswordResetEmail(email, resetCode);
 
         log.info("비밀번호 재설정용 이메일 인증코드 발송 완료: {}", email);
@@ -61,92 +89,117 @@ public class EmailService {
     /**
      * 이메일 인증코드 검증 (회원가입용)
      */
+    @Transactional
     public boolean verifyEmailCode(String email, String code) {
-        String redisKey = "email_verification:" + email;
-        String storedCode = redisTemplate.opsForValue().get(redisKey);
+        Optional<EmailVerification> verificationOpt = emailVerificationRepository
+                .findTopByEmailAndTypeOrderByCreatedAtDesc(email, EmailVerification.VerificationType.SIGNUP);
 
-        if (storedCode == null) {
-            log.warn("인증코드가 만료되었거나 존재하지 않습니다: {}", email);
+        if (verificationOpt.isEmpty()) {
+            log.warn("인증코드가 존재하지 않습니다: {}", email);
             return false;
         }
 
-        if (storedCode.equals(code)) {
-            // 인증 성공 시 기존 코드 삭제
-            redisTemplate.delete(redisKey);
+        EmailVerification verification = verificationOpt.get();
 
-            // 인증 완료 상태를 Redis에 저장
-            String verifiedKey = "email_verified:" + email;
-            redisTemplate.opsForValue().set(verifiedKey, "true",
-                    Duration.ofMinutes(VERIFICATION_STATUS_EXPIRY_MINUTES));
-
-            log.info("이메일 인증 성공: {}", email);
-            return true;
+        if (!verification.canVerify()) {
+            log.warn("인증코드가 만료되었거나 이미 인증되었습니다: {}", email);
+            return false;
         }
 
-        log.warn("인증코드 불일치: {}", email);
-        return false;
+        if (!verification.getCode().equals(code)) {
+            log.warn("인증코드 불일치: {}", email);
+            return false;
+        }
+
+        // 인증 성공 처리
+        verification.setVerified(true);
+        verification.setExpiresAt(LocalDateTime.now().plusMinutes(VERIFICATION_STATUS_EXPIRY_MINUTES));
+        emailVerificationRepository.save(verification);
+
+        log.info("이메일 인증 성공: {}", email);
+        return true;
     }
 
     /**
      * 비밀번호 재설정 코드 검증
      */
+    @Transactional
     public boolean verifyPasswordResetCode(String email, String code) {
-        String redisKey = "password_reset:" + email;
-        String storedCode = redisTemplate.opsForValue().get(redisKey);
+        Optional<EmailVerification> verificationOpt = emailVerificationRepository
+                .findTopByEmailAndTypeOrderByCreatedAtDesc(email, EmailVerification.VerificationType.PASSWORD_RESET);
 
-        if (storedCode == null) {
-            log.warn("비밀번호 재설정 코드가 만료되었거나 존재하지 않습니다: {}", email);
+        if (verificationOpt.isEmpty()) {
+            log.warn("비밀번호 재설정 코드가 존재하지 않습니다: {}", email);
             return false;
         }
 
-        if (storedCode.equals(code)) {
-            // 인증 성공 시 기존 코드 삭제
-            redisTemplate.delete(redisKey);
+        EmailVerification verification = verificationOpt.get();
 
-            // 비밀번호 재설정 권한 부여 (10분간 유효)
-            String resetTokenKey = "password_reset_verified:" + email;
-            redisTemplate.opsForValue().set(resetTokenKey, "true", Duration.ofMinutes(10));
-
-            log.info("비밀번호 재설정 코드 인증 성공: {}", email);
-            return true;
+        if (!verification.canVerify()) {
+            log.warn("비밀번호 재설정 코드가 만료되었거나 이미 인증되었습니다: {}", email);
+            return false;
         }
 
-        log.warn("비밀번호 재설정 코드 불일치: {}", email);
-        return false;
+        if (!verification.getCode().equals(code)) {
+            log.warn("비밀번호 재설정 코드 불일치: {}", email);
+            return false;
+        }
+
+        // 인증 성공 처리 (비밀번호 재설정 권한 부여)
+        verification.setVerified(true);
+        verification.setExpiresAt(LocalDateTime.now().plusMinutes(PASSWORD_RESET_EXPIRY_MINUTES));
+        emailVerificationRepository.save(verification);
+
+        log.info("비밀번호 재설정 코드 인증 성공: {}", email);
+        return true;
     }
 
     /**
      * 이메일 인증 상태 확인 (회원가입 시 사용)
      */
     public boolean isEmailVerified(String email) {
-        String verifiedKey = "email_verified:" + email;
-        String verified = redisTemplate.opsForValue().get(verifiedKey);
-        return "true".equals(verified);
+        Optional<EmailVerification> verificationOpt = emailVerificationRepository
+                .findVerifiedByEmailAndType(email, EmailVerification.VerificationType.SIGNUP, LocalDateTime.now());
+
+        return verificationOpt.isPresent();
     }
 
     /**
      * 비밀번호 재설정 권한 확인
      */
     public boolean canResetPassword(String email) {
-        String resetTokenKey = "password_reset_verified:" + email;
-        String verified = redisTemplate.opsForValue().get(resetTokenKey);
-        return "true".equals(verified);
+        Optional<EmailVerification> verificationOpt = emailVerificationRepository
+                .findVerifiedByEmailAndType(email, EmailVerification.VerificationType.PASSWORD_RESET, LocalDateTime.now());
+
+        return verificationOpt.isPresent();
     }
 
     /**
      * 이메일 인증 상태 삭제 (회원가입 완료 후)
      */
+    @Transactional
     public void removeEmailVerificationStatus(String email) {
-        String verifiedKey = "email_verified:" + email;
-        redisTemplate.delete(verifiedKey);
+        emailVerificationRepository.deleteByEmailAndType(email, EmailVerification.VerificationType.SIGNUP);
     }
 
     /**
      * 비밀번호 재설정 권한 삭제 (비밀번호 변경 완료 후)
      */
+    @Transactional
     public void removePasswordResetPermission(String email) {
-        String resetTokenKey = "password_reset_verified:" + email;
-        redisTemplate.delete(resetTokenKey);
+        emailVerificationRepository.deleteByEmailAndType(email, EmailVerification.VerificationType.PASSWORD_RESET);
+    }
+
+    /**
+     * 만료된 인증 정보 정리 (스케줄러)
+     */
+    @Scheduled(cron = "0 0 * * * *") // 매시간 실행
+    @Transactional
+    public void cleanupExpiredVerifications() {
+        int deletedCount = emailVerificationRepository.deleteExpiredVerifications(LocalDateTime.now());
+        if (deletedCount > 0) {
+            log.info("만료된 이메일 인증 정보 {} 건 삭제 완료", deletedCount);
+        }
     }
 
     // === Private Methods ===
@@ -157,22 +210,6 @@ public class EmailService {
     private String generateRandomCode() {
         Random random = new Random();
         return String.format("%06d", random.nextInt(1000000));
-    }
-
-    /**
-     * 이메일 인증코드를 Redis에 저장
-     */
-    private void saveVerificationCode(String email, String code) {
-        String redisKey = "email_verification:" + email;
-        redisTemplate.opsForValue().set(redisKey, code, Duration.ofMinutes(CODE_EXPIRY_MINUTES));
-    }
-
-    /**
-     * 비밀번호 재설정 코드를 Redis에 저장
-     */
-    private void savePasswordResetCode(String email, String code) {
-        String redisKey = "password_reset:" + email;
-        redisTemplate.opsForValue().set(redisKey, code, Duration.ofMinutes(CODE_EXPIRY_MINUTES));
     }
 
     /**
@@ -291,4 +328,3 @@ public class EmailService {
             """.formatted(code);
     }
 }
-
