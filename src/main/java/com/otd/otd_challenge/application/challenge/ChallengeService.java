@@ -1,6 +1,7 @@
 package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.util.FormattedTime;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.application.challenge.model.detail.*;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
@@ -124,11 +125,15 @@ public class ChallengeService {
     }
 
     private void formatRankingRecords(List<ChallengeRankGetRes> rankingList, String unit) {
-        for (ChallengeRankGetRes ranking : rankingList) {
-            DecimalFormat df = (ranking.getTotalRecord() % 1 == 0)
-                    ? new DecimalFormat("0")
-                    : new DecimalFormat("0.0");
-            ranking.setFormattedTotalRecord(df.format(ranking.getTotalRecord()) + unit);
+        for (ChallengeRankGetRes rank : rankingList) {
+            if ("분".equals(unit)) {
+                rank.setFormattedTotalRecord(FormattedTime.formatMinutes(rank.getTotalRecord()));
+            } else {
+                DecimalFormat df = (rank.getTotalRecord() % 1 == 0)
+                        ? new DecimalFormat("0")
+                        : new DecimalFormat("0.0");
+                rank.setFormattedTotalRecord(df.format(rank.getTotalRecord()) + unit);
+            }
         }
     }
 
@@ -144,14 +149,13 @@ public class ChallengeService {
 
 
         if (res.getGoal() > res.getTotalRecord()) {
-            double percentage = ((res.getTotalRecord() / res.getGoal()) * 100 );
+            double percentage = ((double) res.getTotalRecord() / res.getGoal()) * 100;
             res.setPercent(Math.round(percentage * 10 ) / 10.0);
         } else {
             res.setPercent(100.0);
         }
-        DecimalFormat df = (res.getTotalRecord() % 1 == 0) ? new DecimalFormat("0") : new DecimalFormat("0.0");
-        res.setFormattedTotalRecord(df.format(res.getTotalRecord()) + res.getUnit());
-//        res.setFormattedGoal(res.getGoal() + res.getUnit());
+
+        res.setFormattedFields();
 
         formatRankingRecords(top5Ranking, res.getUnit());
         formatRankingRecords(aroundRanking, res.getUnit());
@@ -179,6 +183,10 @@ public class ChallengeService {
 
     public ResultResponse<?> saveMissionRecord(ChallengeRecordMissionPostReq req){
         int result = challengeMapper.saveMissionRecordByUserIdAndCpId(req);
+//        ChallengeDefinition point = challengeDefinitionRepository.findByCdId(req.getCdId());
+//        User user = userRepository.findByUserId(req.getUserId());
+
+//        updatePointByUserId(user.getPoint() + point.getCdReward(), req.getUserId());
         return new ResultResponse<>("success", result);
     }
 

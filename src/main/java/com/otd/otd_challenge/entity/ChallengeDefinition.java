@@ -32,4 +32,7 @@ public class ChallengeDefinition {
 
     @Column(nullable = false, length = 10)
     private String cdUnit;
+
+    @Column(nullable = false, length = 5)
+    private int exp;
 }

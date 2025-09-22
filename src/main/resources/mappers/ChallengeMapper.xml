@@ -3,7 +3,7 @@
 <mapper namespace="com.otd.otd_challenge.application.challenge.ChallengeMapper">
     <select id="findAll">
         SELECT cd_id AS id, cd_goal AS goal, cd_image AS image,
-               cd_name AS name, cd_type AS type, cd_reward AS reward
+               cd_name AS name, cd_type AS type, cd_reward AS reward, exp, cd_unit AS unit
         FROM challenge_definition
     </select>
     <select id="findAllProgressFromUserId">
