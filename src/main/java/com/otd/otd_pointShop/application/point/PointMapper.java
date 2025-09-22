@@ -9,13 +9,13 @@ import java.util.List;
 @Mapper
 public interface PointMapper {
     // 유저별 포인트 목록 조회
-    List<Point> pointFindAll(
+    List<Point> findAllByUserId(
         @Param("userId") Long userId,
         @Param("offset") int offset,
         @Param("pageSize") int pageSize
     );
 
-    Point pointFindOne(
+    Point findOneByUserIdAndPointId(
         @Param("userId") Long userId,
         @Param("pointId") Long pointId
     );

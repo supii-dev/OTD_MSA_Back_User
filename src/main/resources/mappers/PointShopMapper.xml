@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.otd.onetoday_user.application.point.PointMapper">
+<mapper namespace="com.otd.otd_pointShop.application.point.PointMapper">
 
-    <select id="pointFindAll" resultType="com.otd.otd_pointShop.entity.Point">
+    <select id="findAllByUserId" resultType="com.otd.otd_pointShop.entity.Point">
         SELECT *
         FROM point
         WHERE user_id = #{userId}
@@ -12,7 +12,7 @@
         LIMIT #{offset}, #{pageSize}
     </select>
 
-    <select id="pointFindOne" resultType="com.otd.otd_pointShop.entity.Point">
+    <select id="findOneByUserIdAndPointId" resultType="com.otd.otd_pointShop.entity.Point">
         SELECT *
         FROM point
         WHERE point_id = #{pointId}

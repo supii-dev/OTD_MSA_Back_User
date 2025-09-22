@@ -1,13 +1,16 @@
 package com.otd.otd_pointShop.application.point;
 
 import com.otd.otd_pointShop.application.point.model.PointPostReq;
+import com.otd.otd_pointShop.application.point.model.PointPutReq;
 import com.otd.otd_pointShop.entity.Point;
 import com.otd.otd_pointShop.entity.PointImage;
 import com.otd.otd_pointShop.repository.PointRepository;
 import com.otd.otd_pointShop.repository.PointImageRepository;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +32,7 @@ public class PointService {
     private final PointRepository pointRepository;
     private final PointImageRepository pointImageRepository;
 
+    @Transactional
     public void createPointItem(PointPostReq dto, MultipartFile[] images, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found!"));
@@ -43,6 +47,11 @@ public class PointService {
         List<PointImage> imagesList = new ArrayList<>();
         if (images != null && images.length > 0) {
             for (MultipartFile file : images) {
+                String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+                if (!List.of("jpg", "jpeg", "png", "gif", "bmp").contains(extension.toLowerCase())
+                ) {
+                    throw new IllegalArgumentException("지원하지 않는 이미지 형식입니다.");
+                }
                 String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
                 Path savePath = Paths.get(uploadDir, filename);
                 try {
@@ -61,6 +70,56 @@ public class PointService {
 
         point.setImages(imagesList);
         pointRepository.save(point);
+    }
+
+    @Transactional
+    public void updatePointItem(PointPutReq dto, MultipartFile[] images, Long userId) {
+        User user  = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        Point point = pointRepository.findById(dto.getPointId())
+                .orElseThrow(() -> new RuntimeException("포인트 항목을 찾을 수 없습니다."));
+        if (!point.getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("수정할 권한이 없습니다.");
+        }
+
+        point.setPointScore(dto.getPointScore());
+        point.setPointItemName(dto.getPointItemName());
+        point.setPointItemContent(dto.getPointItemContent());
+
+        List<PointImage> oldImages = pointImageRepository.findByPoint_PointId(dto.getPointId());
+        pointImageRepository.deleteAll(oldImages);
+
+        List<PointImage> newImageList = new ArrayList<>();
+
+        if (images != null && images.length > 0) {
+            for (MultipartFile file : images) {
+                String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+                Path savePath = Paths.get(uploadDir, filename);
+                try {
+                    Files.createDirectories(savePath.getParent());
+                    file.transferTo(savePath.toFile());
+                } catch (IOException e) {
+                    throw new RuntimeException("이미지 저장 실패", e);
+                }
+                PointImage pointImage = new PointImage();
+                pointImage.setImageUrl(filename);
+                pointImage.setPoint(point);
+                newImageList.add(pointImage);
+            }
+        }
+        point.setImages(newImageList);
+        pointRepository.save(point);
+    }
+
+    @Transactional
+    public void deletePointItem(Long pointId, Long userId) {
+        Point point =  pointRepository.findById(pointId)
+                .orElseThrow(() -> new RuntimeException("포인트 항목을 찾을 수 없습니다."));
+        if (!point.getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("삭제할 권한이 없습니다.");
+        }
+        pointImageRepository.deleteAllByPoint(point);
+        pointRepository.delete(point);
     }
 
     public List<Point> getPointByUser(Long userId) {
