@@ -48,13 +48,9 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
         req.getClientRegistration().getRegistrationId(); 소셜로그인 신청한 플랫폼 문자열값이 넘어온다.
         플랫폼 문자열값은 spring.security.oauth2.client.registration 아래에 있는 속성값들이다. (google, kakao, naver)
          */
-
-        //소셜 로그인 accessToken
-        String oauth2AccessToken = req.getAccessToken().getTokenValue();
-
         SignInProviderType signInProviderType = SignInProviderType.valueOf(req.getClientRegistration()
-                                                                              .getRegistrationId()
-                                                                              .toUpperCase());
+                .getRegistrationId()
+                .toUpperCase());
 
         //사용하기 편하도록 규격화된 객체로 변환
         Oauth2UserInfo oauth2UserInfo = oauth2UserInfoFactory.getOauth2UserInfo(signInProviderType, oAuth2User.getAttributes());
@@ -64,7 +60,6 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
         if(user == null) { // 최초 로그인 상황 > 회원가입 처리
             user = new User();
             user.setUid(oauth2UserInfo.getId());
-            user.setAccessToken(oauth2AccessToken);
             user.setProviderType(signInProviderType);
             user.setUpw("");
             user.setNickName(oauth2UserInfo.getName());
@@ -72,21 +67,17 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
 
             //최초 소셜 로그인은 회원가입으로 권한은 USER_1 처리, 챌린지는 TBD 로 측정 TBD이면 설문창 강제적용
             List<UserRole> userRoles = new ArrayList<>(1);
-            UserRoleIds ids = new UserRoleIds();
-            ids.setUserId(user.getUserId());
-            ids.setRoleCode(EnumUserRole.USER);
-            ids.setChallengeCode(EnumChallengeRole.TBD);
+            UserRoleIds ids = new UserRoleIds(user.getUserId(), EnumUserRole.USER_2, EnumChallengeRole.TBD);
+
             UserRole userRole = new UserRole(ids, user);
             userRoles.add(userRole);
 
             user.setUserRoles(userRoles);
-        } else {
-            user.setAccessToken(oauth2AccessToken);
+            userRepository.save(user);
         }
-        userRepository.save(user);
 
         List<EnumUserRole> roles = user.getUserRoles().stream().map(item -> item.getUserRoleIds()
-                                                                                .getRoleCode()).toList();
+                .getRoleCode()).toList();
 
         String nickName = user.getNickName() == null ? user.getUid() : user.getNickName();
         JwtUser jwtUser = new OAuth2JwtUser(nickName, user.getPic(), user.getUserId(), roles);
