@@ -65,7 +65,7 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
             user.setNickName(oauth2UserInfo.getName());
             user.setPic(oauth2UserInfo.getProfileImageUrl());
 
-            //최초 소셜 로그인은 회원가입으로 권한은 USER_1 처리, 챌린지는 TBD 로 측정 TBD이면 설문창 강제적용
+            //최초 소셜 로그인은 회원가입으로 권한은 USER_1 처리
             List<UserRole> userRoles = new ArrayList<>(1);
             UserRoleIds ids = new UserRoleIds(user.getUserId(), EnumUserRole.USER_2, EnumChallengeRole.TBD);
 
