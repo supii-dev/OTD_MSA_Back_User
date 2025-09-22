@@ -8,4 +8,6 @@ import java.util.List;
 public interface ChallengeDefinitionRepository extends JpaRepository<ChallengeDefinition, Long> {
 
     List<ChallengeDefinition> findByCdType(String cdPeriod);
+
+    ChallengeDefinition findByCdId(Long cdId);
 }

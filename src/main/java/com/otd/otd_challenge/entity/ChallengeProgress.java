@@ -2,11 +2,9 @@ package com.otd.otd_challenge.entity;
 
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDate;
 
@@ -15,6 +13,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@Builder
+@DynamicInsert
 public class ChallengeProgress {
 
     @Id
@@ -35,9 +35,9 @@ public class ChallengeProgress {
     @Column(nullable = false)
     private LocalDate endDate;
 
-    @Column
+    @Column(columnDefinition = "double DEFAULT 0", nullable = false)
     private Double totalRecord;
 
-    @Column(columnDefinition = "0", nullable = false)
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 0", nullable = false)
     private boolean isSuccess;
 }

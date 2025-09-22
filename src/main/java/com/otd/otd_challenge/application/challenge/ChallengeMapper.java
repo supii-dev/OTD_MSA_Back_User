@@ -1,6 +1,9 @@
 package com.otd.otd_challenge.application.challenge;
 
 import com.otd.otd_challenge.application.challenge.model.*;
+import com.otd.otd_challenge.application.challenge.model.detail.*;
+import com.otd.otd_challenge.application.challenge.model.home.ChallengeMissionCompleteGetRes;
+import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -11,6 +14,11 @@ public interface ChallengeMapper {
     List<ChallengeProgressGetRes> findAllProgressFromUserId(ChallengeProgressGetReq req);
     List<ChallengeDefinitionGetRes> findByType(ChallengeProgressGetReq req);
     List<ChallengeDefinitionGetRes> findByTypeForCompetition(ChallengeProgressGetReq req);
-    ChallengeDetailGetRes findProgressByUserIdAndCdId(ChallengeProgressGetReq req);
-    List<ChallengeRankGetRes> findRankingLimitFive(ChallengeProgressGetReq req);
+    ChallengeDetailPerGetRes findProgressByUserIdAndCdId(ChallengeProgressGetReq req);
+    List<ChallengeRankGetRes> findTop5Ranking(ChallengeProgressGetReq req);
+    List<ChallengeRankGetRes> findAroundMyRank(ChallengeProgressGetReq req);
+    List<ChallengeDetailDayGetRes> findDayByUserIdAndCdId(ChallengeProgressGetReq req);
+    int findSuccessChallenge(Long userId);
+    int saveMissionRecordByUserIdAndCpId(ChallengeRecordMissionPostReq req);
+    List<ChallengeMissionCompleteGetRes> findByUserIdAndMissionComplete(Long userId);
 }
