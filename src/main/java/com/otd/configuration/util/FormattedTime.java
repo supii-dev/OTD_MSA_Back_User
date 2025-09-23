@@ -1,5 +1,15 @@
 package com.otd.configuration.util;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+
+@Getter
+@AllArgsConstructor
+@Setter
 public class FormattedTime {
     public static String formatMinutes(double minutes) {
         if (minutes <= 0) return "0분";
@@ -14,5 +24,14 @@ public class FormattedTime {
         } else {
             return mins + "분";
         }
+    }
+
+    public static int fetchYear() {
+        LocalDate localDate = LocalDate.now();
+        return localDate.getYear();
+    }
+    public static int fetchMonth() {
+        LocalDate localDate = LocalDate.now();
+        return localDate.getMonthValue();
     }
 }
