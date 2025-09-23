@@ -19,7 +19,7 @@ public class ChallengeDefinition {
     private String cdName;
 
     @Column(nullable = false)
-    private Long cdReward;
+    private int cdReward;
 
     @Column(nullable = false, length = 12)
     private String cdType;
@@ -32,4 +32,7 @@ public class ChallengeDefinition {
 
     @Column(nullable = false, length = 10)
     private String cdUnit;
+
+    @Column(nullable = false, length = 4)
+    private int xp;
 }
