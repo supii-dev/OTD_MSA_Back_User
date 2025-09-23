@@ -1,6 +1,7 @@
 constants:
   file:
     upload-directory: D:/kjh/project_2/upload/challenge
+#   upload-directory: D:/kjh/project_2/upload/challenge
     challenge-pic: /files/
     profile-pic: /profile
     point-pic: /pointimages

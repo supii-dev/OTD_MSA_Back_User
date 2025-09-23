@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChallengeHomeGetRes {
-    private User user;
+    private UserInfoGetRes user;
     private int success;
 
     private List<ChallengeProgressGetRes> personalChallenge;

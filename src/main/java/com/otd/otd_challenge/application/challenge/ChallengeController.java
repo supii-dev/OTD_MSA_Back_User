@@ -1,6 +1,7 @@
 package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.model.UserPrincipal;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeDetailDayGetRes;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeDetailPerGetRes;
@@ -10,6 +11,7 @@ import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRe
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,8 +31,9 @@ public class ChallengeController {
     }
 
     @GetMapping("/selected")
-    public ChallengeHomeGetRes getSelectedList(@ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getSelectedList(req);
+    public ChallengeHomeGetRes getSelectedList(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                               @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getSelectedList(userPrincipal.getSignedUserId(), req);
     }
 
     @GetMapping("/addlist")
@@ -44,8 +47,8 @@ public class ChallengeController {
     }
 
     @GetMapping("/detail/per/{cdId}")
-    public ChallengeDetailPerGetRes getDetail(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getDetail(cdId, req);
+    public ChallengeDetailPerGetRes getDetailPer(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getDetailPer(cdId, req);
     }
 
     @GetMapping("/detail/day/{cdId}")

@@ -1,11 +1,13 @@
 package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.util.FormattedTime;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.application.challenge.model.detail.*;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeMissionCompleteGetRes;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
+import com.otd.otd_challenge.application.challenge.model.home.UserInfoGetRes;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengeProgress;
 import com.otd.otd_user.application.user.UserRepository;
@@ -79,17 +81,24 @@ public class ChallengeService {
         return dto;
     }
 
-    public ChallengeHomeGetRes getSelectedList(ChallengeProgressGetReq req) {
+    public ChallengeHomeGetRes getSelectedList(long userId, ChallengeProgressGetReq req) {
         List<ChallengeProgressGetRes> res = challengeMapper.findAllProgressFromUserId(req);
         List<ChallengeDefinition> daily = challengeDefinitionRepository.findByCdType("daily");
-        User userInfo = userRepository.findByUserId(req.getUserId());
-        int success = challengeMapper.findSuccessChallenge(req.getUserId());
+        User userInfo = userRepository.findByUserId(userId);
+        Integer success = challengeMapper.findSuccessChallenge(userId);
         List<ChallengeMissionCompleteGetRes> missionComplete =
-                challengeMapper.findByUserIdAndMissionComplete(req.getUserId());
+                challengeMapper.findByUserIdAndMissionComplete(userId);
         List<ChallengeProgressGetRes> personal = new ArrayList<>();
         List<ChallengeProgressGetRes> weekly = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
-
+        int successCount = (success != null) ? success : 0;
+        UserInfoGetRes uInfo = UserInfoGetRes.builder()
+                .userId(userId)
+                .name(userInfo.getName())
+                .nickName(userInfo.getNickName())
+                .pic(userInfo.getPic())
+                .ex(userInfo.getXp())
+                .point(userInfo.getPoint()).build();
         addImgPath(daily);
         addImgPath(res);
         for (ChallengeProgressGetRes challengeProgressGetRes : res) {
@@ -101,8 +110,8 @@ public class ChallengeService {
             }
         }
         return ChallengeHomeGetRes.builder()
-                .user(userInfo)
-                .success(success)
+                .user(uInfo)
+                .success(successCount)
                 .dailyMission(daily)
                 .weeklyChallenge(weekly)
                 .competitionChallenge(competition)
@@ -127,15 +136,19 @@ public class ChallengeService {
     }
 
     private void formatRankingRecords(List<ChallengeRankGetRes> rankingList, String unit) {
-        for (ChallengeRankGetRes ranking : rankingList) {
-            DecimalFormat df = (ranking.getTotalRecord() % 1 == 0)
-                    ? new DecimalFormat("0")
-                    : new DecimalFormat("0.0");
-            ranking.setFormattedTotalRecord(df.format(ranking.getTotalRecord()) + unit);
+        for (ChallengeRankGetRes rank : rankingList) {
+            if ("분".equals(unit)) {
+                rank.setFormattedTotalRecord(FormattedTime.formatMinutes(rank.getTotalRecord()));
+            } else {
+                DecimalFormat df = (rank.getTotalRecord() % 1 == 0)
+                        ? new DecimalFormat("0")
+                        : new DecimalFormat("0.0");
+                rank.setFormattedTotalRecord(df.format(rank.getTotalRecord()) + unit);
+            }
         }
     }
 
-    public ChallengeDetailPerGetRes getDetail(Long cdId, ChallengeProgressGetReq req) {
+    public ChallengeDetailPerGetRes getDetailPer(Long cdId, ChallengeProgressGetReq req) {
         req.setCdId(cdId);
         // 상세정보
         ChallengeDetailPerGetRes res = challengeMapper.findProgressByUserIdAndCdId(req);
@@ -147,14 +160,13 @@ public class ChallengeService {
 
 
         if (res.getGoal() > res.getTotalRecord()) {
-            double percentage = ((res.getTotalRecord() / res.getGoal()) * 100 );
+            double percentage = ((double) res.getTotalRecord() / res.getGoal()) * 100;
             res.setPercent(Math.round(percentage * 10 ) / 10.0);
         } else {
             res.setPercent(100.0);
         }
-        DecimalFormat df = (res.getTotalRecord() % 1 == 0) ? new DecimalFormat("0") : new DecimalFormat("0.0");
-        res.setFormattedTotalRecord(df.format(res.getTotalRecord()) + res.getUnit());
-//        res.setFormattedGoal(res.getGoal() + res.getUnit());
+
+        res.setFormattedFields();
 
         formatRankingRecords(top5Ranking, res.getUnit());
         formatRankingRecords(aroundRanking, res.getUnit());
@@ -176,12 +188,21 @@ public class ChallengeService {
 
         ChallengeDetailDayGetRes map = res.get(0);
         List<Integer> record = res.stream().map(ChallengeDetailDayGetRes::getDate).collect(Collectors.toList());
-        map.setRecDate(record);
+        if (map.getDate() == null) {
+            map.setRecDate(new ArrayList<>());
+        } else {
+            map.setRecDate(record);
+        }
         return map;
     }
 
+    @Transactional
     public ResultResponse<?> saveMissionRecord(ChallengeRecordMissionPostReq req){
         int result = challengeMapper.saveMissionRecordByUserIdAndCpId(req);
+        ChallengeDefinition point = challengeDefinitionRepository.findByCdId(req.getCdId());
+        User user = userRepository.findByUserId(req.getUserId());
+        int newPoint = user.getPoint() + point.getCdReward();
+        userRepository.addPointByUserId(newPoint, req.getUserId());
         return new ResultResponse<>("success", result);
     }
 

@@ -55,8 +55,8 @@ public class User extends UpdatedAt{
     @Column(columnDefinition = "int DEFAULT 0", nullable = false)
     private int point;
 
-    @Column(columnDefinition = "int DEFAULT 0", nullable = false)
-    private int level;
+    @Column(columnDefinition = "int DEFAULT 0")
+    private int xp;
 
     // 본인인증 관련 필드 추가
 //    @Column(length = 88, name = "ci")

@@ -23,8 +23,8 @@ public enum EnumChallengeRole implements EnumMapperType {
         public CodeConverter() { super(EnumChallengeRole.class, false); }
     }
 
-    public static EnumChallengeRole fromCode(int surveyResult) {
-        return switch (surveyResult) {
+    public static EnumChallengeRole fromCode(int surveyAnswers) {
+        return switch (surveyAnswers) {
             case 0, 1, 2, 3 -> EnumChallengeRole.BRONZE;
             case 4, 5, 6 -> EnumChallengeRole.SILVER;
             case 7, 8, 9 -> EnumChallengeRole.GOLD;
