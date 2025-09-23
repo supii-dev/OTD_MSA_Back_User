@@ -8,6 +8,5 @@ import lombok.ToString;
 @Setter
 @ToString
 public class ChallengeRecordMissionPostReq {
-  private Long userId;
   private Long cdId;
 }
