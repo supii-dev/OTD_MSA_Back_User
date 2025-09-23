@@ -12,5 +12,5 @@ public class UserInfoGetRes {
     private String nickName;
     private String pic;
     private int point;
-    private int ex;
+    private int xp;
 }

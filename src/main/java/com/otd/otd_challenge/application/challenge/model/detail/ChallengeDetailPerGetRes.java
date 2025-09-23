@@ -18,7 +18,6 @@ public class ChallengeDetailPerGetRes {
     private long cdId;
     private String name;
     private int reward;
-    @JsonIgnore
     private double totalRecord;
     @JsonIgnore
     private double goal;

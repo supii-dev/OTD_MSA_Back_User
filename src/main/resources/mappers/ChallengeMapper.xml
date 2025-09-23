@@ -60,7 +60,7 @@
         WHERE r.user_id = #{userId}
     </select>
     <select id="findTop5Ranking">
-        SELECT u.user_id, u.nick_name, u.pic, cp.total_record,
+        SELECT u.user_id, u.nick_name, u.pic, cp.total_record, u.name,
                RANK() OVER(ORDER BY cp.total_record DESC) AS `rank`
         FROM user u
         INNER JOIN challenge_progress cp
@@ -73,7 +73,7 @@
     <select id="findAroundMyRank">
         WITH ranking AS (
         SELECT
-        u.nick_name, u.pic, cp.cp_id, cp.user_id, cp.total_record,
+        u.nick_name, u.pic, cp.cp_id, cp.user_id, cp.total_record, u.name,
         RANK() OVER (ORDER BY cp.total_record DESC) AS rank
         FROM challenge_progress cp
         INNER JOIN user u ON u.user_id = cp.user_id
