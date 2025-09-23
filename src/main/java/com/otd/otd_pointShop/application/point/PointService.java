@@ -32,10 +32,43 @@ public class PointService {
     private final PointRepository pointRepository;
     private final PointImageRepository pointImageRepository;
 
+    private void validateImageExtension(MultipartFile file) {
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if (!List.of("jpg", "jpeg", "png", "gif", "bmp").contains(extension.toLowerCase())
+        ) {
+            throw new IllegalArgumentException("지원하지 않는 이미지 형식입니다.");
+        }
+    }
+
+    // image save logic
+    private List<PointImage> storeImages(MultipartFile[] images, Point point) {
+        List<PointImage> imagesList = new ArrayList<>();
+        if (images != null || images.length > 0) return imagesList;
+
+        for (MultipartFile file : images) {
+            validateImageExtension(file);
+            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            Path savePath = Paths.get(uploadDir, filename);
+
+            try {
+                Files.createDirectories(savePath.getParent());
+                file.transferTo(savePath.toFile());
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 저장 실패", e);
+            }
+
+            PointImage pointImage = new PointImage();
+            pointImage.setImageUrl(filename);
+            pointImage.setPoint(point);
+            imagesList.add(pointImage);
+        }
+        return imagesList;
+    }
+
     @Transactional
     public void createPointItem(PointPostReq dto, MultipartFile[] images, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다!"));
 
         Point point = new Point();
         point.setUser(user);
@@ -43,31 +76,7 @@ public class PointService {
         point.setPointItemName(dto.getPointItemName());
         point.setPointItemContent(dto.getPointItemContent());
 
-        // image save logic
-        List<PointImage> imagesList = new ArrayList<>();
-        if (images != null && images.length > 0) {
-            for (MultipartFile file : images) {
-                String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-                if (!List.of("jpg", "jpeg", "png", "gif", "bmp").contains(extension.toLowerCase())
-                ) {
-                    throw new IllegalArgumentException("지원하지 않는 이미지 형식입니다.");
-                }
-                String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-                Path savePath = Paths.get(uploadDir, filename);
-                try {
-                    Files.createDirectories(savePath.getParent());
-                    file.transferTo(savePath.toFile());
-                } catch (IOException e) {
-                    throw new RuntimeException("이미지 저장 실패", e);
-                }
-
-                PointImage pointImage = new PointImage();
-                pointImage.setImageUrl(filename);
-                pointImage.setPoint(point);
-                imagesList.add(pointImage);
-            }
-        }
-
+        List<PointImage> imagesList = storeImages(images, point);
         point.setImages(imagesList);
         pointRepository.save(point);
     }
@@ -89,24 +98,7 @@ public class PointService {
         List<PointImage> oldImages = pointImageRepository.findByPoint_PointId(dto.getPointId());
         pointImageRepository.deleteAll(oldImages);
 
-        List<PointImage> newImageList = new ArrayList<>();
-
-        if (images != null && images.length > 0) {
-            for (MultipartFile file : images) {
-                String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-                Path savePath = Paths.get(uploadDir, filename);
-                try {
-                    Files.createDirectories(savePath.getParent());
-                    file.transferTo(savePath.toFile());
-                } catch (IOException e) {
-                    throw new RuntimeException("이미지 저장 실패", e);
-                }
-                PointImage pointImage = new PointImage();
-                pointImage.setImageUrl(filename);
-                pointImage.setPoint(point);
-                newImageList.add(pointImage);
-            }
-        }
+        List<PointImage> newImageList = storeImages(images, point);
         point.setImages(newImageList);
         pointRepository.save(point);
     }

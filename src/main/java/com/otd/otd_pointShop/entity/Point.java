@@ -32,7 +32,7 @@ public class Point {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "point_category_id")
     private PointCategory pointCategory;
 
     @OneToMany(mappedBy = "point", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

@@ -16,6 +16,6 @@ public class PointCategory {
 
     private String categoryName;
 
-    @OneToMany(mappedBy = "point_category")
+    @OneToMany(mappedBy = "pointCategory", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Point> items = new ArrayList<>();
 }
