@@ -43,5 +43,5 @@ public class UserJoinReq{
     private String pic;
 
     private List<EnumUserRole> roles;
-    private int challengeSurvey; // 챌린지 설문 총 점수
+    private int surveyAnswers; // 챌린지 설문 총 점수
 }
