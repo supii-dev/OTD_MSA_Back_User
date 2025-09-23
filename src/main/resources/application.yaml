@@ -56,7 +56,7 @@ constants:
 
 spring:
   application:
-    name: OTD_USER
+    name: otd-user
   task:
     scheduling:
       enabled: true
@@ -158,7 +158,7 @@ spring:
       mode: always
 
 server:
-  port: 8080
+  port: 8082
   servlet:
     encoding:
       charset: UTF-8
