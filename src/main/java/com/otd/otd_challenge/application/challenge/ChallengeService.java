@@ -81,7 +81,8 @@ public class ChallengeService {
         return dto;
     }
 
-    public ChallengeHomeGetRes getSelectedList(long userId, ChallengeProgressGetReq req) {
+    public ChallengeHomeGetRes getSelectedList(Long userId, ChallengeProgressGetReq req) {
+        req.setUserId(userId);
         List<ChallengeProgressGetRes> res = challengeMapper.findAllProgressFromUserId(req);
         List<ChallengeDefinition> daily = challengeDefinitionRepository.findByCdType("daily");
         User userInfo = userRepository.findByUserId(userId);
@@ -97,7 +98,7 @@ public class ChallengeService {
                 .name(userInfo.getName())
                 .nickName(userInfo.getNickName())
                 .pic(userInfo.getPic())
-                .ex(userInfo.getXp())
+                .xp(userInfo.getXp())
                 .point(userInfo.getPoint()).build();
         addImgPath(daily);
         addImgPath(res);
@@ -120,19 +121,20 @@ public class ChallengeService {
                 .build();
     }
 
-    public List<ChallengeDefinitionGetRes> getChallenge(ChallengeProgressGetReq req) {
+    public List<ChallengeDefinitionGetRes> getChallengeList(Long userId, ChallengeProgressGetReq req) {
+        req.setUserId(userId);
         List<ChallengeDefinitionGetRes> res = challengeMapper.findByType(req);
         addImgPath(res);
         return res;
     }
 
-    public Map<String, List<ChallengeDefinitionGetRes>> getMapChallenge(ChallengeProgressGetReq req) {
+    public Map<String, List<ChallengeDefinitionGetRes>> getCompetitionList(Long userId, ChallengeProgressGetReq req) {
+        req.setUserId(userId);
         List<ChallengeDefinitionGetRes> res = challengeMapper.findByTypeForCompetition(req);
         addImgPath(res);
-        Map<String, List<ChallengeDefinitionGetRes>> grouping = res.stream()
-                    .collect(Collectors.groupingBy(ChallengeDefinitionGetRes::getName));
 
-        return grouping;
+        return res.stream()
+                    .collect(Collectors.groupingBy(ChallengeDefinitionGetRes::getName));
     }
 
     private void formatRankingRecords(List<ChallengeRankGetRes> rankingList, String unit) {
@@ -148,8 +150,17 @@ public class ChallengeService {
         }
     }
 
-    public ChallengeDetailPerGetRes getDetailPer(Long cdId, ChallengeProgressGetReq req) {
+    private void fetchName(List<ChallengeRankGetRes> list) {
+        for (ChallengeRankGetRes rank : list) {
+            if (rank.getNickName() == null) {
+                rank.setNickName(rank.getName());
+            }
+        }
+    }
+
+    public ChallengeDetailPerGetRes getDetailPer(Long cdId, Long userId, ChallengeProgressGetReq req) {
         req.setCdId(cdId);
+        req.setUserId(userId);
         // 상세정보
         ChallengeDetailPerGetRes res = challengeMapper.findProgressByUserIdAndCdId(req);
         // top5
@@ -167,9 +178,10 @@ public class ChallengeService {
         }
 
         res.setFormattedFields();
-
         formatRankingRecords(top5Ranking, res.getUnit());
         formatRankingRecords(aroundRanking, res.getUnit());
+        fetchName(top5Ranking);
+        fetchName(aroundRanking);
 
         res.setTopRanking(top5Ranking);
         res.setAroundRanking(aroundRanking);
@@ -182,8 +194,9 @@ public class ChallengeService {
         return new ResultResponse<>("success", result);
     }
 
-    public ChallengeDetailDayGetRes getDetailDay(Long cdId, ChallengeProgressGetReq req) {
+    public ChallengeDetailDayGetRes getDetailDay(Long cdId, Long userId, ChallengeProgressGetReq req) {
         req.setCdId(cdId);
+        req.setUserId(userId);
         List<ChallengeDetailDayGetRes> res = challengeMapper.findDayByUserIdAndCdId(req);
 
         ChallengeDetailDayGetRes map = res.get(0);
@@ -197,17 +210,17 @@ public class ChallengeService {
     }
 
     @Transactional
-    public ResultResponse<?> saveMissionRecord(ChallengeRecordMissionPostReq req){
-        int result = challengeMapper.saveMissionRecordByUserIdAndCpId(req);
+    public ResultResponse<?> saveMissionRecord(Long userId, ChallengeRecordMissionPostReq req){
+        int result = challengeMapper.saveMissionRecordByUserIdAndCpId(userId, req.getCdId());
         ChallengeDefinition point = challengeDefinitionRepository.findByCdId(req.getCdId());
-        User user = userRepository.findByUserId(req.getUserId());
+        User user = userRepository.findByUserId(userId);
         int newPoint = user.getPoint() + point.getCdReward();
-        userRepository.addPointByUserId(newPoint, req.getUserId());
+        userRepository.addPointByUserId(newPoint, userId);
         return new ResultResponse<>("success", result);
     }
 
-    public ResultResponse<?> saveChallenge(ChallengePostReq req){
-        User user = userRepository.findByUserId(req.getUserId());
+    public ResultResponse<?> saveChallenge(Long userId, ChallengePostReq req){
+        User user = userRepository.findByUserId(userId);
         ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(req.getCdId());
 
         LocalDate startDate = LocalDate.now();

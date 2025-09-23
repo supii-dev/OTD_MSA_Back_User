@@ -37,23 +37,27 @@ public class ChallengeController {
     }
 
     @GetMapping("/addlist")
-    public List<ChallengeDefinitionGetRes> getChallenge(@ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getChallenge(req);
+    public List<ChallengeDefinitionGetRes> getChallengeList(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                            @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getChallengeList(userPrincipal.getSignedUserId(), req);
     }
 
     @GetMapping("/addcompetitionlist")
-    public Map<String, List<ChallengeDefinitionGetRes>> getMapChallenge(@ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getMapChallenge(req);
+    public Map<String, List<ChallengeDefinitionGetRes>> getCompetitionList(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                                        @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getCompetitionList(userPrincipal.getSignedUserId(), req);
     }
 
     @GetMapping("/detail/per/{cdId}")
-    public ChallengeDetailPerGetRes getDetailPer(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getDetailPer(cdId, req);
+    public ChallengeDetailPerGetRes getDetailPer(@PathVariable Long cdId, @AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                 @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getDetailPer(cdId, userPrincipal.getSignedUserId(), req);
     }
 
     @GetMapping("/detail/day/{cdId}")
-    public ChallengeDetailDayGetRes getDetailDay(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getDetailDay(cdId, req);
+    public ChallengeDetailDayGetRes getDetailDay(@PathVariable Long cdId, @AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                 @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getDetailDay(cdId, userPrincipal.getSignedUserId(), req);
     }
 
     @PutMapping("/success")
@@ -62,11 +66,13 @@ public class ChallengeController {
     }
 
     @PostMapping("/record/mission")
-    public ResultResponse<?> postMissionRecord(@RequestBody ChallengeRecordMissionPostReq req){
-        return challengeService.saveMissionRecord(req);
+    public ResultResponse<?> postMissionRecord(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                               @RequestBody ChallengeRecordMissionPostReq req){
+        return challengeService.saveMissionRecord(userPrincipal.getSignedUserId(), req);
     }
     @PostMapping("/add")
-    public ResultResponse<?> postChallenge(@RequestBody ChallengePostReq req){
-        return challengeService.saveChallenge(req);
+    public ResultResponse<?> postChallenge(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                           @RequestBody ChallengePostReq req){
+        return challengeService.saveChallenge(userPrincipal.getSignedUserId(), req);
     }
 }
