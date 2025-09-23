@@ -97,7 +97,7 @@ public class ChallengeService {
                 .name(userInfo.getName())
                 .nickName(userInfo.getNickName())
                 .pic(userInfo.getPic())
-                .ex(userInfo.getXp())
+                .xp(userInfo.getXp())
                 .point(userInfo.getPoint()).build();
         addImgPath(daily);
         addImgPath(res);
