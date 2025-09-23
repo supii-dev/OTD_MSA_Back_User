@@ -157,9 +157,9 @@ public class UserService {
         return count > 0;
     }
 
-    public UserProfileGetRes getProfileUser(UserProfileGetDto dto) {
+    public UserProfileGetRes getProfileUser(long signedUserId) {
         // MyBatis 사용 (복잡한 조회)
-        return userMapper.findProfileByUserId(dto);
+        return userMapper.findProfileByUserId(signedUserId);
     }
 
     @Transactional

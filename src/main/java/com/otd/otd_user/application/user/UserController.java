@@ -99,11 +99,8 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResultResponse<?> getProfileUser(@AuthenticationPrincipal UserPrincipal userPrincipal
-            , @RequestParam("profile_user_id") long profileUserId) {
-        log.info("profileUserId: {}", profileUserId);
-        UserProfileGetDto dto = new UserProfileGetDto(userPrincipal.getSignedUserId(), profileUserId);
-        UserProfileGetRes userProfileGetRes = userService.getProfileUser(dto);
+    public ResultResponse<?> getProfileUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        UserProfileGetRes userProfileGetRes = userService.getProfileUser(userPrincipal.getSignedUserId());
         return new ResultResponse<>("프로파일 유저 정보", userProfileGetRes);
     }
 

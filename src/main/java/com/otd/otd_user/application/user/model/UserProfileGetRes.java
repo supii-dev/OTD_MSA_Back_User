@@ -15,12 +15,14 @@ public class UserProfileGetRes {
     private String pic;
     private LocalDateTime createdAt;  // String에서 LocalDateTime으로 변경 권장
     private String uid;
+    private String name;
     private String nickName;
     private String email;
     private String phone;
     private String birthDate;
     private String gender;
     private LocalDateTime lastLoginAt;
+    private int point;
 
     // String 타입의 createdAt을 사용하려면 이 생성자를 사용
     public UserProfileGetRes(Long userId, String pic, String createdAt, String uid, String nickName) {
