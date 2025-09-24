@@ -46,7 +46,6 @@ public class WebSecurityConfiguration {
                    .formLogin(formLoginSpec -> formLoginSpec.disable()) //시큐리티가 제공해주는 인증 처리 -> 사용 안 함
                    .csrf(csrfSpec -> csrfSpec.disable()) // BE - csrf라는 공격이 있는데 공격을 막는 것이 기본으로 활성화 되어 있는데
                                                         // 세션을 이용한 공격이다. 세션을 어차피 안 쓰니까 비활성화
-                   .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource())) // ⭐️⭐️⭐️
                    .authorizeHttpRequests(req -> req
                            .requestMatchers(HttpMethod.POST, "/api/OTD/user/logout").authenticated()
                                        .requestMatchers("/api/user/profile"
@@ -56,7 +55,7 @@ public class WebSecurityConfiguration {
                    .logout(logout -> logout.disable())
                    .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                    .oauth2Login(oauth2 -> oauth2.authorizationEndpoint( auth -> auth.baseUri(constOAuth2.baseUri)
-//                                                                                    .authorizationRequestRepository(repository)
+                                                                                    .authorizationRequestRepository(repository)
                                           )
                                           .redirectionEndpoint( redirection -> redirection.baseUri(constOAuth2.redirectionBaseUri) )
                                           .userInfoEndpoint( userInfo -> userInfo.userService(myOauth2UserService) )
@@ -64,26 +63,13 @@ public class WebSecurityConfiguration {
                                           .failureHandler( authenticationFailureHandler )
                    )
                    .addFilterBefore(new Oauth2AuthenticationCheckRedirectUriFilter(constOAuth2), OAuth2AuthorizationRequestRedirectFilter.class)
+                   //.logout(logout -> logout.logoutUrl("/api/user/sign-out").deleteCookies("JSESSIONID", "Authorization", "RefreshToken"))
                    .exceptionHandling(e -> e.authenticationEntryPoint(tokenAuthenticationEntryPoint))
                    .build();
     }
 
 
-    // ⭐️ CORS 설정
-    CorsConfigurationSource corsConfigurationSource() {
-        return request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedHeaders(Collections.singletonList("*"));
-            config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedOrigins(Arrays.asList(
-                    "http://localhost:5173",
-                    "http://127.0.0.1:5173",
-                    "https://greenart.n-e.kr"
-            ));
-            config.setAllowCredentials(true);
-            return config;
-        };
-    }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }

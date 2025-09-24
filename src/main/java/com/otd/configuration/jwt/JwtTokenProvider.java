@@ -3,6 +3,7 @@ package com.otd.configuration.jwt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otd.configuration.constants.ConstJwt;
+import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.model.JwtUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -43,8 +44,9 @@ public class JwtTokenProvider {
                 .issuer(constJwt.getIssuer())
                 .issuedAt(now) //발행일시(토큰 생성일시)
                 .expiration(new Date(now.getTime() + tokenValidityMilliSeconds)) //만료일시(토큰 만료일시)
-                .claim(constJwt.getClaimKey(), makeClaimByUserToJson(jwtUser)) //커스텀 클레임
-
+                .claim("roles", jwtUser.getRoles().stream()
+                        .map(EnumUserRole::name)   // USER_1, ADMIN
+                        .toList())
                 //signature
                 .signWith(secretKey)
                 .compact();

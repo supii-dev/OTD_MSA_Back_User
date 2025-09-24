@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.otd.onetoday_user.application.user.UserMapper">
+<mapper namespace="com.otd.otd_user.application.user.UserMapper">
 
     <select id="findProfileByUserId"
             parameterType="com.otd.otd_user.application.user.model.UserProfileGetDto"
@@ -13,5 +13,12 @@
         nick_name as nickName
         FROM user
         WHERE user_id = #{profileUserId}
+    </select>
+    <select id="countByUid" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM user WHERE uid = #{uid}
+    </select>
+
+    <select id="countByNickname" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM user WHERE nick_name = #{nickname}
     </select>
 </mapper>
