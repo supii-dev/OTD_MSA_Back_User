@@ -30,6 +30,8 @@ spring:
         strategy: refresh
   datasource:
     url: jdbc:log4jdbc:mariadb://192.168.0.93/hsb
+    username: hsb
+    password: green502
   jpa:
     hibernate:
       ddl-auto: update

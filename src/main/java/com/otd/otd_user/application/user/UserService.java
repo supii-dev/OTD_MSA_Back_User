@@ -36,7 +36,9 @@ public class UserService {
     private final EmailService emailService;
     private final MyFileManager myFileManager;
 
-
+    public boolean isUidAvailable(String uid) {
+        return userMapper.countByUid(uid) == 0;
+    }
     @Transactional
     public void join(UserJoinReq req, MultipartFile pic) {
         String hashedPassword = passwordEncoder.encode(req.getUpw());
@@ -143,10 +145,6 @@ public class UserService {
     }
 
 
-    public boolean isUidAvailable(String uid) {
-        return userMapper.countByUid(uid) == 0;
-    }
-
     public boolean isNicknameAvailable(String nickname) {
         return userMapper.countByNickname(nickname) == 0;
     }
@@ -184,4 +182,5 @@ public class UserService {
         imgUploadManager.removeProfileDirectory(signedUserId);
         user.setPic(null);
     }
+
 }

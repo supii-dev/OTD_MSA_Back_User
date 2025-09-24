@@ -13,4 +13,5 @@ public interface UserMapper {
     int countByCi(String ci);
     int countByDi(String di);
     UserLoginRes findRoleByUserId(long signedUserId);
+
 }

@@ -13,4 +13,11 @@
         FROM user
         WHERE user_id = #{signedUserId}
     </select>
+    <select id="countByUid" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM user WHERE uid = #{uid}
+    </select>
+
+    <select id="countByNickname" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM user WHERE nick_name = #{nickname}
+    </select>
 </mapper>
