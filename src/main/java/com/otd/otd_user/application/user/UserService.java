@@ -1,5 +1,6 @@
 package com.otd.otd_user.application.user;
 
+import com.otd.configuration.jwt.JwtTokenManager;
 import com.otd.configuration.util.MyFileManager;
 import com.otd.configuration.util.MyFileUtils;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
@@ -40,7 +41,6 @@ public class UserService {
     public void join(UserJoinReq req, MultipartFile pic) {
         String hashedPassword = passwordEncoder.encode(req.getUpw());
 
-
         User user = User.builder()
                 .providerType(SignInProviderType.LOCAL)
                 .uid(req.getUid())
@@ -75,17 +75,22 @@ public class UserService {
         if(user == null || !passwordEncoder.matches(req.getUpw(), user.getUpw())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "아이디/비밀번호를 확인해 주세요.");
         }
-
         List<EnumUserRole> roles = user.getUserRoles().stream()
                 .map(item -> item.getUserRoleIds().getRoleCode()).toList();
-
         log.info("roles: {}", roles);
         JwtUser jwtUser = new JwtUser(user.getUserId(), roles);
 
+        EnumChallengeRole challengeRoles = user.getUserRoles().stream()
+                .map(item -> item.getUserRoleIds().getChallengeCode())
+                .findFirst().orElse(null);
+
         UserLoginRes userLoginRes = UserLoginRes.builder()
                 .userId(user.getUserId())
-                .nickName(user.getNickName() == null ? user.getUid() : user.getNickName())
+                .nickName(user.getNickName() == null ? user.getName() : user.getNickName())
                 .pic(user.getPic())
+                .point(user.getPoint())
+                .xp(user.getXp())
+                .challengeRole(challengeRoles)
                 .build();
 
         return UserLoginDto.builder()

@@ -6,7 +6,7 @@
                cd_name AS name, cd_type AS type, cd_reward AS reward, xp, cd_unit AS unit
         FROM challenge_definition
     </select>
-    <select id="findAllProgressFromUserId">
+    <select id="findAllMonthlyFromUserId">
         SELECT cp.user_id AS userId, cp.cp_id AS cpId, cp.cd_id AS cdId,
                cp.start_date, cp.end_date, cp.total_record, cd.cd_image AS image,
                cd.cd_type AS type, cd.cd_name AS `name`,
@@ -17,6 +17,20 @@
         WHERE cp.user_id = #{userId}
         AND Year(cp.start_date) = #{year}
         AND Month(cp.start_date) = #{month}
+    </select>
+    <select id="findAllWeeklyFromUserId">
+        SELECT cp.user_id AS userId, cp.cp_id AS cpId, cp.cd_id AS cdId,
+        cp.start_date, cp.end_date, cp.total_record, cd.cd_image AS image,
+        cd.cd_type AS type, cd.cd_name AS `name`,
+        cd.cd_reward AS reward, cd.cd_unit AS unit
+        FROM challenge_progress cp
+        INNER JOIN challenge_definition cd
+        ON cd.cd_id = cp.cd_id
+        WHERE cp.user_id = #{userId}
+        AND Year(cp.start_date) = #{year}
+        AND Month(cp.start_date) = #{month}
+        AND DAY(cp.start_date) > #{day}
+        AND cd.cd_type = "weekly"
     </select>
     <select id="findByType">
         SELECT cd.cd_id AS id, cd.cd_goal AS goal, cd.cd_image AS image,
