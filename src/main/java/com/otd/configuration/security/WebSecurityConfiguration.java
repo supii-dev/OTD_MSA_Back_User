@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 /*
@@ -45,13 +46,14 @@ public class WebSecurityConfiguration {
                    .formLogin(formLoginSpec -> formLoginSpec.disable()) //시큐리티가 제공해주는 인증 처리 -> 사용 안 함
                    .csrf(csrfSpec -> csrfSpec.disable()) // BE - csrf라는 공격이 있는데 공격을 막는 것이 기본으로 활성화 되어 있는데
                                                         // 세션을 이용한 공격이다. 세션을 어차피 안 쓰니까 비활성화
+                   .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource())) // ⭐️⭐️⭐️
                    .authorizeHttpRequests(req -> req
                            .requestMatchers(HttpMethod.POST, "/api/OTD/user/logout").authenticated()
                                        .requestMatchers("/api/user/profile"
                                                       , "/api/user/profile/pic").authenticated()
                                        .anyRequest().permitAll()
                    )
-                   //.addFilterBefore(tokenAuthenticationFilter, LogoutFilter.class)
+                   .logout(logout -> logout.disable())
                    .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                    .oauth2Login(oauth2 -> oauth2.authorizationEndpoint( auth -> auth.baseUri(constOAuth2.baseUri)
                                                                                     .authorizationRequestRepository(repository)

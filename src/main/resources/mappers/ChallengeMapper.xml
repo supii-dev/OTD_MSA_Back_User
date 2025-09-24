@@ -3,7 +3,7 @@
 <mapper namespace="com.otd.otd_challenge.application.challenge.ChallengeMapper">
     <select id="findAll">
         SELECT cd_id AS id, cd_goal AS goal, cd_image AS image,
-               cd_name AS name, cd_type AS type, cd_reward AS reward
+               cd_name AS name, cd_type AS type, cd_reward AS reward, xp, cd_unit AS unit
         FROM challenge_definition
     </select>
     <select id="findAllProgressFromUserId">
@@ -60,7 +60,7 @@
         WHERE r.user_id = #{userId}
     </select>
     <select id="findTop5Ranking">
-        SELECT u.user_id, u.nick_name, u.pic, cp.total_record,
+        SELECT u.user_id, u.nick_name, u.pic, cp.total_record, u.name,
                RANK() OVER(ORDER BY cp.total_record DESC) AS `rank`
         FROM user u
         INNER JOIN challenge_progress cp
@@ -73,7 +73,7 @@
     <select id="findAroundMyRank">
         WITH ranking AS (
         SELECT
-        u.nick_name, u.pic, cp.cp_id, cp.user_id, cp.total_record,
+        u.nick_name, u.pic, cp.cp_id, cp.user_id, cp.total_record, u.name,
         RANK() OVER (ORDER BY cp.total_record DESC) AS rank
         FROM challenge_progress cp
         INNER JOIN user u ON u.user_id = cp.user_id
@@ -96,7 +96,7 @@
                DAY(cr.rec_date) AS date, cp.start_date, cp.end_date,
                cd.cd_reward AS reward, cp.is_success
         FROM challenge_progress cp
-        INNER JOIN challenge_record cr
+        LEFT JOIN challenge_record cr
         ON cr.cp_id = cp.cp_id
         INNER JOIN challenge_definition cd
         ON cd.cd_id = cp.cd_id

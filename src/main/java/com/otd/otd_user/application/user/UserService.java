@@ -53,7 +53,7 @@ public class UserService {
                 .gender(req.getGender())
                 .build();
 
-        EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(req.getChallengeSurvey());
+        EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(req.getSurveyAnswers());
         // 기본 역할 설정
         if (req.getRoles() == null || req.getRoles().isEmpty()) {
             user.addUserRoles(List.of(EnumUserRole.USER_2), challengeRole);
