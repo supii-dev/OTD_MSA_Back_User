@@ -91,6 +91,6 @@ public class Oauth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private void clearAuthenticationAttributes(HttpServletRequest req, HttpServletResponse res) {
         super.clearAuthenticationAttributes(req);
-        repository.removeAuthorizationCookies(res);
+//        repository.removeAuthorizationCookies(res);
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 /*
@@ -55,7 +56,7 @@ public class WebSecurityConfiguration {
                    .logout(logout -> logout.disable())
                    .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                    .oauth2Login(oauth2 -> oauth2.authorizationEndpoint( auth -> auth.baseUri(constOAuth2.baseUri)
-                                                                                    .authorizationRequestRepository(repository)
+//                                                                                    .authorizationRequestRepository(repository)
                                           )
                                           .redirectionEndpoint( redirection -> redirection.baseUri(constOAuth2.redirectionBaseUri) )
                                           .userInfoEndpoint( userInfo -> userInfo.userService(myOauth2UserService) )
@@ -74,7 +75,11 @@ public class WebSecurityConfiguration {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedHeaders(Collections.singletonList("*"));
             config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedOriginPatterns(Collections.singletonList("*")); // ⭐️ 허용할 origin
+            config.setAllowedOrigins(Arrays.asList(
+                    "http://localhost:5173",
+                    "http://127.0.0.1:5173",
+                    "https://greenart.n-e.kr"
+            ));
             config.setAllowCredentials(true);
             return config;
         };

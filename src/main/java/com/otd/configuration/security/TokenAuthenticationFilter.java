@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Slf4j
 @Component
@@ -32,17 +33,28 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 //    }
 @Override
 protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-    log.info("request.getRequestURI(): {}", request.getRequestURI());
+    log.info("요청 URI: {}", request.getRequestURI());
 
     // 로그아웃 요청은 토큰 없어도 통과
     if (request.getRequestURI().equals("/api/OTD/user/logout")) {
+
         filterChain.doFilter(request, response);
         return;
     }
-
+    // 들어온 쿠키 출력
+    if (request.getCookies() != null) {
+        Arrays.stream(request.getCookies()).forEach(c ->
+                log.info("Cookie: {} = {}", c.getName(), c.getValue())
+        );
+    } else {
+        log.warn("요청에 쿠키 없음");
+    }
     Authentication authentication = jwtTokenManager.getAuthentication(request);
     if (authentication != null) {
+        log.info("인증 성공: principal={}", authentication.getPrincipal());
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    } else {
+        log.warn("인증 실패 → authentication == null");
     }
 
     filterChain.doFilter(request, response);

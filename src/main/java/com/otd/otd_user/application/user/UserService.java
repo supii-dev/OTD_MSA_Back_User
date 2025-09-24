@@ -2,6 +2,7 @@ package com.otd.otd_user.application.user;
 
 import com.otd.configuration.util.MyFileManager;
 import com.otd.configuration.util.MyFileUtils;
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.otd_user.application.email.EmailService;
 import com.otd.otd_user.application.email.model.PasswordChangeReq;
 import com.otd.otd_user.application.email.model.PasswordResetReq;
@@ -54,7 +55,13 @@ public class UserService {
                 .gender(req.getGender())
                 .build();
 
-        user.addUserRoles(req.getRoles());
+        EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(req.getSurveyAnswers());
+        // 기본 역할 설정
+        if (req.getRoles() == null || req.getRoles().isEmpty()) {
+            user.addUserRoles(List.of(EnumUserRole.USER_2), challengeRole);
+        } else {
+            user.addUserRoles(req.getRoles(), challengeRole);
+        }
 
         userRepository.save(user);
 
