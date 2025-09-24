@@ -1,5 +1,6 @@
 package com.otd.configuration.enumcode;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,14 +9,23 @@ import java.util.Map;
 public class EnumMapper {
     private Map<String, List<EnumMapperValue>> factory = new LinkedHashMap<>();
 
-    //e는 EnumMapperValue를 상속받은 어떤 타입이든 전달 될 수 있다.
-    public void put(String key, Class<? extends EnumMapperValue> e) {
+    public void put(String key, Class<? extends EnumMapperType> e) {
         factory.put(key, toEnumValues(e));
     }
 
-    private List<EnumMapperValue> toEnumValues(Class<? extends EnumMapperValue> e) {
-        e.getEnumConstants(); //특정 enum 타입이 갖고 있는 모든 값을 출력시키는 기능은 Class의 getEnumConstants() 메소드를 사용
-        return null;
+    // e.getEnumConstants(): SchoolTypeCode[] schoolTypeCodeArray = [ SchoolTypeCode.ELEMENTARY, SchoolTypeCode.MIDDLE, SchoolTypeCode.HIGH ];
+    private List<EnumMapperValue> toEnumValues(Class<? extends EnumMapperType> e) {
+        return Arrays.stream(e.getEnumConstants()) // Array to Stream
+                .map(EnumMapperValue::new) // 같은 크기의 스트림을 만든다. 메소드 참조 .map(item -> new EnumMapperValue(item)) 이렇게 작성된 것과 같다.
+                .toList(); // 최종연산
     }
+    // 스트림 ( EnumMapperValue객체, EnumMapperValue객체, EnumMapperValue객체 )
+    // 첫번째 EnumMapperValue는 code="00101", value="초등학교"
+    // 두번째 EnumMapperValue는 code="00102", value="중학교"
+    // 세번째 EnumMapperValue는 code="00103", value="고등학교"
+    // 최종연산은 toList니까 Stream > ArrayList바뀐다.
 
+    public List<EnumMapperValue> get(String key) {
+        return factory.get(key);
+    }
 }
