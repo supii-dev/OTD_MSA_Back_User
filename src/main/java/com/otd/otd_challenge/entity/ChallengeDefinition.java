@@ -1,12 +1,10 @@
 package com.otd.otd_challenge.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
+@Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,7 +19,7 @@ public class ChallengeDefinition {
     private String cdName;
 
     @Column(nullable = false)
-    private Long cdReward;
+    private int cdReward;
 
     @Column(nullable = false, length = 12)
     private String cdType;
@@ -34,4 +32,7 @@ public class ChallengeDefinition {
 
     @Column(nullable = false, length = 10)
     private String cdUnit;
+
+    @Column(nullable = false, length = 4)
+    private int xp;
 }

@@ -1,16 +1,14 @@
 package com.otd.otd_user.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@Setter
 public class UserRole {
     @EmbeddedId
     private UserRoleIds userRoleIds;
