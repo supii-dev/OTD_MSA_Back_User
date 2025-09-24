@@ -10,4 +10,6 @@ public class PointGetReq {
     private String pointItemName;
     private String pointItemContent;
     private String pointItemImage;
+    private int offset;
+    private int pageSize;
 }

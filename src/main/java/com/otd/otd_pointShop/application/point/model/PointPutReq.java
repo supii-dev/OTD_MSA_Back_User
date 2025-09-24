@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class PointPutReq {
     private Long pointId;
     private Integer pointScore;
-    private String PointItemName;
-    private String PointItemContent;
+    private String pointItemName;
+    private String pointItemContent;
 }

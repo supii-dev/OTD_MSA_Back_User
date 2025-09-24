@@ -1,6 +1,7 @@
 package com.otd.otd_pointShop.application.point;
 
 import com.otd.otd_pointShop.entity.Point;
+import com.otd.otd_pointShop.entity.PointImage;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -18,6 +19,12 @@ public interface PointMapper {
     Point findOneByUserIdAndPointId(
         @Param("userId") Long userId,
         @Param("pointId") Long pointId
+    );
+
+    PointImage findImageAndComment(
+            @Param("pointItemName")  String pointItemName,
+            @Param("pointItemContent") String pointItemContent,
+            @Param("pointItemImage") String pointItemImage
     );
 
     int savePoint(Point point);

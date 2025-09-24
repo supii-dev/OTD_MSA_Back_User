@@ -15,4 +15,5 @@ public interface PointRepository extends JpaRepository<Point,Long> {
     List<Point> updateByPoint_PointId(Long pointId);
     List<Point> deleteByPoint_PointId(Long pointId);
     List<PointImage> findByPoint_PointId(Long pointId);
+    List<Point> findByUserWithPagination(Long userId,int offset,int pageSize);
 }

@@ -1,7 +1,6 @@
 package com.otd.otd_pointShop.application.point;
 
-import com.otd.otd_pointShop.application.point.model.PointPostReq;
-import com.otd.otd_pointShop.application.point.model.PointPutReq;
+import com.otd.otd_pointShop.application.point.model.*;
 import com.otd.otd_pointShop.entity.Point;
 import com.otd.otd_pointShop.entity.PointImage;
 import com.otd.otd_pointShop.repository.PointRepository;
@@ -18,9 +17,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,10 +38,25 @@ public class PointService {
         }
     }
 
+    public List<PointListRes> getPointListByUser(Long userId, int offset, int pageSize) {
+        List<Point> points = pointRepository.findByUserWithPagination(userId, offset, pageSize);
+
+        return points.stream()
+                .map(point -> PointListRes.builder()
+                        .pointId(point.getPointId())
+                        .pointItemName(point.getPointItemName())
+                        .pointItemImage(point.getPointItemImage())
+                        .pointScore(point.getPointScore())
+                        .createdAt(point.getCreatedAt())
+                        .build())
+                .toList();
+    }
+
     // image save logic
     private List<PointImage> storeImages(MultipartFile[] images, Point point) {
         List<PointImage> imagesList = new ArrayList<>();
-        if (images != null || images.length > 0) return imagesList;
+
+        if (images == null || images.length == 0) return imagesList;
 
         for (MultipartFile file : images) {
             validateImageExtension(file);
@@ -62,7 +75,47 @@ public class PointService {
             pointImage.setPoint(point);
             imagesList.add(pointImage);
         }
+        if (!imagesList.isEmpty()) {
+            point.setPointItemImage(imagesList.get(0).getImageUrl());
+        }
         return imagesList;
+    }
+
+    public List<PointGetRes> pointGetResList(Long userId) {
+        List<Point> points = pointRepository.findByUser_UserId(userId);
+
+        return points.stream().map(point -> {
+            List<PointImage> images = pointImageRepository.findByPoint_PointId(point.getPointId());
+            List<String> imageUrls = images.stream()
+                                           .map(PointImage::getImageUrl)
+                                           .toList();
+            return PointGetRes.builder()
+                    .pointId(point.getPointId())
+                    .pointItemName(point.getPointItemName())
+                    .pointItemContent(point.getPointItemContent())
+                    .pointScore(point.getPointScore())
+                    .createdAt(point.getCreatedAt())
+                    .images(imageUrls)
+                    .build();
+        }).toList();
+    }
+
+    public Set<String> getPointKeywordByUser(Long userId) {
+        List<Point> points = pointRepository.findByUser_UserId(userId);
+        Set<String> keywords = new HashSet<>();
+        for (Point point : points) {
+            keywords.addAll(extractKeywords(point.getPointItemContent()));
+        }
+        return keywords;
+    }
+
+    private Set<String> extractKeywords(String pointItemContent) {
+        if (pointItemContent == null) return Set.of();
+        return Arrays.stream(pointItemContent.split("\\s+"))
+                .map(word -> word.replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}]", ""))
+                .filter(word -> word.length() > 1)
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
     }
 
     @Transactional

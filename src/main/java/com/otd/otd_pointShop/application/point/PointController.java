@@ -1,16 +1,21 @@
 package com.otd.otd_pointShop.application.point;
 
-import com.otd.otd_pointShop.application.point.model.PointApiResponse;
-import com.otd.otd_pointShop.application.point.model.PointPostReq;
-import com.otd.otd_pointShop.application.point.model.PointPutReq;
+import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.model.UserPrincipal;
+import com.otd.otd_pointShop.application.point.model.*;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.xml.transform.Result;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -38,6 +43,28 @@ public class PointController {
             log.error("사용자 {}가 포인트를 등록하는 데 실패했습니다. 제목: {}", userId, dto.getPointItemName());
             return ResponseEntity.status(500).body(new PointApiResponse<>(false, "서버 오류: " + e.getMessage()));
         }
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<?> getPointList (
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @Valid @ModelAttribute PointGetReq req
+    ) {
+        if(userPrincipal == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+        Long userId = userPrincipal.getSignedUserId();
+        List<PointListRes> list = pointService.getPointListByUser(userId, req.getOffset(), req.getPageSize());
+        return ResponseEntity.ok().body(list);
+    }
+
+    @GetMapping("/keyword")
+    public ResultResponse<?> getPointKeywordByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        if(userPrincipal == null) {
+            return new ResultResponse<>("로그인이 필요합니다.", null);
+        }
+        Set<String> result = pointService.getPointKeywordByUser(userPrincipal.getSignedUserId());
+        return new ResultResponse<>(String.format("rows: %d", result.size()), result);
     }
 
     @PutMapping(value = "/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

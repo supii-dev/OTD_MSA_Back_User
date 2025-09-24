@@ -1,18 +1,16 @@
 package com.otd.otd_pointShop.application.point.model;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
+@Getter
 @Builder
-@Data
-public class PointGetRes {
+public class PointListRes {
     private Long pointId;
-    private int pointScore;
     private String pointItemName;
-    private String pointItemContent;
+    private String pointItemImage;
+    private int pointScore;
     private LocalDateTime createdAt;
-    private List<String> images;
 }
