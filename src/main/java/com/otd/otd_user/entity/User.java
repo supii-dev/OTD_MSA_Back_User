@@ -55,6 +55,10 @@ public class User extends UpdatedAt{
     @Column(columnDefinition = "int DEFAULT 0", nullable = false)
     private int point;
 
+    @Column(columnDefinition = "int DEFAULT 0")
+    private int xp;
+
+
     //cascade는 자식과 나랑 모든 연결 (내가 영속성되면 자식도 영속성되고, 내가 삭제되면 자식도 삭제 된다. 등등)
     //ohphanRemoval은 userRoles에서 자식을 하나 제거함. 그러면 DB에도 뺀 자식은 삭제처리가 된다.
     @Builder.Default
