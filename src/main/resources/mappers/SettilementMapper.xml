@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.otd.otd_challenge.application.challenge.ChallengeSettlementMapper">
+    <select id="findByUserId">
+        SELECT cp.user_id
+        FROM challenge_progress cp
+        JOIN challenge_definition cd
+        ON cp.cd_id = cd.cd_id AND cd.type = #{type}
+        WHERE start_date >= #{startDate}
+        AND end_date = #{endDate}
+    </select>
+</mapper>
