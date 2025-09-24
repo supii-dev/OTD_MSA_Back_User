@@ -36,7 +36,7 @@ public class UserController {
         log.info("req: {}", req);
         log.info("pic: {}", pic != null ? pic.getOriginalFilename() : pic);
         userService.join(req, pic);
-        return new ResultResponse<>("회원가입이 완료되었습니다.", 1);
+        return new ResultResponse<>("", 1);
     }
 
     @PostMapping("/login")
@@ -77,25 +77,12 @@ public class UserController {
         return new ResultResponse<>("닉네임 중복 확인", Map.of("isAvailable", isAvailable));
     }
 
-    // 중복가입 확인
-    @PostMapping("/check-duplicate")
-    public ResultResponse<?> checkDuplicateUser(@RequestBody Map<String, String> req) {
-        String ci = req.get("ci");
-        String di = req.get("di");
-        boolean isDuplicate = userService.isDuplicateUser(ci, di);
-        return new ResultResponse<>("중복가입 확인", Map.of("isDuplicate", isDuplicate));
-    }
-
     @PostMapping("/logout")
     public ResultResponse<?> logout(HttpServletResponse response) {
         jwtTokenManager.logout(response);
         return new ResultResponse<>("sign-out 성공", null);
     }
 
-    @PostMapping("/test")
-    public String test() {
-        return "테스트 성공";
-    }
 
     @PostMapping("/reissue")
     public ResultResponse<?> reissue(HttpServletResponse response, HttpServletRequest request) {
