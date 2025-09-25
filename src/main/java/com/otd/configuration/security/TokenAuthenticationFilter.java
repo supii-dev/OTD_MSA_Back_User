@@ -36,7 +36,8 @@ protected void doFilterInternal(HttpServletRequest request, HttpServletResponse 
     log.info("요청 URI: {}", request.getRequestURI());
 
     // 로그아웃 요청은 토큰 없어도 통과
-    if (request.getRequestURI().equals("/api/OTD/user/logout")) {
+    if (request.getRequestURI().equals("/api/OTD/user/logout") ||
+            request.getRequestURI().equals("/api/OTD/user/join")  ) {
 
         filterChain.doFilter(request, response);
         return;

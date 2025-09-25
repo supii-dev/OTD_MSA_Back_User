@@ -1,5 +1,6 @@
 package com.otd.otd_challenge.application.challenge;
 
+import com.otd.configuration.constants.ConstFile;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.util.FormattedTime;
 import com.otd.otd_challenge.application.challenge.model.*;
@@ -37,9 +38,8 @@ public class ChallengeService {
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
     private final UserRepository userRepository;
-    @Value("${constants.file.challenge-pic}")
+    @Value("${constants.file.challenge}")
     private String imgPath;
-
     private void addImgPath(List<?> list) {
         for (Object o : list) {
             if (o instanceof ChallengeDefinitionGetRes cd) {
