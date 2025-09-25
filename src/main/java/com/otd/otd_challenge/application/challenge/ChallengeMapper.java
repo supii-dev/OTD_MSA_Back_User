@@ -11,7 +11,8 @@ import java.util.List;
 @Mapper
 public interface ChallengeMapper {
     List<ChallengeDefinitionGetRes> findAll();
-    List<ChallengeProgressGetRes> findAllProgressFromUserId(ChallengeProgressGetReq req);
+    List<ChallengeProgressGetRes> findAllMonthlyFromUserId(ChallengeProgressGetReq req);
+    List<ChallengeProgressGetRes> findAllWeeklyFromUserId(ChallengeProgressGetReq req);
     List<ChallengeDefinitionGetRes> findByType(ChallengeProgressGetReq req);
     List<ChallengeDefinitionGetRes> findByTypeForCompetition(ChallengeProgressGetReq req);
     ChallengeDetailPerGetRes findProgressByUserIdAndCdId(ChallengeProgressGetReq req);

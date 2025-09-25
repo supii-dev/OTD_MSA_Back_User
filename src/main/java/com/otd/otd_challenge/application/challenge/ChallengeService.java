@@ -1,5 +1,6 @@
 package com.otd.otd_challenge.application.challenge;
 
+import com.otd.configuration.constants.ConstFile;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.util.FormattedTime;
 import com.otd.otd_challenge.application.challenge.model.*;
@@ -37,9 +38,9 @@ public class ChallengeService {
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
     private final UserRepository userRepository;
-    @Value("${constants.file.challenge-pic}")
-    private String imgPath;
 
+    @Value("${constants.file.challenge}")
+    private String imgPath;
     private void addImgPath(List<?> list) {
         for (Object o : list) {
             if (o instanceof ChallengeDefinitionGetRes cd) {
@@ -80,17 +81,17 @@ public class ChallengeService {
         log.info("ChallengeService getChallengeList dto: {}", dto);
         return dto;
     }
-
+    // HomeInfo
     public ChallengeHomeGetRes getSelectedList(Long userId, ChallengeProgressGetReq req) {
         req.setUserId(userId);
-        List<ChallengeProgressGetRes> res = challengeMapper.findAllProgressFromUserId(req);
+        List<ChallengeProgressGetRes> monthly = challengeMapper.findAllMonthlyFromUserId(req);
+        List<ChallengeProgressGetRes> weekly = challengeMapper.findAllWeeklyFromUserId(req);
         List<ChallengeDefinition> daily = challengeDefinitionRepository.findByCdType("daily");
         User userInfo = userRepository.findByUserId(userId);
         Integer success = challengeMapper.findSuccessChallenge(userId);
         List<ChallengeMissionCompleteGetRes> missionComplete =
                 challengeMapper.findByUserIdAndMissionComplete(userId);
         List<ChallengeProgressGetRes> personal = new ArrayList<>();
-        List<ChallengeProgressGetRes> weekly = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
         int successCount = (success != null) ? success : 0;
         UserInfoGetRes uInfo = UserInfoGetRes.builder()
@@ -100,13 +101,13 @@ public class ChallengeService {
                 .pic(userInfo.getPic())
                 .xp(userInfo.getXp())
                 .point(userInfo.getPoint()).build();
-        addImgPath(daily);
-        addImgPath(res);
-        for (ChallengeProgressGetRes challengeProgressGetRes : res) {
 
+        addImgPath(weekly);
+        addImgPath(daily);
+        addImgPath(monthly);
+        for (ChallengeProgressGetRes challengeProgressGetRes : monthly) {
             switch (challengeProgressGetRes.getType()) {
                 case "personal" -> personal.add(challengeProgressGetRes);
-                case "weekly" -> weekly.add(challengeProgressGetRes);
                 case "competition" -> competition.add(challengeProgressGetRes);
             }
         }
@@ -161,6 +162,8 @@ public class ChallengeService {
     public ChallengeDetailPerGetRes getDetailPer(Long cdId, Long userId, ChallengeProgressGetReq req) {
         req.setCdId(cdId);
         req.setUserId(userId);
+        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(cdId);
+        req.setType(cd.getCdType());
         // 상세정보
         ChallengeDetailPerGetRes res = challengeMapper.findProgressByUserIdAndCdId(req);
         // top5

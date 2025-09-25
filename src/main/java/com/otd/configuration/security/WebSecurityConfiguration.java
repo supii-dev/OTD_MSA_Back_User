@@ -3,6 +3,7 @@ package com.otd.configuration.security;
 import com.otd.configuration.constants.ConstOAuth2;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.oauth.*;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -48,12 +50,19 @@ public class WebSecurityConfiguration {
                                                         // 세션을 이용한 공격이다. 세션을 어차피 안 쓰니까 비활성화
                    .authorizeHttpRequests(req -> req
                            .requestMatchers(HttpMethod.POST, "/api/OTD/user/logout").authenticated()
-                                       .requestMatchers("/api/user/profile"
-                                                      , "/api/user/profile/pic").authenticated()
-                                       .anyRequest().permitAll()
+                           .requestMatchers("/api/OTD/user/profile" , "/api/OTD/user/profile/pic").authenticated()
+                           .requestMatchers( "/api/OTD/user/logout",
+                                   "/api/OTD/user/reissue",
+                                   "/api/OTD/user/join",
+                                   "/api/OTD/user/login",
+                                   "/api/OTD/user/**"
+                                   ,"/home/green/download/challenge/**").permitAll()
+                           .anyRequest().permitAll()
                    )
-                   .logout(logout -> logout.disable())
-                   .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout
+                        .logoutUrl("/api/OTD/user/logout") // 기본은 POST, 아래에서 GET 허용 예시
+                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
+                )       .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                    .oauth2Login(oauth2 -> oauth2.authorizationEndpoint( auth -> auth.baseUri(constOAuth2.baseUri)
                                                                                     .authorizationRequestRepository(repository)
                                           )
