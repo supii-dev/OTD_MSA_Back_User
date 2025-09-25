@@ -146,4 +146,5 @@
         WHERE user_id = #{userId}
         AND success_date = CURRENT_DATE;
     </select>
+
 </mapper>
