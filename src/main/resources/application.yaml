@@ -30,6 +30,7 @@ constants:
 
     refresh-token-cookie-name: refresh-token
     refresh-token-cookie-path: /api/OTD/user/reissue #해당 path때만 refresh-token값이 넘어온다.
+    # refresh-token-cookie-path: / #해당 path때만 refresh-token값이 넘어온다.
     refresh-token-cookie-validity-seconds: 1_296_000 # 15일 (s) 60 * 60 * 24 * 15
     refresh-token-validity-milliseconds: 1_296_000_000 # 15일 (ms) 60 * 60 * 24 * 15 * 1000
   oauth2:
