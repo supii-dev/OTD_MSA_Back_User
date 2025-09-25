@@ -80,12 +80,12 @@ spring:
             enable: true
     default-encoding: UTF-8
   datasource:
-    url: jdbc:log4jdbc:mariadb://localhost/otd
-    username: root
-    password: green502
-#    url: jdbc:log4jdbc:mariadb://112.222.157.157:5012/hsb
-#    username: hsb
+#    url: jdbc:log4jdbc:mariadb://localhost/otd
+#    username: root
 #    password: green502
+    url: jdbc:log4jdbc:mariadb://112.222.157.157:5012/hsb
+    username: hsb
+    password: green502
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
   jackson:
     default-property-inclusion: non_null # 응답 JSON에서 null인 속성은 제외
