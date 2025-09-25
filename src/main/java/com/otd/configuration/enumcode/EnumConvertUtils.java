@@ -8,22 +8,19 @@ import java.util.EnumSet;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EnumConvertUtils {
-    //String(Code값) to Enum
-    //리턴타입이 Enum이어야 하고 EnumMapperType을 상속받은 Enum이어야 한다.
-    //enumClass는 Enum타입이어야 한다.
+    //enumClass: SchoolTypeCode.class, value: "00101"  >> SchoolTypeCode.ELEMENTARY 타입이 리턴
+    //enumClass: SchoolTypeCode.class, value: "00102"  >> SchoolTypeCode.MIDDLE 타입이 리턴
     public static <E extends Enum<E> & EnumMapperType> E ofCode(Class<E> enumClass, String code) {
-        if (StringUtils.isBlank(code)) {
-            return null;
-        } //code 매개변수가 null이거나 빈칸인 경우 return null처리
-
-        //Enum에 있는 값 중 매개변수 code와 같은 값을 찾아 리턴하기 위함. 근데 같은게 없으면 return null
-        return EnumSet.allOf(enumClass).stream() //enum을 Stream화 하기 위함
-                .filter(item -> item.getCode().equals(code))
-                .findFirst()
-                .orElse(null);
+        if (StringUtils.isBlank(code)) { return null; }
+        return EnumSet.allOf(enumClass) //Enum이 가지고 있는 모든 아이템들을 가진 콜렉션 리턴 (1)
+                .stream() // (1)을 스트림 생성
+                .filter(item -> item.getCode().equals(code)) //스트림 아이템 중에 원하는 아이템만 다시 스트림 생성한다. (2)
+                .findFirst() //(2)스트림 아이템 중 첫번째 아이템을 리턴(Optional) (3)
+                .orElse(null); //(3)이 null이었다면 null리턴
     }
 
-    //Enum to String(Code값)
+    // enumItem으로 SchoolTypeCode.ELEMENTARY가 들어오면 "00101" 리턴
+    // enumItem으로 SchoolTypeCode.MIDDLE이 들어오면 "00102" 리턴
     public static <E extends Enum<E> & EnumMapperType> String toCode(E enumItem) {
         if (enumItem == null) { return null; }
         return enumItem.getCode();
