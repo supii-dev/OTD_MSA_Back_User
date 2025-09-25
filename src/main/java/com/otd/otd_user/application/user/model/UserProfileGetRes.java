@@ -15,11 +15,13 @@ public class UserProfileGetRes {
     private String pic;
     private LocalDateTime createdAt;
     private String uid;
+    private String name;
     private String nickName;
     private String email;
     private String phone;
     private String birthDate;
     private String gender;
     private LocalDateTime lastLoginAt;
+    private int point;
 
 }

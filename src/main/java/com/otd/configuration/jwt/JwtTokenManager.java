@@ -106,10 +106,31 @@ public class JwtTokenManager {
 
     public Authentication getAuthentication(HttpServletRequest request) {
         String accessToken = getAccessTokenFromCookie(request);
-        if(accessToken == null){ return null; }
-        JwtUser jwtUser = getJwtUserFromToken(accessToken);
-        //if(jwtUser == null) { return null; } //토큰이 오염됐을 시 예외발생하기 때문에 null처리는 안 해도 된다.
-        UserPrincipal userPrincipal = new UserPrincipal(jwtUser);
-        return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
+        String refreshToken = getRefreshTokenFromCookie(request);
+        log.info("accessToken: {}", accessToken);
+        log.info("refreshToken: {}", refreshToken);
+        if(accessToken !=null){
+            JwtUser jwtUser = getJwtUserFromToken(accessToken);
+            //if(jwtUser == null) { return null; } //토큰이 오염됐을 시 예외발생하기 때문에 null처리는 안 해도 된다.
+            UserPrincipal userPrincipal = new UserPrincipal(jwtUser);
+            return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
+
+        }
+        else if(refreshToken != null){
+            JwtUser jwtUser = getJwtUserFromToken(refreshToken);
+            log.info(jwtUser.toString());
+            //if(jwtUser == null) { return null; } //토큰이 오염됐을 시 예외발생하기 때문에 null처리는 안 해도 된다.
+            UserPrincipal userPrincipal = new UserPrincipal(jwtUser);
+            return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
+
+        }
+        else
+            return null;
+
+
+//        JwtUser jwtUser = getJwtUserFromToken(accessToken);
+//        //if(jwtUser == null) { return null; } //토큰이 오염됐을 시 예외발생하기 때문에 null처리는 안 해도 된다.
+//        UserPrincipal userPrincipal = new UserPrincipal(jwtUser);
+//        return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
     }
 }
