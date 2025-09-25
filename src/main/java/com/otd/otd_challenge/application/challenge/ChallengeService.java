@@ -161,6 +161,8 @@ public class ChallengeService {
     public ChallengeDetailPerGetRes getDetailPer(Long cdId, Long userId, ChallengeProgressGetReq req) {
         req.setCdId(cdId);
         req.setUserId(userId);
+        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(cdId);
+        req.setType(cd.getCdType());
         // 상세정보
         ChallengeDetailPerGetRes res = challengeMapper.findProgressByUserIdAndCdId(req);
         // top5
