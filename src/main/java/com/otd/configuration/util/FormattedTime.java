@@ -4,8 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.cglib.core.Local;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 
 @Getter
 @AllArgsConstructor
@@ -33,5 +36,10 @@ public class FormattedTime {
     public static int fetchMonth() {
         LocalDate localDate = LocalDate.now();
         return localDate.getMonthValue();
+    }
+    public static int fetchDay() {
+        LocalDate localDate = LocalDate.now();
+        LocalDate monday = localDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        return monday.getDayOfMonth() - 1;
     }
 }
