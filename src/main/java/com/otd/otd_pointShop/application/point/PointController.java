@@ -91,7 +91,7 @@ public class PointController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deletePointItem(
-            @RequestParam("pointId") Long pointId,
+            @RequestParam("pointId") Integer pointId,
             HttpSession session
     ) {
         Long userId = (Long) session.getAttribute("userId");

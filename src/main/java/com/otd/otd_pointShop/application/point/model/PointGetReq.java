@@ -4,12 +4,12 @@ import lombok.Data;
 
 @Data
 public class PointGetReq {
-    private int userId;
-    private int pointId;
-    private int pointScore;
+    private Long userId;
+    private Integer pointId;
+    private Integer pointScore;
     private String pointItemName;
     private String pointItemContent;
     private String pointItemImage;
-    private int offset;
-    private int pageSize;
+    private Integer offset;
+    private Integer pageSize;
 }

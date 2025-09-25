@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @NoArgsConstructor
 @Data
 public class PointPutReq {
-    private Long pointId;
+    private Integer pointId;
     private Integer pointScore;
     private String pointItemName;
     private String pointItemContent;

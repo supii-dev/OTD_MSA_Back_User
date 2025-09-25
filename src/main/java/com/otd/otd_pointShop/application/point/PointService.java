@@ -38,7 +38,7 @@ public class PointService {
         }
     }
 
-    public List<PointListRes> getPointListByUser(Long userId, int offset, int pageSize) {
+    public List<PointListRes> getPointListByUser(Long userId, Integer offset, Integer pageSize) {
         List<Point> points = pointRepository.findByUserWithPagination(userId, offset, pageSize);
 
         return points.stream()
@@ -157,8 +157,8 @@ public class PointService {
     }
 
     @Transactional
-    public void deletePointItem(Long pointId, Long userId) {
-        Point point =  pointRepository.findById(pointId)
+    public void deletePointItem(Integer pointId, Long userId) {
+        Point point = pointRepository.findById(pointId)
                 .orElseThrow(() -> new RuntimeException("포인트 항목을 찾을 수 없습니다."));
         if (!point.getUser().getUserId().equals(userId)) {
             throw new RuntimeException("삭제할 권한이 없습니다.");
@@ -170,7 +170,7 @@ public class PointService {
     public List<Point> getPointByUser(Long userId) {
         return pointRepository.findByUser_UserId(userId);
     }
-    public List<PointImage> getImagesForPoint(Long pointId) {
+    public List<PointImage> getImagesForPoint(Integer pointId) {
         return pointImageRepository.findByPoint_PointId(pointId);
     }
 }

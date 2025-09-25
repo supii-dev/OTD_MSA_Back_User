@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface PointImageRepository extends JpaRepository<PointImage, Long> {
     List<PointImage> findByPoint(Point point); // 특정 포인트 아이템 이미지 목록 조회
-    List<PointImage> findByPoint_PointId(Long pointId);
-
+    List<PointImage> findByPoint_PointId(Integer pointId);
+    void updateAllByPoint(Point point);
     void deleteAllByPoint(Point point);
 }

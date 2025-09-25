@@ -12,13 +12,13 @@ public interface PointMapper {
     // 유저별 포인트 목록 조회
     List<Point> findAllByUserId(
         @Param("userId") Long userId,
-        @Param("offset") int offset,
-        @Param("pageSize") int pageSize
+        @Param("offset") Integer offset,
+        @Param("pageSize") Integer pageSize
     );
 
     Point findOneByUserIdAndPointId(
         @Param("userId") Long userId,
-        @Param("pointId") Long pointId
+        @Param("pointId") Integer pointId
     );
 
     PointImage findImageAndComment(
@@ -31,6 +31,6 @@ public interface PointMapper {
     int updatePoint(Point point);
     int deletePoint(
         @Param("userId") Long userId,
-        @Param("pointId") Long pointId
+        @Param("pointId") Integer pointId
     );
 }

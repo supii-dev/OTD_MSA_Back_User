@@ -8,9 +8,10 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class PointListRes {
-    private Long pointId;
+    private Integer pointId;
     private String pointItemName;
+    private String pointItemContent;
     private String pointItemImage;
-    private int pointScore;
+    private Integer pointScore;
     private LocalDateTime createdAt;
 }

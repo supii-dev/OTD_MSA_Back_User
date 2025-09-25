@@ -18,10 +18,10 @@ import java.util.List;
 public class Point {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long pointId; // 고유 ID
+    private Integer pointId; // 고유 ID
 
     @Column(nullable = false)
-    private int pointScore;
+    private Integer pointScore;
 
     @Column(nullable = false, length = 100)
     private String pointItemName;

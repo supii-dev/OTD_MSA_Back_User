@@ -9,8 +9,8 @@ import java.util.List;
 @Builder
 @Data
 public class PointGetRes {
-    private Long pointId;
-    private int pointScore;
+    private Integer pointId;
+    private Integer pointScore;
     private String pointItemName;
     private String pointItemContent;
     private LocalDateTime createdAt;

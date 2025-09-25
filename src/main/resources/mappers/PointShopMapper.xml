@@ -41,7 +41,11 @@
 
     <select id="findPointListByUser" resultType="com.otd.otd_pointShop.application.point.model.PointListRes">
         SELECT
-        p.point_id, p.point_item_name, p.point_item_content, p.point_item_image, p.created_at
+        p.point_id AS pointId,
+        p.point_item_name AS pointItemName,
+        p.point_item_content AS pointItemContent,
+        p.point_item_image AS pointItemImage,
+        p.created_at AS createdAt
         FROM point p
         WHERE p.user_id = #{userId}
         ORDER BY p.created_at DESC
