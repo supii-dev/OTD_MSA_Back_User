@@ -1,5 +1,6 @@
 package com.otd.otd_challenge.application.challenge;
 
+import com.otd.configuration.constants.ConstFile;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.util.FormattedTime;
 import com.otd.otd_challenge.application.challenge.model.*;
@@ -44,7 +45,6 @@ public class ChallengeService {
     private final ChallengeSettlementRepository challengeSettlementRepository;
     @Value("${constants.file.challenge-pic}")
     private String imgPath;
-
     private void addImgPath(List<?> list) {
         for (Object o : list) {
             if (o instanceof ChallengeDefinitionGetRes cd) {
@@ -166,6 +166,8 @@ public class ChallengeService {
     public ChallengeDetailPerGetRes getDetailPer(Long cdId, Long userId, ChallengeProgressGetReq req) {
         req.setCdId(cdId);
         req.setUserId(userId);
+        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(cdId);
+        req.setType(cd.getCdType());
         // 상세정보
         ChallengeDetailPerGetRes res = challengeMapper.findProgressByUserIdAndCdId(req);
         // top5
