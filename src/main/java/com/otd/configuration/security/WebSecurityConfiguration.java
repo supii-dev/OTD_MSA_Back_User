@@ -51,11 +51,12 @@ public class WebSecurityConfiguration {
                    .authorizeHttpRequests(req -> req
                            .requestMatchers(HttpMethod.POST, "/api/OTD/user/logout").authenticated()
                            .requestMatchers("/api/OTD/user/profile" , "/api/OTD/user/profile/pic").authenticated()
-                           .requestMatchers(   "/api/OTD/user/logout",
+                           .requestMatchers( "/api/OTD/user/logout",
                                    "/api/OTD/user/reissue",
                                    "/api/OTD/user/join",
                                    "/api/OTD/user/login",
-                                   "/api/OTD/user/**"  ).permitAll()
+                                   "/api/OTD/user/**"
+                                   ,"/home/green/download/challenge/**").permitAll()
                            .anyRequest().permitAll()
                    )
                 .logout(logout -> logout

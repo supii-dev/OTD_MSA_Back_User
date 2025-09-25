@@ -1,7 +1,7 @@
 constants:
   file:
     upload-directory: /home/green/download/challenge/
-    challenge: /files/
+    challenge: /home/green/download/challenge/
     profile-pic: /profile
   feign-client:
     weather-api:
