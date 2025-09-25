@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @RequiredArgsConstructor
 @ToString
 public class ConstFile {
-    private final String uploadDirectory;
-    private final String challengePic;
-    private final String profilePic;
+    public final String uploadDirectory;
+    public final String challenge;
+    public final String profilePic;
 }

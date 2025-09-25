@@ -9,16 +9,17 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum EnumUserRole implements EnumMapperType {
-    USER("01", "유저")
-    , MANAGER("02", "매니저")
-    , ADMIN("03", "관리자")
+    USER_1("01", "USER")
+    ,USER_2("02", "SOCIAL")
+    , MANAGER("03", "MANAGER")
+    , ADMIN("04", "ADMIN")
 
     ;
 
     private final String code;
     private final String value;
 
-    @Converter(autoApply = true)
+    @Converter(autoApply = false)
     public static class CodeConverter extends AbstractEnumCodeConverter<EnumUserRole> {
         public CodeConverter() { super(EnumUserRole.class, false); }
     }

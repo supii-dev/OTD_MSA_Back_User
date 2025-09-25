@@ -3,6 +3,7 @@ package com.otd.configuration.jwt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otd.configuration.constants.ConstJwt;
+import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.model.JwtUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -26,7 +27,7 @@ public class JwtTokenProvider {
     public JwtTokenProvider(ObjectMapper objectMapper, ConstJwt constJwt) {
         this.objectMapper = objectMapper;
         this.constJwt = constJwt;
-        this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(constJwt.getSecretKey()));
+        this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(constJwt.secretKey));
     }
 
     // JWT 토큰 생성
@@ -36,14 +37,14 @@ public class JwtTokenProvider {
         Date now = new Date(); //Data객체를 기본생성자로 만들면 현재일시 정보로 객체화
         return Jwts.builder()
                 //header
-                .header().type(constJwt.getBearerFormat())
+                .header().type(constJwt.bearerFormat)
                 .and()
 
                 //payload
-                .issuer(constJwt.getIssuer())
+                .issuer(constJwt.issuer)
                 .issuedAt(now) //발행일시(토큰 생성일시)
                 .expiration(new Date(now.getTime() + tokenValidityMilliSeconds)) //만료일시(토큰 만료일시)
-                .claim(constJwt.getClaimKey(), makeClaimByUserToJson(jwtUser)) //커스텀 클레임
+                .claim(constJwt.claimKey, makeClaimByUserToJson(jwtUser)) //커스텀 클레임
 
                 //signature
                 .signWith(secretKey)
@@ -61,7 +62,7 @@ public class JwtTokenProvider {
     public JwtUser getJwtUserFromToken(String token) {
         try {
             Claims claims = getClaims(token);
-            String json = claims.get(constJwt.getClaimKey(), String.class);
+            String json = claims.get(constJwt.claimKey, String.class);
             return objectMapper.readValue(json, JwtUser.class);
         } catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "토큰 문제 발생" );
@@ -71,9 +72,9 @@ public class JwtTokenProvider {
     private Claims getClaims(String token) {
 
         return Jwts.parser()
-                   .verifyWith(secretKey)
-                   .build()
-                   .parseSignedClaims(token)
-                   .getPayload();
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

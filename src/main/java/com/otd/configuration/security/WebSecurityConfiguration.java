@@ -3,6 +3,7 @@ package com.otd.configuration.security;
 import com.otd.configuration.constants.ConstOAuth2;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.oauth.*;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,9 +15,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 /*
@@ -45,15 +48,21 @@ public class WebSecurityConfiguration {
                    .formLogin(formLoginSpec -> formLoginSpec.disable()) //시큐리티가 제공해주는 인증 처리 -> 사용 안 함
                    .csrf(csrfSpec -> csrfSpec.disable()) // BE - csrf라는 공격이 있는데 공격을 막는 것이 기본으로 활성화 되어 있는데
                                                         // 세션을 이용한 공격이다. 세션을 어차피 안 쓰니까 비활성화
-                   .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource())) // ⭐️⭐️⭐️
                    .authorizeHttpRequests(req -> req
                            .requestMatchers(HttpMethod.POST, "/api/OTD/user/logout").authenticated()
-                                       .requestMatchers("/api/user/profile"
-                                                      , "/api/user/profile/pic").authenticated()
-                                       .anyRequest().permitAll()
+                           .requestMatchers("/api/OTD/user/profile" , "/api/OTD/user/profile/pic").authenticated()
+                           .requestMatchers( "/api/OTD/user/logout",
+                                   "/api/OTD/user/reissue",
+                                   "/api/OTD/user/join",
+                                   "/api/OTD/user/login",
+                                   "/api/OTD/user/**"
+                                   ,"/home/green/download/challenge/**").permitAll()
+                           .anyRequest().permitAll()
                    )
-                   .logout(logout -> logout.disable())
-                   .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout
+                        .logoutUrl("/api/OTD/user/logout") // 기본은 POST, 아래에서 GET 허용 예시
+                        .logoutSuccessHandler((req, res, auth) -> res.setStatus(HttpServletResponse.SC_OK))
+                )       .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                    .oauth2Login(oauth2 -> oauth2.authorizationEndpoint( auth -> auth.baseUri(constOAuth2.baseUri)
                                                                                     .authorizationRequestRepository(repository)
                                           )
@@ -63,22 +72,13 @@ public class WebSecurityConfiguration {
                                           .failureHandler( authenticationFailureHandler )
                    )
                    .addFilterBefore(new Oauth2AuthenticationCheckRedirectUriFilter(constOAuth2), OAuth2AuthorizationRequestRedirectFilter.class)
+                   //.logout(logout -> logout.logoutUrl("/api/user/sign-out").deleteCookies("JSESSIONID", "Authorization", "RefreshToken"))
                    .exceptionHandling(e -> e.authenticationEntryPoint(tokenAuthenticationEntryPoint))
                    .build();
     }
 
 
-    // ⭐️ CORS 설정
-    CorsConfigurationSource corsConfigurationSource() {
-        return request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedHeaders(Collections.singletonList("*"));
-            config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedOriginPatterns(Collections.singletonList("*")); // ⭐️ 허용할 origin
-            config.setAllowCredentials(true);
-            return config;
-        };
-    }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }

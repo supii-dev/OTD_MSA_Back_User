@@ -1,5 +1,6 @@
-package com.otd.otd_challenge.application.challenge.model;
+package com.otd.otd_challenge.application.challenge.model.detail;
 
+import com.otd.otd_user.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,4 +19,5 @@ public class ChallengeProgressGetRes {
     private String type;
     private String name;
     private int reward;
+    private User user;
 }
