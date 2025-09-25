@@ -26,7 +26,8 @@ public class ChallengeController {
     private final ChallengeService challengeService;
 
     @GetMapping("/list")
-    public Map<String, Object> getChallengeList() {
+    public Map<String, Object> getChallengeList(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        log.info("유저 아이디: {}", userPrincipal.getSignedUserId());
         return challengeService.getChallengeList();
     }
 
