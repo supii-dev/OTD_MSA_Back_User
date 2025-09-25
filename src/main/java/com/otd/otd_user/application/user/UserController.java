@@ -79,7 +79,9 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResultResponse<?> logout(HttpServletResponse response) {
+        log.info("logout");
         jwtTokenManager.logout(response);
+
         return new ResultResponse<>("sign-out 성공", null);
     }
 
