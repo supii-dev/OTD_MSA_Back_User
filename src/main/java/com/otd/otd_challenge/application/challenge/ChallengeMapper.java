@@ -4,6 +4,7 @@ import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.application.challenge.model.detail.*;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeMissionCompleteGetRes;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

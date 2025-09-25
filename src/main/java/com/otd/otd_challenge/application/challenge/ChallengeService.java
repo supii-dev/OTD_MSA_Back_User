@@ -8,8 +8,12 @@ import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRe
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeMissionCompleteGetRes;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
 import com.otd.otd_challenge.application.challenge.model.home.UserInfoGetRes;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSuccessDto;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
+import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeProgress;
+import com.otd.otd_challenge.entity.ChallengeSettlementLog;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
@@ -37,6 +41,7 @@ public class ChallengeService {
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
     private final UserRepository userRepository;
+    private final ChallengeSettlementRepository challengeSettlementRepository;
     @Value("${constants.file.challenge-pic}")
     private String imgPath;
 
@@ -246,5 +251,63 @@ public class ChallengeService {
         challengeProgressRepository.save(challengeProgress);
 
         return new ResultResponse<>("저장 되었습니다.",challengeProgress);
+    }
+
+    private final ChallengeSettlementMapper challengeSettlementMapper;
+    private final ChallengePointRepository challengePointRepository;
+
+    @Transactional
+    public ResultResponse<?> setSettlement(ChallengeSettlementDto dto){
+        List<Long> userIds = challengeSettlementMapper.findByUserId(dto);
+
+        for (Long userId : userIds) {
+//            User user = new User();
+//            user.setUserId(userId);
+            User user = userRepository.findById(userId).orElseThrow();
+
+            ChallengeSettlementDto userDto = ChallengeSettlementDto.builder()
+                    .userId(userId)
+                    .build();
+
+            int totalPoint = 0;
+
+            List<ChallengeSuccessDto> challengeProgress = challengeSettlementMapper.findByProgressChallengeByUserId(userDto);
+
+            for (ChallengeSuccessDto progress : challengeProgress) {
+//                ChallengeDefinition cd = new ChallengeDefinition();
+//                cd.setCdId(progress.getCdId());
+                ChallengeDefinition cd = challengeDefinitionRepository.findById(progress.getCdId()).orElseThrow();
+
+                int point = progress.getReward();
+
+                totalPoint += point;
+
+                ChallengePointHistory ch = ChallengePointHistory.builder().user(user).challengeDefinition(cd).point(point).reason("weekly_challenge").build();
+                challengePointRepository.save(ch);
+                if(progress.getRank() <= 3) {
+                    int rankPoint = switch (progress.getRank()) {
+                        case 1 -> 100;
+                        case 2 -> 70;
+                        case 3 -> 50;
+                        default -> 0;
+                    };
+                    if (rankPoint > 0) {
+                        ChallengePointHistory chRank = ChallengePointHistory.builder()
+                                .user(user)
+                                .challengeDefinition(cd)
+                                .point(rankPoint)
+                                .reason("rank_reward")
+                                .build();
+                        challengePointRepository.save(chRank);
+                        totalPoint += rankPoint;
+                    }
+                }
+                ChallengeSettlementLog log = ChallengeSettlementLog.builder().
+                        user(user).challengeDefinition(cd).type("weekly_challenge").totalXp(progress.getXp()).totalPoint(totalPoint).build();
+                challengeSettlementRepository.save(log);
+            }
+
+        }
+        return new ResultResponse<>("정산완료", userIds);
     }
 }
