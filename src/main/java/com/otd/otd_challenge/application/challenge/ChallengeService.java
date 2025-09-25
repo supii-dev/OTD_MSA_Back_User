@@ -80,17 +80,17 @@ public class ChallengeService {
         log.info("ChallengeService getChallengeList dto: {}", dto);
         return dto;
     }
-
+    // HomeInfo
     public ChallengeHomeGetRes getSelectedList(Long userId, ChallengeProgressGetReq req) {
         req.setUserId(userId);
-        List<ChallengeProgressGetRes> res = challengeMapper.findAllProgressFromUserId(req);
+        List<ChallengeProgressGetRes> monthly = challengeMapper.findAllMonthlyFromUserId(req);
+        List<ChallengeProgressGetRes> weekly = challengeMapper.findAllWeeklyFromUserId(req);
         List<ChallengeDefinition> daily = challengeDefinitionRepository.findByCdType("daily");
         User userInfo = userRepository.findByUserId(userId);
         Integer success = challengeMapper.findSuccessChallenge(userId);
         List<ChallengeMissionCompleteGetRes> missionComplete =
                 challengeMapper.findByUserIdAndMissionComplete(userId);
         List<ChallengeProgressGetRes> personal = new ArrayList<>();
-        List<ChallengeProgressGetRes> weekly = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
         int successCount = (success != null) ? success : 0;
         UserInfoGetRes uInfo = UserInfoGetRes.builder()
@@ -100,13 +100,13 @@ public class ChallengeService {
                 .pic(userInfo.getPic())
                 .xp(userInfo.getXp())
                 .point(userInfo.getPoint()).build();
-        addImgPath(daily);
-        addImgPath(res);
-        for (ChallengeProgressGetRes challengeProgressGetRes : res) {
 
+        addImgPath(weekly);
+        addImgPath(daily);
+        addImgPath(monthly);
+        for (ChallengeProgressGetRes challengeProgressGetRes : monthly) {
             switch (challengeProgressGetRes.getType()) {
                 case "personal" -> personal.add(challengeProgressGetRes);
-                case "weekly" -> weekly.add(challengeProgressGetRes);
                 case "competition" -> competition.add(challengeProgressGetRes);
             }
         }
