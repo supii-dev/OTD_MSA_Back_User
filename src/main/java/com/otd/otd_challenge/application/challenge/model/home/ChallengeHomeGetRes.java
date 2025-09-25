@@ -1,5 +1,6 @@
 package com.otd.otd_challenge.application.challenge.model.home;
 
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgressGetRes;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_user.entity.User;
@@ -12,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChallengeHomeGetRes {
-    private User user;
+    private UserInfoGetRes user;
     private int success;
 
     private List<ChallengeProgressGetRes> personalChallenge;
@@ -21,4 +22,6 @@ public class ChallengeHomeGetRes {
 
     private List<ChallengeDefinition> dailyMission;
     private List<ChallengeMissionCompleteGetRes> missionComplete;
+
+    private EnumChallengeRole role;
 }

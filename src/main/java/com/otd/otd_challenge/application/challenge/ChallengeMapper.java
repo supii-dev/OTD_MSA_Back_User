@@ -11,14 +11,15 @@ import java.util.List;
 @Mapper
 public interface ChallengeMapper {
     List<ChallengeDefinitionGetRes> findAll();
-    List<ChallengeProgressGetRes> findAllProgressFromUserId(ChallengeProgressGetReq req);
+    List<ChallengeProgressGetRes> findAllMonthlyFromUserId(ChallengeProgressGetReq req);
+    List<ChallengeProgressGetRes> findAllWeeklyFromUserId(ChallengeProgressGetReq req);
     List<ChallengeDefinitionGetRes> findByType(ChallengeProgressGetReq req);
     List<ChallengeDefinitionGetRes> findByTypeForCompetition(ChallengeProgressGetReq req);
     ChallengeDetailPerGetRes findProgressByUserIdAndCdId(ChallengeProgressGetReq req);
     List<ChallengeRankGetRes> findTop5Ranking(ChallengeProgressGetReq req);
     List<ChallengeRankGetRes> findAroundMyRank(ChallengeProgressGetReq req);
     List<ChallengeDetailDayGetRes> findDayByUserIdAndCdId(ChallengeProgressGetReq req);
-    int findSuccessChallenge(Long userId);
-    int saveMissionRecordByUserIdAndCpId(ChallengeRecordMissionPostReq req);
+    Integer findSuccessChallenge(Long userId);
+    int saveMissionRecordByUserIdAndCpId(Long userId, Long cdId);
     List<ChallengeMissionCompleteGetRes> findByUserIdAndMissionComplete(Long userId);
 }

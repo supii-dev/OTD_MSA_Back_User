@@ -25,13 +25,18 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenManager jwtTokenManager;
 
+    @GetMapping("/")
+    public String healthCheck() {
+        return "Hello from OTD-USER Service!";
+    }
+
     @PostMapping("/join")
     public ResultResponse<?> join(@Valid @RequestPart UserJoinReq req
             , @RequestPart(required = false) MultipartFile pic) {
         log.info("req: {}", req);
         log.info("pic: {}", pic != null ? pic.getOriginalFilename() : pic);
         userService.join(req, pic);
-        return new ResultResponse<>("회원가입이 완료되었습니다.", 1);
+        return new ResultResponse<>("", 1);
     }
 
     @PostMapping("/login")
@@ -72,25 +77,14 @@ public class UserController {
         return new ResultResponse<>("닉네임 중복 확인", Map.of("isAvailable", isAvailable));
     }
 
-    // 중복가입 확인
-    @PostMapping("/check-duplicate")
-    public ResultResponse<?> checkDuplicateUser(@RequestBody Map<String, String> req) {
-        String ci = req.get("ci");
-        String di = req.get("di");
-        boolean isDuplicate = userService.isDuplicateUser(ci, di);
-        return new ResultResponse<>("중복가입 확인", Map.of("isDuplicate", isDuplicate));
-    }
-
     @PostMapping("/logout")
     public ResultResponse<?> logout(HttpServletResponse response) {
+        log.info("logout");
         jwtTokenManager.logout(response);
+
         return new ResultResponse<>("sign-out 성공", null);
     }
 
-    @PostMapping("/test")
-    public String test() {
-        return "테스트 성공";
-    }
 
     @PostMapping("/reissue")
     public ResultResponse<?> reissue(HttpServletResponse response, HttpServletRequest request) {
@@ -99,11 +93,8 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResultResponse<?> getProfileUser(@AuthenticationPrincipal UserPrincipal userPrincipal
-            , @RequestParam("profile_user_id") long profileUserId) {
-        log.info("profileUserId: {}", profileUserId);
-        UserProfileGetDto dto = new UserProfileGetDto(userPrincipal.getSignedUserId(), profileUserId);
-        UserProfileGetRes userProfileGetRes = userService.getProfileUser(dto);
+    public ResultResponse<?> getProfileUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        UserProfileGetRes userProfileGetRes = userService.getProfileUser(userPrincipal.getSignedUserId());
         return new ResultResponse<>("프로파일 유저 정보", userProfileGetRes);
     }
 

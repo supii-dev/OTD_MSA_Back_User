@@ -1,6 +1,7 @@
 package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.model.UserPrincipal;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeDetailDayGetRes;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeDetailPerGetRes;
@@ -10,6 +11,7 @@ import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRe
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,28 +31,33 @@ public class ChallengeController {
     }
 
     @GetMapping("/selected")
-    public ChallengeHomeGetRes getSelectedList(@ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getSelectedList(req);
+    public ChallengeHomeGetRes getSelectedList(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                               @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getSelectedList(userPrincipal.getSignedUserId(), req);
     }
 
     @GetMapping("/addlist")
-    public List<ChallengeDefinitionGetRes> getChallenge(@ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getChallenge(req);
+    public List<ChallengeDefinitionGetRes> getChallengeList(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                            @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getChallengeList(userPrincipal.getSignedUserId(), req);
     }
 
     @GetMapping("/addcompetitionlist")
-    public Map<String, List<ChallengeDefinitionGetRes>> getMapChallenge(@ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getMapChallenge(req);
+    public Map<String, List<ChallengeDefinitionGetRes>> getCompetitionList(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                                        @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getCompetitionList(userPrincipal.getSignedUserId(), req);
     }
 
     @GetMapping("/detail/per/{cdId}")
-    public ChallengeDetailPerGetRes getDetail(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getDetail(cdId, req);
+    public ChallengeDetailPerGetRes getDetailPer(@PathVariable Long cdId, @AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                 @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getDetailPer(cdId, userPrincipal.getSignedUserId(), req);
     }
 
     @GetMapping("/detail/day/{cdId}")
-    public ChallengeDetailDayGetRes getDetailDay(@PathVariable Long cdId, @ModelAttribute ChallengeProgressGetReq req) {
-        return challengeService.getDetailDay(cdId, req);
+    public ChallengeDetailDayGetRes getDetailDay(@PathVariable Long cdId, @AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                 @ModelAttribute ChallengeProgressGetReq req) {
+        return challengeService.getDetailDay(cdId, userPrincipal.getSignedUserId(), req);
     }
 
     @PutMapping("/success")
@@ -59,11 +66,13 @@ public class ChallengeController {
     }
 
     @PostMapping("/record/mission")
-    public ResultResponse<?> postMissionRecord(@RequestBody ChallengeRecordMissionPostReq req){
-        return challengeService.saveMissionRecord(req);
+    public ResultResponse<?> postMissionRecord(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                               @RequestBody ChallengeRecordMissionPostReq req){
+        return challengeService.saveMissionRecord(userPrincipal.getSignedUserId(), req);
     }
     @PostMapping("/add")
-    public ResultResponse<?> postChallenge(@RequestBody ChallengePostReq req){
-        return challengeService.saveChallenge(req);
+    public ResultResponse<?> postChallenge(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                           @RequestBody ChallengePostReq req){
+        return challengeService.saveChallenge(userPrincipal.getSignedUserId(), req);
     }
 }

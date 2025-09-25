@@ -18,7 +18,7 @@ public class UserJoinReq{
 
     @Column(nullable = false)
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{10,}$",
-            message = "비밀번호는 영문자, 숫자, 특수기호로 구성되며 10자 이상이어야 합니다.")
+            message = "비밀번호는 10자 이상이어야 합니다.")
     private String upw;
 
     @Email(message = "올바른 이메일 형식이 아닙니다.")
@@ -43,5 +43,5 @@ public class UserJoinReq{
     private String pic;
 
     private List<EnumUserRole> roles;
-    private int challengeSurvey; // 챌린지 설문 총 점수
+    private int surveyAnswers; // 챌린지 설문 총 점수
 }

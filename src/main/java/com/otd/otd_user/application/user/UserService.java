@@ -1,5 +1,6 @@
 package com.otd.otd_user.application.user;
 
+import com.otd.configuration.jwt.JwtTokenManager;
 import com.otd.configuration.util.MyFileManager;
 import com.otd.configuration.util.MyFileUtils;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
@@ -35,11 +36,12 @@ public class UserService {
     private final EmailService emailService;
     private final MyFileManager myFileManager;
 
-
+    public boolean isUidAvailable(String uid) {
+        return userMapper.countByUid(uid) == 0;
+    }
     @Transactional
     public void join(UserJoinReq req, MultipartFile pic) {
         String hashedPassword = passwordEncoder.encode(req.getUpw());
-
 
         User user = User.builder()
                 .providerType(SignInProviderType.LOCAL)
@@ -53,7 +55,7 @@ public class UserService {
                 .gender(req.getGender())
                 .build();
 
-        EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(req.getChallengeSurvey());
+        EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(req.getSurveyAnswers());
         // 기본 역할 설정
         if (req.getRoles() == null || req.getRoles().isEmpty()) {
             user.addUserRoles(List.of(EnumUserRole.USER_2), challengeRole);
@@ -75,17 +77,22 @@ public class UserService {
         if(user == null || !passwordEncoder.matches(req.getUpw(), user.getUpw())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "아이디/비밀번호를 확인해 주세요.");
         }
-
         List<EnumUserRole> roles = user.getUserRoles().stream()
                 .map(item -> item.getUserRoleIds().getRoleCode()).toList();
-
         log.info("roles: {}", roles);
         JwtUser jwtUser = new JwtUser(user.getUserId(), roles);
 
+        EnumChallengeRole challengeRoles = user.getUserRoles().stream()
+                .map(item -> item.getUserRoleIds().getChallengeCode())
+                .findFirst().orElse(null);
+
         UserLoginRes userLoginRes = UserLoginRes.builder()
                 .userId(user.getUserId())
-                .nickName(user.getNickName() == null ? user.getUid() : user.getNickName())
+                .nickName(user.getNickName() == null ? user.getName() : user.getNickName())
                 .pic(user.getPic())
+                .point(user.getPoint())
+                .xp(user.getXp())
+                .challengeRole(challengeRoles)
                 .build();
 
         return UserLoginDto.builder()
@@ -138,10 +145,6 @@ public class UserService {
     }
 
 
-    public boolean isUidAvailable(String uid) {
-        return userMapper.countByUid(uid) == 0;
-    }
-
     public boolean isNicknameAvailable(String nickname) {
         return userMapper.countByNickname(nickname) == 0;
     }
@@ -157,9 +160,9 @@ public class UserService {
         return count > 0;
     }
 
-    public UserProfileGetRes getProfileUser(UserProfileGetDto dto) {
+    public UserProfileGetRes getProfileUser(long signedUserId) {
         // MyBatis 사용 (복잡한 조회)
-        return userMapper.findProfileByUserId(dto);
+        return userMapper.findProfileByUserId(signedUserId);
     }
 
     @Transactional
@@ -179,4 +182,5 @@ public class UserService {
         imgUploadManager.removeProfileDirectory(signedUserId);
         user.setPic(null);
     }
+
 }
