@@ -38,7 +38,10 @@
         FROM challenge_definition cd
         WHERE cd.cd_id NOT IN(SELECT cp.cd_id FROM challenge_progress cp WHERE cp.user_id = #{userId}
                                                                         AND YEAR(cp.start_date) = #{year}
-                                                                        AND MONTH(cp.start_date) = #{month})
+                                                                        AND MONTH(cp.start_date) = #{month}
+                                                                        <if test="type == 'weekly'">
+                                                                            AND Day(cp.start_date) > #{day}
+                                                                        </if>)
         AND cd.cd_type = #{type}
     </select>
     <select id="findByTypeForCompetition">
@@ -51,7 +54,10 @@
                             ON cd.cd_id = cp.cd_id AND cd.cd_type = #{type}
                             WHERE cp.user_id = #{userId}
                             AND YEAR(cp.start_date) = #{year}
-                            AND MONTH(cp.start_date) = #{month})
+                            AND MONTH(cp.start_date) = #{month}
+                            <if test="type == 'weekly'">
+                                AND Day(cp.start_date) > #{day}
+                            </if>)
         AND cd_type = #{type};
     </select>
     <select id="findProgressByUserIdAndCdId">
@@ -82,6 +88,9 @@
         WHERE cp.cd_id = #{cdId}
         AND Year(cp.start_date) = #{year}
         AND Month(cp.start_date) = #{month}
+        <if test="type == 'weekly'">
+            AND Day(cp.start_date) > #{day}
+        </if>
         LIMIT 5;
     </select>
     <select id="findAroundMyRank">
@@ -137,4 +146,5 @@
         WHERE user_id = #{userId}
         AND success_date = CURRENT_DATE;
     </select>
+
 </mapper>
