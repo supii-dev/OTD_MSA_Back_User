@@ -17,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class User extends UpdatedAt{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
