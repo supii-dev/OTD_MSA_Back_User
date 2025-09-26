@@ -1,6 +1,6 @@
 package com.otd.otd_challenge.application.challenge;
 
-import com.otd.configuration.constants.ConstFile;
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.util.FormattedTime;
 import com.otd.otd_challenge.application.challenge.model.*;
@@ -38,6 +38,7 @@ public class ChallengeService {
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
     private final UserRepository userRepository;
+
     @Value("${constants.file.challenge}")
     private String imgPath;
     private void addImgPath(List<?> list) {
@@ -121,10 +122,22 @@ public class ChallengeService {
                 .build();
     }
 
+    // CD쪽 DB tier와 챌린지 등급 매핑
+    private void mapChallengeTier(List<ChallengeDefinitionGetRes> challenges, EnumChallengeRole userRole) {
+        challenges.forEach(cd -> {
+            EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(cd.getTierCode()); // 문자열 그대로 변환
+            cd.setTier(challengeRole);
+            cd.setAvailable(userRole.isHigherOrEqual(challengeRole));
+        });
+    }
     public List<ChallengeDefinitionGetRes> getChallengeList(Long userId, ChallengeProgressGetReq req) {
         req.setUserId(userId);
         List<ChallengeDefinitionGetRes> res = challengeMapper.findByType(req);
         addImgPath(res);
+        User user = userRepository.findByUserId(userId);
+        EnumChallengeRole userRole = user.getChallengeRole();
+        mapChallengeTier(res, userRole);
+
         return res;
     }
 
@@ -132,7 +145,9 @@ public class ChallengeService {
         req.setUserId(userId);
         List<ChallengeDefinitionGetRes> res = challengeMapper.findByTypeForCompetition(req);
         addImgPath(res);
-
+        User user = userRepository.findByUserId(userId);
+        EnumChallengeRole userRole = user.getChallengeRole();
+        mapChallengeTier(res, userRole);
         return res.stream()
                     .collect(Collectors.groupingBy(ChallengeDefinitionGetRes::getName));
     }
