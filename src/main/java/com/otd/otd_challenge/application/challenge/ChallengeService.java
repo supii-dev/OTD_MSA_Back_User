@@ -38,6 +38,7 @@ public class ChallengeService {
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
     private final UserRepository userRepository;
+
     @Value("${constants.file.challenge}")
     private String imgPath;
     private void addImgPath(List<?> list) {

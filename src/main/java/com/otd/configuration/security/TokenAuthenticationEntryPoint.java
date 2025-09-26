@@ -19,11 +19,17 @@ public class TokenAuthenticationEntryPoint implements AuthenticationEntryPoint {
      */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException, ServletException {
-        log.error("commence error");
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("인증 필요");
+            throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
+        response.setContentType("application/json;charset=UTF-8");
+        response.setHeader("Cache-Control", "no-store");
+
+        // 표준화된 JSON 오브젝트로 응답 (문자만/불리언 리터럴 X)
+        String body = """
+      {"success":false,"code":"UNAUTHORIZED","message":"Authentication required"}
+    """;
+        response.getWriter().write(body);
+        response.getWriter().flush();
+        // 여기서 끝 (체인 진행 X)
     }
 }
