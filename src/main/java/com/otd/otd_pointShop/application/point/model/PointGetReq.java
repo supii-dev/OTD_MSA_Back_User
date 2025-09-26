@@ -1,15 +1,12 @@
 package com.otd.otd_pointShop.application.point.model;
 
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class PointGetReq {
     private Long userId;
-    private Integer pointId;
-    private Integer pointScore;
+    private Long pointId;
     private String pointItemName;
     private String pointItemContent;
-    private String pointItemImage;
-    private Integer offset;
-    private Integer pageSize;
 }

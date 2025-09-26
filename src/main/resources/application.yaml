@@ -4,6 +4,7 @@ constants:
 #   upload-directory: D:/kjh/project_2/upload/challenge
     challenge-pic: /files/
     profile-pic: /profile
+    pointshop-pic: /pointshop
   feign-client:
     weather-api:
       url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0

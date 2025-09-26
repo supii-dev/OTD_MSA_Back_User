@@ -4,11 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
 public class PointListRes {
-    private Integer pointId;
+    private Long pointId;
     private String pointItemName;
     private String pointItemContent;
     private String pointItemImage;

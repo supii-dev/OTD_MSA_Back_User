@@ -5,12 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
 public class PointKeywordGetReq {
     @Size(min = 1)
     private String keyword;
-    private String pointItemName;
-    private String pointItemContent;
+    private Integer page = 0;
+    private Integer size = 10;
 }

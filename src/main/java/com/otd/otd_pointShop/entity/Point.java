@@ -12,13 +12,13 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"user", "pointCategory", "images"})
+@ToString(exclude = {"user", "pointCategory", "pointItemImages"})
 @Entity
 @Table(name = "point")
 public class Point {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer pointId; // 고유 ID
+    private Long pointId; // 고유 ID
 
     @Column(nullable = false)
     private Integer pointScore;
@@ -29,10 +29,7 @@ public class Point {
     @Column(length = 500)
     private String pointItemContent;
 
-    @Column(length = 255)
-    private String pointItemImage;
-
-    @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
@@ -52,10 +49,10 @@ public class Point {
     @JoinColumn(name = "user_id", nullable = false) // FK
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "point_category_id")
     private PointCategory pointCategory;
 
     @OneToMany(mappedBy = "point", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<PointImage> images = new ArrayList<>();
+    private List<PointImage> pointItemImages = new ArrayList<>();
 }

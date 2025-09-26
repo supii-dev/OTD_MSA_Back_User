@@ -6,10 +6,10 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Builder
 @Data
+@Builder
 public class PointGetRes {
-    private Integer pointId;
+    private Long pointId;
     private Integer pointScore;
     private String pointItemName;
     private String pointItemContent;

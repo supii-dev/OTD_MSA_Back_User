@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(basePackages = "com.otd.otd_pointshop")
+@RestControllerAdvice(basePackages = "com.otd.otd_pointShop")
 public class PointGlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)

@@ -18,19 +18,16 @@ public interface PointMapper {
 
     Point findOneByUserIdAndPointId(
         @Param("userId") Long userId,
-        @Param("pointId") Integer pointId
+        @Param("pointId") Long pointId
     );
 
-    PointImage findImageAndComment(
-            @Param("pointItemName")  String pointItemName,
-            @Param("pointItemContent") String pointItemContent,
-            @Param("pointItemImage") String pointItemImage
-    );
+    List<PointImage> findImagesByPointId(
+            @Param("pointId") Long pointId);
 
     int savePoint(Point point);
     int updatePoint(Point point);
     int deletePoint(
         @Param("userId") Long userId,
-        @Param("pointId") Integer pointId
+        @Param("pointId") Long pointId
     );
 }
