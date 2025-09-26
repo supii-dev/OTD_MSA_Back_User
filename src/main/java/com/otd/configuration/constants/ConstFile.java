@@ -11,6 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ToString
 public class ConstFile {
     public final String uploadDirectory;
-    public final String challengePic;
+    public final String challenge;
     public final String profilePic;
 }
