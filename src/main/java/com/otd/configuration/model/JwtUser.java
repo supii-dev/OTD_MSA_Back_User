@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class JwtUser {
     private Long signedUserId;
+
     private List<EnumUserRole> roles; //인가 처리 때 사용
     /*
     role 이름은 ROLE_아무거나
