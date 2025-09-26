@@ -149,19 +149,8 @@ public class UserService {
         return userMapper.countByNickname(nickname) == 0;
     }
 
-    public boolean isDuplicateUser(String ci, String di) {
-        int count = 0;
-        if (ci != null && !ci.isEmpty()) {
-            count += userMapper.countByCi(ci);
-        }
-        if (di != null && !di.isEmpty()) {
-            count += userMapper.countByDi(di);
-        }
-        return count > 0;
-    }
 
     public UserProfileGetRes getProfileUser(long signedUserId) {
-        // MyBatis 사용 (복잡한 조회)
         return userMapper.findProfileByUserId(signedUserId);
     }
 

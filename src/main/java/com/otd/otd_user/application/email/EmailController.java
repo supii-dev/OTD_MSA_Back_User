@@ -1,9 +1,9 @@
 package com.otd.otd_user.application.email;
 
-
 import com.otd.otd_user.application.email.model.EmailCodeVerifyReq;
 import com.otd.otd_user.application.email.model.EmailSendReq;
 import com.otd.otd_user.application.email.model.EmailVerifyReq;
+import com.otd.otd_user.application.email.model.InquiryEmailReq;
 import com.otd.configuration.model.ResultResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -82,5 +82,23 @@ public class EmailController {
         boolean isVerified = emailService.isEmailVerified(email);
         return new ResultResponse<>("이메일 인증 상태 조회",
                 Map.of("email", email, "verified", isVerified));
+    }
+
+    /**
+     * 문의하기 이메일 전송
+     */
+    @PostMapping("/send-inquiry")
+    public ResultResponse<?> sendInquiryEmail(@Valid @RequestBody InquiryEmailReq req) {
+        log.info("문의하기 이메일 전송 요청: 제목={}, 보낸이={}", req.getSubject(), req.getSenderName());
+
+        try {
+            emailService.sendInquiryEmail(req);
+            return new ResultResponse<>("문의가 성공적으로 전송되었습니다.",
+                    Map.of("success", true, "timestamp", System.currentTimeMillis()));
+        } catch (Exception e) {
+            log.error("문의하기 이메일 전송 실패", e);
+            return new ResultResponse<>("문의 전송에 실패했습니다. 잠시 후 다시 시도해주세요.",
+                    Map.of("success", false));
+        }
     }
 }

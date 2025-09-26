@@ -1,5 +1,6 @@
 package com.otd.otd_user.application.email;
 
+import com.otd.otd_user.application.email.model.InquiryEmailReq;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.EmailVerification;
 import jakarta.mail.MessagingException;
@@ -13,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.Random;
 
@@ -27,7 +29,7 @@ public class EmailService {
     private static final int CODE_EXPIRY_MINUTES = 5;
     private static final int VERIFICATION_STATUS_EXPIRY_MINUTES = 30;
     private static final int PASSWORD_RESET_EXPIRY_MINUTES = 10;
-
+    private final JavaMailSender javaMailSender;
     /**
      * 회원가입용 이메일 인증코드 발송
      */
@@ -326,5 +328,93 @@ public class EmailService {
                 </div>
             </div>
             """.formatted(code);
+    }
+    // EmailService.java에 추가할 메소드
+
+    /**
+     * 문의하기 이메일 전송
+     */
+    public void sendInquiryEmail(InquiryEmailReq req) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            // 받는 이메일 주소 (관리자 이메일)
+            helper.setTo("hwangsubin93@gmail.com");
+            helper.setSubject("[웹사이트 문의] " + req.getSubject());
+
+            // HTML 형태의 이메일 내용 구성
+            String htmlContent = buildInquiryEmailContent(req);
+            helper.setText(htmlContent, true);
+
+            // 보낸이 정보 설정
+            helper.setFrom("hwangsubin93@gmail.com", "OTD 웹사이트");
+
+            javaMailSender.send(message);
+            log.info("문의하기 이메일 전송 성공: {}", req.getSubject());
+
+        } catch (Exception e) {
+            log.error("문의하기 이메일 전송 실패", e);
+            throw new RuntimeException("이메일 전송에 실패했습니다.", e);
+        }
+    }
+
+    /**
+     * 문의 이메일 내용 구성
+     */
+    private String buildInquiryEmailContent(InquiryEmailReq req) {
+        StringBuilder html = new StringBuilder();
+        html.append("<html><body>");
+        html.append("<div style='max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;'>");
+        html.append("<h2 style='color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;'>");
+        html.append("새로운 문의가 접수되었습니다");
+        html.append("</h2>");
+
+        html.append("<div style='background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;'>");
+        html.append("<p><strong>제목:</strong> ").append(escapeHtml(req.getSubject())).append("</p>");
+        html.append("<p><strong>보낸이:</strong> ").append(escapeHtml(req.getSenderName())).append("</p>");
+
+        if (req.getSenderEmail() != null && !req.getSenderEmail().isEmpty()) {
+            html.append("<p><strong>이메일:</strong> ").append(escapeHtml(req.getSenderEmail())).append("</p>");
+        }
+
+        html.append("<p><strong>접수시간:</strong> ");
+        if (req.getTimestamp() != null) {
+            html.append(req.getTimestamp());
+        } else {
+            html.append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        }
+        html.append("</p>");
+        html.append("</div>");
+
+        html.append("<div style='background-color: #ffffff; padding: 20px; border: 1px solid #dee2e6; border-radius: 5px;'>");
+        html.append("<h4 style='color: #495057; margin-top: 0;'>문의 내용:</h4>");
+        html.append("<p style='line-height: 1.6; white-space: pre-wrap;'>");
+        html.append(escapeHtml(req.getMessage()));
+        html.append("</p>");
+        html.append("</div>");
+
+        html.append("<div style='text-align: center; margin-top: 20px; padding: 10px; background-color: #e9ecef; border-radius: 5px;'>");
+        html.append("<p style='color: #6c757d; font-size: 12px; margin: 0;'>");
+        html.append("이 메일은 OTD 웹사이트 문의하기를 통해 자동으로 발송되었습니다.");
+        html.append("</p>");
+        html.append("</div>");
+
+        html.append("</div>");
+        html.append("</body></html>");
+
+        return html.toString();
+    }
+
+    /**
+     * HTML 이스케이프 처리
+     */
+    private String escapeHtml(String input) {
+        if (input == null) return "";
+        return input.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 }
