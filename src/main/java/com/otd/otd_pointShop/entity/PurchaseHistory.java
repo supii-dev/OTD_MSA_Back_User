@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Enabled
 @Data
+@Entity
 @Table(name = "purchase_history")
 public class PurchaseHistory {
     @Id
@@ -23,5 +24,10 @@ public class PurchaseHistory {
     @JoinColumn(name = "point_id", nullable = false)
     private Point pointItem;
 
-    private LocalDateTime purchaseTime = LocalDateTime.now();
+    private LocalDateTime purchaseTime;
+
+    @PrePersist
+    public void prePersist() {
+        this.purchaseTime = LocalDateTime.now();
+    }
 }

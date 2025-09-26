@@ -54,5 +54,5 @@ public class Point {
     private PointCategory pointCategory;
 
     @OneToMany(mappedBy = "point", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<PointImage> pointItemImages = new ArrayList<>();
+    private List<PointImage> pointItemImage = new ArrayList<>();
 }

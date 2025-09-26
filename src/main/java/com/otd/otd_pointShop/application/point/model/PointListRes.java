@@ -12,7 +12,7 @@ public class PointListRes {
     private Long pointId;
     private String pointItemName;
     private String pointItemContent;
-    private String pointItemImage;
     private Integer pointScore;
     private LocalDateTime createdAt;
+    private List<String> pointItemImage;
 }

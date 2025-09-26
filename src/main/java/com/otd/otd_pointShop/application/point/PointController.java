@@ -5,10 +5,9 @@ import com.otd.configuration.model.UserPrincipal;
 import com.otd.otd_pointShop.application.point.model.*;
 import com.otd.otd_pointShop.repository.PointRepository;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.xml.transform.Result;
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Set;
 
@@ -62,15 +59,16 @@ public class PointController {
     }
 
     @GetMapping("/keyword")
-    public ResultResponse<?> getPointKeywordByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResultResponse<?> getPointKeywordByUser(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(defaultValue = "") String keyword,
+            @PageableDefault(page = 0, size = 10) Pageable pageable
+    ) {
         if(userPrincipal == null) {
             return new ResultResponse<>("로그인이 필요합니다.", null);
         }
         Set<String> result = pointService.getPointKeywordByUser(
-                userPrincipal.getSignedUserId(),
-                PointKeywordGetReq.getKeyword(),
-                PointRepository.pageable()
-        );
+                userPrincipal.getSignedUserId(), keyword, pageable);
         return new ResultResponse<>(String.format("rows: %d", result.size()), result);
     }
 

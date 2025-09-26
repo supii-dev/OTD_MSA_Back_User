@@ -7,12 +7,12 @@ import com.otd.otd_pointShop.repository.PointRepository;
 import com.otd.otd_pointShop.repository.PointImageRepository;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,13 +27,16 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PointService {
+
     @Value("${upload.point-pic}")
     private String uploadDir;
 
     private final UserRepository userRepository;
     private final PointRepository pointRepository;
     private final PointImageRepository pointImageRepository;
-    private final PointMapper pointMapper;
+
+    private static final String POINT_NOT_FOUND = "포인트를 찾을 수 없습니다";
+    private static final String UNAUTHORIZED_ACCESS = "접근 권한이 없습니다";
 
     private void validateImageExtension(MultipartFile file) {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
@@ -42,10 +45,8 @@ public class PointService {
         }
     }
 
-    // image save logic
     private List<PointImage> storeImages(MultipartFile[] images, Point point) {
         List<PointImage> imagesList = new ArrayList<>();
-
         if (images == null || images.length == 0) return imagesList;
 
         for (MultipartFile file : images) {
@@ -57,16 +58,13 @@ public class PointService {
                 Files.createDirectories(savePath.getParent());
                 file.transferTo(savePath.toFile());
             } catch (IOException e) {
-                throw new RuntimeException("이미지 저장 실패", e);
+                throw new RuntimeException("이미지 저장에 실패하였습니다", e);
             }
 
             PointImage pointImage = new PointImage();
             pointImage.setImageUrl(filename);
             pointImage.setPoint(point);
             imagesList.add(pointImage);
-        }
-        if (!imagesList.isEmpty()) {
-            point.setPointItemImage(imagesList.get(0).getImageUrl());
         }
         return imagesList;
     }
@@ -77,26 +75,29 @@ public class PointService {
                 .map(point -> PointListRes.builder()
                         .pointId(point.getPointId())
                         .pointItemName(point.getPointItemName())
-                        .pointitemImages(point.getPointItemImages())
+                        .pointItemContent(point.getPointItemContent())
+                        .pointItemImage(
+                                point.getPointItemImage().stream()
+                                        .map(PointImage::getImageUrl)
+                                        .collect(Collectors.toList())
+                        )
                         .pointScore(point.getPointScore())
                         .createdAt(point.getCreatedAt())
                         .build())
                 .toList();
     }
 
-
     public List<PointGetRes> pointGetResList(Long userId, Pageable pageable) {
-        return pointRepository.findByUser_UserId(userId, pageable)
-                .map(point -> {
-                    List<String> imageUrls = pointImageRepository.findByPoint_PointId(point.getPointId())
-                    .stream()
-                    .map(PointImage::getImageUrl)
-                    .toList();
+        Page<Point> page = pointRepository.findByUser_UserId(userId, pageable);
+        return page.getContent().stream().map(point -> {
+            List<String> imageUrls = pointImageRepository.findByPoint_PointId(point.getPointId())
+                    .stream().map(PointImage::getImageUrl).toList();
+
             return PointGetRes.builder()
                     .pointId(point.getPointId())
                     .pointItemName(point.getPointItemName())
                     .pointItemContent(point.getPointItemContent())
-                    .pointScore(point.getPointScore().intValue())
+                    .pointScore(point.getPointScore())
                     .createdAt(point.getCreatedAt())
                     .images(imageUrls)
                     .build();
@@ -104,16 +105,15 @@ public class PointService {
     }
 
     public Set<String> getPointKeywordByUser(Long userId, String keyword, Pageable pageable) {
-
         return pointRepository.findByUser_UserIdAndPointItemContentContaining(userId, keyword, pageable)
                 .stream()
                 .flatMap(p -> extractKeywords(p.getPointItemContent()).stream())
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> extractKeywords(String pointItemContent) {
-        if (pointItemContent == null) return Set.of();
-        return Arrays.stream(pointItemContent.split("\\s+"))
+    private Set<String> extractKeywords(String content) {
+        if (content == null) return Set.of();
+        return Arrays.stream(content.split("\\s+"))
                 .map(word -> word.replaceAll("[^\\p{IsAlphabetic}\\d]", ""))
                 .filter(word -> word.length() > 1)
                 .map(String::toLowerCase)
@@ -122,57 +122,44 @@ public class PointService {
 
     @Transactional
     public void createPointItem(PointPostReq dto, MultipartFile[] images, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다!"));
-
         Point point = new Point();
-        point.setUser(user);
-        point.setPointScore(dto.getPointScore().intValue());
+        point.setUser(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자 없음")));
+        point.setPointScore(dto.getPointScore());
         point.setPointItemName(dto.getPointItemName());
         point.setPointItemContent(dto.getPointItemContent());
 
         List<PointImage> imagesList = storeImages(images, point);
-        point.setImages(imagesList);
+        point.setPointItemImage(imagesList);
+
         pointRepository.save(point);
     }
 
     @Transactional
     public void updatePointItem(PointPutReq dto, MultipartFile[] images, Long userId) {
-        User user  = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         Point point = pointRepository.findById(dto.getPointId())
-                .orElseThrow(() -> new RuntimeException("포인트 항목을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("포인트를 찾을 수 없습니다."));
         if (!point.getUser().getUserId().equals(userId)) {
-            throw new RuntimeException("수정할 권한이 없습니다.");
+            throw new EntityNotFoundException("조회할 권한이 없습니다.");
         }
-
-        point.setPointScore(dto.getPointScore().intValue());
         point.setPointItemName(dto.getPointItemName());
         point.setPointItemContent(dto.getPointItemContent());
 
-        List<PointImage> oldImages = pointImageRepository.findByPoint_PointId(dto.getPointId(), dto.getItem);
+        List<PointImage> oldImages = pointImageRepository.findByPoint(point);
         pointImageRepository.deleteAll(oldImages);
 
-        List<PointImage> newImageList = storeImages(images, point);
-        point.setImages(newImageList);
+        List<PointImage> newImages = storeImages(images, point);
+        point.setPointItemImage(newImages);
         pointRepository.save(point);
     }
 
     @Transactional
     public void deletePointItem(Long pointId, Long userId) {
         Point point = pointRepository.findById(pointId)
-                .orElseThrow(() -> new RuntimeException("포인트 항목을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("포인트를 찾을 수 없습니다"));
         if (!point.getUser().getUserId().equals(userId)) {
-            throw new RuntimeException("삭제할 권한이 없습니다.");
+            throw new EntityNotFoundException("삭제할 권한이 없습니다");
         }
         pointImageRepository.deleteAllByPoint(point);
         pointRepository.delete(point);
-    }
-
-    public List<Point> getPointByUser(Long userId) {
-        return pointRepository.findByUser_UserId(userId);
-    }
-    public List<PointImage> getImagesForPoint(Long pointId) {
-        return pointImageRepository.findByPoint_PointId(pointId);
     }
 }
