@@ -1,8 +1,8 @@
 constants:
   file:
-    upload-directory: /home/green/download/challenge/
-    challenge-pic: /files/
-    profile-pic: /home/green/download/profile/
+    upload-directory: /home/green/download
+    challenge: /files/
+    profile-pic: /profile/
   feign-client:
     weather-api:
       url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0

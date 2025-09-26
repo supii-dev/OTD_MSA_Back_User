@@ -87,7 +87,7 @@ public class EmailController {
     /**
      * 문의하기 이메일 전송
      */
-    @PostMapping("/send-inquiry")
+    @PostMapping("/sendMunhe")
     public ResultResponse<?> sendInquiryEmail(@Valid @RequestBody InquiryEmailReq req) {
         log.info("문의하기 이메일 전송 요청: 제목={}, 보낸이={}", req.getSubject(), req.getSenderName());
 
