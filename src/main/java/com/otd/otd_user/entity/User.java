@@ -82,5 +82,10 @@ public class User extends UpdatedAt{
             this.userRoles.add(userRole);
         }
     }
-
+    public EnumChallengeRole getChallengeRole() {
+        return this.userRoles.stream()
+                .map(userRole -> userRole.getUserRoleIds().getChallengeCode())
+                .findFirst() // 유저가 가진 챌린지 Role 하나만 꺼냄
+                .orElse(EnumChallengeRole.TBD);
+    }
 }

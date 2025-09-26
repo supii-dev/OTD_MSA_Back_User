@@ -92,6 +92,7 @@ public class UserService {
                 .pic(user.getPic())
                 .point(user.getPoint())
                 .xp(user.getXp())
+                .email(user.getEmail())
                 .challengeRole(challengeRoles)
                 .build();
 
