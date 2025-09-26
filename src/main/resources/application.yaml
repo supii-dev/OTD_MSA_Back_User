@@ -1,6 +1,6 @@
 constants:
   file:
-    upload-directory: /home/green/download/
+    upload-directory: /home/green/download
     challenge: /files/
     profile-pic: /profile/
   feign-client:
