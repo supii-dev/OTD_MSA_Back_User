@@ -11,6 +11,7 @@
     </select>
 
     <select id="findByProgressChallengeByUserId">
+        <if test="type == 'competition' or type == 'weekly'">
         WITH ranked AS (
         SELECT cpp.user_id, cpp.cd_id,
             RANK() OVER (PARTITION BY cpp.cd_id ORDER BY cpp.total_record DESC) AS rank
@@ -21,6 +22,7 @@
         AND cpp.end_date = #{endDate}
         AND cpp.is_success = TRUE
         )
+        </if>
         SELECT cp.user_id,
             cd.cd_id,
             cp.cp_id,
@@ -29,13 +31,17 @@
             cp.total_record,
             cd.cd_reward AS reward,
             cd.xp AS xp,
-            cd.cd_type AS `type`,
-            r.rank
+            cd.cd_type AS `type`
+            <if test="type == 'competition' || type == 'weekly'">
+            , r.rank
+            </if>
         FROM challenge_progress cp
         JOIN challenge_definition cd
         ON cp.cd_id = cd.cd_id AND cd.cd_type = #{type}
+        <if test="type == 'competition' || type == 'weekly'">
         LEFT JOIN ranked r
         ON r.user_id = cp.user_id AND r.cd_id = cd.cd_id
+        </if>
         WHERE cp.start_date >= #{startDate}
         AND cp.end_date = #{endDate}
         AND cp.user_id = #{userId}

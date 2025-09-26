@@ -16,13 +16,15 @@ public class ChallengeSettlementScheduler {
     LocalDate today = LocalDate.now();
     LocalDate startDate = today.minusWeeks(1);
     LocalDate endDate = today.minusDays(1);
-
-
-    challengeSchedulerService.weeklySettlement(startDate, endDate);
+    challengeSchedulerService.setSettlement(startDate, endDate, "weekly");
   }
 
   @Scheduled(cron = "0 0 0 1 * ?")
   public void monthlySettlementScheduler() {
-
+    LocalDate today = LocalDate.now();
+    LocalDate startDate = today.minusMonths(1);
+    LocalDate endDate = today.minusDays(1);
+    challengeSchedulerService.setSettlement(startDate, endDate, "competition");
+    challengeSchedulerService.setSettlement(startDate, endDate, "personal");
   }
 }

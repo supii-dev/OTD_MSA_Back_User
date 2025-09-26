@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class ChallengeSettlementDto {
   private LocalDate startDate;
   private LocalDate endDate;
