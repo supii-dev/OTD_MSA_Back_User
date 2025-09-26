@@ -58,7 +58,7 @@ public class User extends UpdatedAt{
     @Column(columnDefinition = "int DEFAULT 0")
     private int xp;
 
-    @Column(length = 100)
+    @Column(length = 300)
     private String refreshToken;
 
     // 본인인증 관련 필드 추가
