@@ -33,7 +33,6 @@ public class UserController {
     @PostMapping("/join")
     public ResultResponse<?> join(@Valid @RequestPart UserJoinReq req
             , @RequestPart(required = false) MultipartFile pic) {
-        log.info("req: {}", req);
         log.info("pic: {}", pic != null ? pic.getOriginalFilename() : pic);
         userService.join(req, pic);
         return new ResultResponse<>("", 1);
@@ -43,7 +42,9 @@ public class UserController {
     public ResultResponse<?> login(@Valid @RequestBody UserLoginReq req, HttpServletResponse response) {
         log.info("req: {}", req);
         UserLoginDto userloginDto = userService.login(req);
-        jwtTokenManager.issue(response, userloginDto.getJwtUser());
+        String refreshToken = jwtTokenManager.issue(response, userloginDto.getJwtUser());
+
+        userService.updateRefreshToken(userloginDto.getUserLoginRes().getUserId(), refreshToken);
         return new ResultResponse<>("로그인 성공", userloginDto.getUserLoginRes());
     }
 

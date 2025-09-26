@@ -59,7 +59,7 @@ public class User extends UpdatedAt{
     @Column(columnDefinition = "int DEFAULT 0")
     private int xp;
 
-    @Column(length = 100)
+    @Column(length = 300)
     private String refreshToken;
 
     // 본인인증 관련 필드 추가
@@ -83,5 +83,10 @@ public class User extends UpdatedAt{
             this.userRoles.add(userRole);
         }
     }
-
+    public EnumChallengeRole getChallengeRole() {
+        return this.userRoles.stream()
+                .map(userRole -> userRole.getUserRoleIds().getChallengeCode())
+                .findFirst() // 유저가 가진 챌린지 Role 하나만 꺼냄
+                .orElse(EnumChallengeRole.TBD);
+    }
 }
