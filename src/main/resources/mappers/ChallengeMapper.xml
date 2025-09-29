@@ -152,4 +152,22 @@
         WHERE user_id = #{userId}
         AND success_date = CURRENT_DATE;
     </select>
+    <select id="findAllMyChallenge">
+        SELECT cd.cd_id, cd.cd_goal AS goal, cp.total_record, cd.cd_name AS `name`
+             , cd.cd_unit AS unit, cd.cd_type AS type
+        FROM challenge_definition cd
+        INNER JOIN challenge_progress cp
+        ON cp.cd_id = cd.cd_id
+        WHERE cp.user_id = #{userId}
+        AND Year(cp.start_date) = #{year}
+        AND Month(cp.start_date) = #{month}
+        AND ((cd.cd_type = 'weekly' AND Day(cp.start_date) > #{day})
+        OR (cd.cd_type = 'competition') OR (cd.cd_type = 'personal'))
+        ORDER BY
+        CASE cd.cd_type
+        WHEN 'competition' THEN 1
+        WHEN 'personal' THEN 2
+        WHEN 'weekly' THEN 3
+        ELSE 4 END;
+    </select>
 </mapper>

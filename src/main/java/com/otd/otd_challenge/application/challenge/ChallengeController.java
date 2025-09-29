@@ -9,6 +9,8 @@ import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgres
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeSuccessPutReq;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
+import com.otd.otd_challenge.application.challenge.model.home.MainHomGetReq;
+import com.otd.otd_challenge.application.challenge.model.home.MainHomeGetRes;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetReq;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetRes;
@@ -98,5 +100,11 @@ public class ChallengeController {
                                                              @ModelAttribute ChallengeSettlementGetReq req){
         System.out.println("req" + req);
         return challengeSchedulerService.getSettlementLog(userPrincipal.getSignedUserId(), req);
+    }
+
+    @GetMapping("/home")
+    public List<MainHomeGetRes> getMyChallenge(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                               @ModelAttribute MainHomGetReq req) {
+        return challengeService.getMainHomeChallenge(userPrincipal.getSignedUserId(), req);
     }
 }
