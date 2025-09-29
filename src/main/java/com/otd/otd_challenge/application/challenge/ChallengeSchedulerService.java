@@ -1,8 +1,10 @@
 package com.otd.otd_challenge.application.challenge;
 
-import com.otd.configuration.model.ResultResponse;
-import com.otd.otd_challenge.application.challenge.model.ChallengeDefinitionGetRes;
-import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgressGetRes;
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeDefinitionRepository;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengePointRepository;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeRoleRepository;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeSettlementRepository;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetReq;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetRes;
@@ -11,7 +13,6 @@ import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeSettlementLog;
 import com.otd.otd_user.application.user.UserRepository;
-import com.otd.otd_user.application.user.UserService;
 import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,8 @@ public class ChallengeSchedulerService {
   private final ChallengeSettlementMapper challengeSettlementMapper;
   private final ChallengePointRepository challengePointRepository;
   private final ChallengeSettlementRepository challengeSettlementRepository;
+  private final TierService tierService;
+  private final ChallengeRoleRepository challengeRoleRepository;
   private final ChallengeService challengeService;
 
   @Transactional
@@ -117,16 +120,22 @@ public class ChallengeSchedulerService {
 
         challengeSettlementRepository.save(log);
 
-        int userPoint = user.getPoint();
-        int userXp = user.getXp();
+        int sumPoint = user.getPoint() + totalPoint;
+        int sumXp = user.getXp() + progress.getXp();
 
-        user.setPoint(userPoint + totalPoint);
-        user.setXp(userXp + progress.getXp());
 
+        user.setPoint(sumPoint);
+        user.setXp(sumXp);
+
+        EnumChallengeRole myRole = user.getChallengeRole();
+
+        EnumChallengeRole newRole = tierService.checkTierUp(myRole, sumXp);
+        if (newRole != myRole) {
+          challengeRoleRepository.updateChallengeRole(user.getUserId(), newRole);
+        }
       }
 
     }
-
   }
 
   @Value("${constants.file.challenge}")

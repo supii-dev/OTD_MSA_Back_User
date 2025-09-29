@@ -87,6 +87,7 @@ public class ChallengeController {
         return challengeService.saveChallenge(userPrincipal.getSignedUserId(), req);
     }
 
+
     @PostMapping("/settlement")
     public ResultResponse<?> weeklySettlement(@RequestBody ChallengeSettlementDto dto) {
         return challengeService.setSettlement(dto);

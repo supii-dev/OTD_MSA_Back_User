@@ -1,5 +1,6 @@
 package com.otd.otd_challenge.application.challenge.model.home;
 
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import lombok.*;
 
 @Getter
@@ -13,4 +14,5 @@ public class UserInfoGetRes {
     private String pic;
     private int point;
     private int xp;
+    private EnumChallengeRole challengeRole;
 }
