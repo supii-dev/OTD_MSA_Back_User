@@ -50,7 +50,7 @@ public class WebSecurityConfiguration {
                                                         // 세션을 이용한 공격이다. 세션을 어차피 안 쓰니까 비활성화
                    .authorizeHttpRequests(req -> req
                            .requestMatchers(HttpMethod.POST, "/api/OTD/user/logout").authenticated()
-                           .requestMatchers("/api/OTD/user/profile" , "/api/OTD/user/profile/pic").authenticated()
+                           .requestMatchers( "/api/OTD/challenge/**","/api/OTD/user/profile" , "/api/OTD/user/profile/pic").authenticated()
                            .requestMatchers("/api/OTD/email/sendMunhe").authenticated()
                            .requestMatchers( "/api/OTD/user/logout",
                                    "/api/OTD/user/reissue",
