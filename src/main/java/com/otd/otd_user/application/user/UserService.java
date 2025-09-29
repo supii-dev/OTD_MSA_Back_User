@@ -86,6 +86,8 @@ public class UserService {
         log.info("roles: {}", roles);
         JwtUser jwtUser = new JwtUser(user.getUserId(), roles);
 
+        EnumUserRole userRole = user.getUserRoles().stream()
+                .map(item -> item.getUserRoleIds().getRoleCode()).findFirst().orElse(null);
         EnumChallengeRole challengeRoles = user.getUserRoles().stream()
                 .map(item -> item.getUserRoleIds().getChallengeCode())
                 .findFirst().orElse(null);
@@ -98,6 +100,7 @@ public class UserService {
                 .xp(user.getXp())
                 .email(user.getEmail())
                 .challengeRole(challengeRoles)
+                .userRole(userRole)
                 .build();
 
         return UserLoginDto.builder()

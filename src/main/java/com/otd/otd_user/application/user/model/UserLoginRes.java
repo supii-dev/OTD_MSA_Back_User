@@ -1,6 +1,7 @@
 package com.otd.otd_user.application.user.model;
 
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.configuration.enumcode.model.EnumUserRole;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -20,4 +21,5 @@ public class UserLoginRes {
     private List<String> roles;
     private LocalDateTime lastLoginAt;
     private EnumChallengeRole challengeRole;
+    private EnumUserRole userRole;
 }
