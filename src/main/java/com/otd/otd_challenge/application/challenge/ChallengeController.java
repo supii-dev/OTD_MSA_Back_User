@@ -9,12 +9,14 @@ import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgres
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeSuccessPutReq;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -81,4 +83,13 @@ public class ChallengeController {
                                            @RequestBody ChallengePostReq req){
         return challengeService.saveChallenge(userPrincipal.getSignedUserId(), req);
     }
+
+
+    @PostMapping("/settlement")
+    public ResultResponse<?> weeklySettlement(@RequestBody ChallengeSettlementDto dto) {
+        return challengeService.setSettlement(dto);
+    }
+
+//    @GetMapping("/challenge/settlement")
+//    public List<>
 }
