@@ -15,7 +15,7 @@ public enum EnumUserRole implements EnumMapperType {
     USER_1("01", "USER"),
     USER_2("02", "SOCIAL"),
     MANAGER("03", "MANAGER"),
-    ADMIN("04", "ADMIM");
+    ADMIN("04", "ADMIN");
 
     private final String code;
     private final String value; // 예: "USER, user" (콤마로 구분된 허용 토큰)
