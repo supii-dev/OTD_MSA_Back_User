@@ -1,7 +1,13 @@
 package com.otd.otd_challenge.application.challenge;
 
-import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeDefinitionRepository;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengePointRepository;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeRoleRepository;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeSettlementRepository;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetReq;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetRes;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSuccessDto;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
@@ -11,6 +17,7 @@ import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,6 +33,9 @@ public class ChallengeSchedulerService {
   private final ChallengeSettlementMapper challengeSettlementMapper;
   private final ChallengePointRepository challengePointRepository;
   private final ChallengeSettlementRepository challengeSettlementRepository;
+  private final TierService tierService;
+  private final ChallengeRoleRepository challengeRoleRepository;
+  private final ChallengeService challengeService;
 
   @Transactional
   public void setSettlement(LocalDate startDate, LocalDate endDate, String type){
@@ -43,7 +53,7 @@ public class ChallengeSchedulerService {
               .type(dto.getType())
               .build();
 
-      List<ChallengeSuccessDto> challengeProgress = challengeSettlementMapper.findByProgressChallengeByUserId(userDto);
+      List<ChallengeSuccessDto> challengeProgress = challengeSettlementMapper.findProgressChallengeByUserId(userDto);
 
       for (ChallengeSuccessDto progress : challengeProgress) {
         ChallengeDefinition cd = challengeDefinitionRepository.findById(progress.getCdId()).orElseThrow();
@@ -110,15 +120,37 @@ public class ChallengeSchedulerService {
 
         challengeSettlementRepository.save(log);
 
-        int userPoint = user.getPoint();
-        int userXp = user.getXp();
+        int sumPoint = user.getPoint() + totalPoint;
+        int sumXp = user.getXp() + progress.getXp();
 
-        user.setPoint(userPoint + totalPoint);
-        user.setXp(userXp + progress.getXp());
 
+        user.setPoint(sumPoint);
+        user.setXp(sumXp);
+
+        EnumChallengeRole myRole = user.getChallengeRole();
+
+        EnumChallengeRole newRole = tierService.checkTierUp(myRole, sumXp);
+        if (newRole != myRole) {
+          challengeRoleRepository.updateChallengeRole(user.getUserId(), newRole);
+        }
       }
 
     }
   }
 
+  @Value("${constants.file.challenge}")
+  private String imgPath;
+  private void addImgPath(List<?> list) {
+    for (Object o : list) {
+     if(o instanceof ChallengeSettlementGetRes cs){
+       cs.setImage(imgPath + cs.getImage());
+     }
+    }
+  }
+  public List<ChallengeSettlementGetRes> getSettlementLog(Long userId, ChallengeSettlementGetReq req){
+    req.setUserId(userId);
+    List<ChallengeSettlementGetRes> res = challengeSettlementMapper.findSettlementLogByUserIdAndSettlementDate(req);
+    addImgPath(res);
+    return res;
+  }
 }

@@ -1,4 +1,4 @@
-package com.otd.otd_challenge.application.challenge;
+package com.otd.otd_challenge.application.challenge.Repository;
 
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import org.springframework.data.jpa.repository.JpaRepository;

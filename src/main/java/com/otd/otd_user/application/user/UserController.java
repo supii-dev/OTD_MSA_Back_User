@@ -12,11 +12,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.context.annotation.ComponentScan;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+
+
 import java.util.Map;
+
 
 @Slf4j
 @RestController
@@ -26,10 +31,6 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenManager jwtTokenManager;
 
-    @GetMapping("/")
-    public String healthCheck() {
-        return "Hello from OTD-USER Service!";
-    }
 
     @PostMapping(
             value = "/join",
