@@ -89,7 +89,4 @@ public class ChallengeController {
     public ResultResponse<?> weeklySettlement(@RequestBody ChallengeSettlementDto dto) {
         return challengeService.setSettlement(dto);
     }
-
-//    @GetMapping("/challenge/settlement")
-//    public List<>
 }

@@ -1,6 +1,10 @@
 package com.otd.otd_challenge.application.challenge;
 
-import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeDefinitionRepository;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengePointRepository;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeRoleRepository;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeSettlementRepository;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSuccessDto;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
@@ -26,6 +30,8 @@ public class ChallengeSchedulerService {
   private final ChallengeSettlementMapper challengeSettlementMapper;
   private final ChallengePointRepository challengePointRepository;
   private final ChallengeSettlementRepository challengeSettlementRepository;
+  private final TierService tierService;
+  private final ChallengeRoleRepository challengeRoleRepository;
 
   @Transactional
   public void setSettlement(LocalDate startDate, LocalDate endDate, String type){
@@ -110,12 +116,19 @@ public class ChallengeSchedulerService {
 
         challengeSettlementRepository.save(log);
 
-        int userPoint = user.getPoint();
-        int userXp = user.getXp();
+        int sumPoint = user.getPoint() + totalPoint;
+        int sumXp = user.getXp() + progress.getXp();
 
-        user.setPoint(userPoint + totalPoint);
-        user.setXp(userXp + progress.getXp());
 
+        user.setPoint(sumPoint);
+        user.setXp(sumXp);
+
+        EnumChallengeRole myRole = user.getChallengeRole();
+
+        EnumChallengeRole newRole = tierService.checkTierUp(myRole, sumXp);
+        if (newRole != myRole) {
+          challengeRoleRepository.updateChallengeRole(user.getUserId(), newRole);
+        }
       }
 
     }

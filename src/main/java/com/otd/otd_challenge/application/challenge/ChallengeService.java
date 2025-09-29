@@ -3,6 +3,7 @@ package com.otd.otd_challenge.application.challenge;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.util.FormattedTime;
+import com.otd.otd_challenge.application.challenge.Repository.*;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.application.challenge.model.detail.*;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
@@ -100,12 +101,16 @@ public class ChallengeService {
         List<ChallengeProgressGetRes> personal = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
         int successCount = (success != null) ? success : 0;
+
+        EnumChallengeRole cr = userInfo.getChallengeRole();
+
         UserInfoGetRes uInfo = UserInfoGetRes.builder()
                 .userId(userId)
                 .name(userInfo.getName())
                 .nickName(userInfo.getNickName())
                 .pic(userInfo.getPic())
                 .xp(userInfo.getXp())
+                .challengeRole(cr)
                 .point(userInfo.getPoint()).build();
 
         addImgPath(weekly);
@@ -274,7 +279,8 @@ public class ChallengeService {
     // 정산 테스트
     private final ChallengeSettlementMapper challengeSettlementMapper;
     private final ChallengePointRepository challengePointRepository;
-
+    private final TierService tierService;
+    private final ChallengeRoleRepository challengeRoleRepository;
     @Transactional
     public ResultResponse<?> setSettlement(ChallengeSettlementDto dto){
         List<Long> userIds = challengeSettlementMapper.findByUserId(dto);
@@ -356,16 +362,21 @@ public class ChallengeService {
 
                 challengeSettlementRepository.save(log);
 
-                int userPoint = user.getPoint();
-                int userXp = user.getXp();
+                int sumPoint = user.getPoint() + totalPoint;
+                int sumXp = user.getXp() + progress.getXp();
 
-                user.setPoint(userPoint + totalPoint);
-                user.setXp(userXp + progress.getXp());
 
+                user.setPoint(sumPoint);
+                user.setXp(sumXp);
+
+                EnumChallengeRole myRole = user.getChallengeRole();
+
+                EnumChallengeRole newRole = tierService.checkTierUp(myRole, sumXp);
+                if (newRole != myRole) {
+                    challengeRoleRepository.updateChallengeRole(user.getUserId(), newRole);
+                }
             }
-
         }
         return new ResultResponse<>("정산완료", 1);
     }
-
 }
