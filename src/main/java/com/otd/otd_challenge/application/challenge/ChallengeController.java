@@ -10,6 +10,8 @@ import com.otd.otd_challenge.application.challenge.model.detail.ChallengeSuccess
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetReq;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,7 @@ import java.util.Map;
 public class ChallengeController {
 
     private final ChallengeService challengeService;
+    private final ChallengeSchedulerService challengeSchedulerService;
 
 
 
@@ -88,5 +91,12 @@ public class ChallengeController {
     @PostMapping("/settlement")
     public ResultResponse<?> weeklySettlement(@RequestBody ChallengeSettlementDto dto) {
         return challengeService.setSettlement(dto);
+    }
+
+    @GetMapping("/settlement/log")
+    public List<ChallengeSettlementGetRes> getSettlementLog(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                             @ModelAttribute ChallengeSettlementGetReq req){
+        System.out.println("req" + req);
+        return challengeSchedulerService.getSettlementLog(userPrincipal.getSignedUserId(), req);
     }
 }

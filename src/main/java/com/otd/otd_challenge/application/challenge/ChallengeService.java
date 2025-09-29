@@ -295,7 +295,7 @@ public class ChallengeService {
                 .type(dto.getType())
                 .build();
 
-            List<ChallengeSuccessDto> challengeProgress = challengeSettlementMapper.findByProgressChallengeByUserId(userDto);
+            List<ChallengeSuccessDto> challengeProgress = challengeSettlementMapper.findProgressChallengeByUserId(userDto);
 
             for (ChallengeSuccessDto progress : challengeProgress) {
                 ChallengeDefinition cd = challengeDefinitionRepository.findById(progress.getCdId()).orElseThrow();
