@@ -12,13 +12,14 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum EnumUserRole implements EnumMapperType {
-    USER_1("01", "USER, user"),
-    USER_2("02", "SOCIAL, social"),
-    MANAGER("03", "MANAGER, manager"),
-    ADMIN("04", "ADMIN, admin");
+    USER_1("01", "USER"),
+    USER_2("02", "SOCIAL"),
+    MANAGER("03", "MANAGER"),
+    ADMIN("04", "ADMIN");
 
     private final String code;
     private final String value; // 예: "USER, user" (콤마로 구분된 허용 토큰)
+
 
     /**
      * JSON 역직렬화: "user", "USER", "USER_1", "01" 등 다양한 입력을 허용.
