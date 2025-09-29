@@ -10,7 +10,7 @@
         AND cp.end_date = #{endDate}
     </select>
 
-    <select id="findByProgressChallengeByUserId">
+    <select id="findProgressChallengeByUserId">
         <if test="type == 'competition' or type == 'weekly'">
         WITH ranked AS (
         SELECT cpp.user_id, cpp.cd_id,
@@ -48,4 +48,36 @@
         AND cp.is_success = TRUE;
     </select>
 
+    <select id="findSettlementLogByUserIdAndSettlementDate">
+        SELECT cs.cs_id,
+        cs.total_point,
+        cd.cd_image AS image,
+        cd.cd_name AS name,
+        cd.cd_reward AS reward,
+        cd.xp AS xp,
+        ch.point AS extra_reward
+        FROM challenge_settlement_log cs
+        JOIN challenge_definition cd
+        ON cs.cd_id = cd.cd_id
+        LEFT JOIN challenge_point_history ch
+        ON ch.user_id = cs.user_id
+        AND DATE(ch.created_at) = DATE(cs.created_at)
+        <if test="type == 'monthly'">
+            AND (ch.reason = CONCAT('rank_reward_', cd.cd_name)
+            OR ch.reason = CONCAT('attendance_reward_', cd.cd_name))
+        </if>
+        <if test="type == 'weekly'">
+            AND ch.reason = CONCAT('rank_reward_', cd.cd_name)
+        </if>
+        <where>
+            cs.user_id = #{userId}
+            AND DATE(cs.created_at) = #{settlementDate}
+            <if test="type == 'monthly'">
+                AND (cs.`type` LIKE 'competition%' OR cs.`type` LIKE 'personal%')
+            </if>
+            <if test="type == 'weekly'">
+                AND cs.`type` LIKE 'weekly%'
+            </if>
+        </where>
+    </select>
 </mapper>

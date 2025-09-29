@@ -7,6 +7,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
 public class ChallengeSuccessDto {
   private Long userId;
   private Long cdId;
