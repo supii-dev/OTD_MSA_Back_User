@@ -1,6 +1,6 @@
 package com.otd.otd_challenge.application.challenge;
 
-import com.otd.configuration.constants.ConstFile;
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.util.FormattedTime;
 import com.otd.otd_challenge.application.challenge.model.*;
@@ -9,8 +9,12 @@ import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRe
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeMissionCompleteGetRes;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
 import com.otd.otd_challenge.application.challenge.model.home.UserInfoGetRes;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSuccessDto;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
+import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeProgress;
+import com.otd.otd_challenge.entity.ChallengeSettlementLog;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
@@ -29,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.prometheus.client.Counter.build;
+
 
 @Slf4j
 @Service
@@ -38,7 +44,7 @@ public class ChallengeService {
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
     private final UserRepository userRepository;
-
+    private final ChallengeSettlementRepository challengeSettlementRepository;
     @Value("${constants.file.challenge}")
     private String imgPath;
     private void addImgPath(List<?> list) {
@@ -122,10 +128,22 @@ public class ChallengeService {
                 .build();
     }
 
+    // CD쪽 DB tier와 챌린지 등급 매핑
+    private void mapChallengeTier(List<ChallengeDefinitionGetRes> challenges, EnumChallengeRole userRole) {
+        challenges.forEach(cd -> {
+            EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(cd.getTierCode()); // 문자열 그대로 변환
+            cd.setTier(challengeRole);
+            cd.setAvailable(userRole.isHigherOrEqual(challengeRole));
+        });
+    }
     public List<ChallengeDefinitionGetRes> getChallengeList(Long userId, ChallengeProgressGetReq req) {
         req.setUserId(userId);
         List<ChallengeDefinitionGetRes> res = challengeMapper.findByType(req);
         addImgPath(res);
+        User user = userRepository.findByUserId(userId);
+        EnumChallengeRole userRole = user.getChallengeRole();
+        mapChallengeTier(res, userRole);
+
         return res;
     }
 
@@ -133,7 +151,9 @@ public class ChallengeService {
         req.setUserId(userId);
         List<ChallengeDefinitionGetRes> res = challengeMapper.findByTypeForCompetition(req);
         addImgPath(res);
-
+        User user = userRepository.findByUserId(userId);
+        EnumChallengeRole userRole = user.getChallengeRole();
+        mapChallengeTier(res, userRole);
         return res.stream()
                     .collect(Collectors.groupingBy(ChallengeDefinitionGetRes::getName));
     }
@@ -250,4 +270,102 @@ public class ChallengeService {
 
         return new ResultResponse<>("저장 되었습니다.",challengeProgress);
     }
+
+    // 정산 테스트
+    private final ChallengeSettlementMapper challengeSettlementMapper;
+    private final ChallengePointRepository challengePointRepository;
+
+    @Transactional
+    public ResultResponse<?> setSettlement(ChallengeSettlementDto dto){
+        List<Long> userIds = challengeSettlementMapper.findByUserId(dto);
+
+        for (Long userId : userIds) {
+            User user = userRepository.findById(userId).orElseThrow();
+
+            ChallengeSettlementDto userDto = ChallengeSettlementDto.builder()
+                .userId(userId)
+                .startDate(dto.getStartDate())
+                .endDate(dto.getEndDate())
+                .type(dto.getType())
+                .build();
+
+            List<ChallengeSuccessDto> challengeProgress = challengeSettlementMapper.findByProgressChallengeByUserId(userDto);
+
+            for (ChallengeSuccessDto progress : challengeProgress) {
+                ChallengeDefinition cd = challengeDefinitionRepository.findById(progress.getCdId()).orElseThrow();
+
+                int totalPoint = 0;
+
+                totalPoint += progress.getReward();
+
+                ChallengePointHistory ch = ChallengePointHistory.builder()
+                    .user(user).challengeDefinition(cd)
+                    .point(progress.getReward())
+                    .reason(progress.getType()+"_"+progress.getName())
+                    .build();
+
+                challengePointRepository.save(ch);
+
+                if(dto.getType().equals("weekly") || dto.getType().equals("competition")){
+                    if(progress.getRank() <= 3) {
+                        int rankPoint = switch (progress.getRank()) {
+                            case 1 -> 100;
+                            case 2 -> 70;
+                            case 3 -> 50;
+                            default -> 0;
+                        };
+
+                        if (rankPoint > 0) {
+                            ChallengePointHistory chRank = ChallengePointHistory.builder()
+                                .user(user)
+                                .challengeDefinition(cd)
+                                .point(rankPoint)
+                                .reason("rank_reward_" + progress.getName())
+                                .build();
+                            challengePointRepository.save(chRank);
+                            totalPoint += rankPoint;
+                        }
+                    }
+                }
+
+                if(dto.getType().equals("personal")){
+                    int endDateOfMonth = dto.getEndDate().getDayOfMonth();
+                    int attendancePoint = 0;
+
+                    if(progress.getTotalRecord() == endDateOfMonth){
+                        attendancePoint = 100;
+                    }else if(progress.getTotalRecord() >= 25){
+                        attendancePoint = 70;
+                    }else if(progress.getTotalRecord() >= 20){
+                        attendancePoint = 50;
+                    }
+
+                    if(attendancePoint > 0){
+                        ChallengePointHistory chRank = ChallengePointHistory.builder()
+                            .user(user)
+                            .challengeDefinition(cd)
+                            .point(attendancePoint)
+                            .reason("attendance_reward_" + progress.getName())
+                            .build();
+                        challengePointRepository.save(chRank);
+                        totalPoint += attendancePoint;
+                    }
+                }
+                ChallengeSettlementLog log = ChallengeSettlementLog.builder().
+                    user(user).challengeDefinition(cd).type(progress.getType()+"_"+progress.getName()).totalXp(progress.getXp()).totalPoint(totalPoint).build();
+
+                challengeSettlementRepository.save(log);
+
+                int userPoint = user.getPoint();
+                int userXp = user.getXp();
+
+                user.setPoint(userPoint + totalPoint);
+                user.setXp(userXp + progress.getXp());
+
+            }
+
+        }
+        return new ResultResponse<>("정산완료", 1);
+    }
+
 }
