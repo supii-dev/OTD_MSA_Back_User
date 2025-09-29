@@ -1,8 +1,10 @@
 package com.otd.otd_user.application.email;
 
-import com.otd.otd_user.application.email.model.InquiryEmailReq;
+import com.otd.otd_user.application.email.model.MunheEmailReq;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.EmailVerification;
+import com.otd.otd_user.entity.Munhe;
+import com.otd.otd_user.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
@@ -12,6 +14,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,11 +28,13 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final EmailVerificationRepository emailVerificationRepository;
     private final UserRepository userRepository;
+    private final MunheRepository munheRepository;
 
     private static final int CODE_EXPIRY_MINUTES = 5;
     private static final int VERIFICATION_STATUS_EXPIRY_MINUTES = 30;
     private static final int PASSWORD_RESET_EXPIRY_MINUTES = 10;
     private final JavaMailSender javaMailSender;
+
     /**
      * 회원가입용 이메일 인증코드 발송
      */
@@ -259,34 +264,34 @@ public class EmailService {
      */
     private String createVerificationEmailContent(String code) {
         return """
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="color: #10b981;">OneToDay</h1>
-                    <h2 style="color: #374151;">이메일 인증</h2>
-                </div>
-                
-                <div style="background-color: #f9fafb; padding: 30px; border-radius: 8px; text-align: center;">
-                    <p style="font-size: 16px; color: #6b7280; margin-bottom: 20px;">
-                        회원가입을 완료하기 위해 아래 인증코드를 입력해주세요.
-                    </p>
-                    
-                    <div style="background-color: #10b981; color: white; font-size: 32px; font-weight: bold; 
-                                padding: 20px; border-radius: 8px; letter-spacing: 8px; margin: 20px 0;">
-                        %s
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h1 style="color: #10b981;">OneToDay</h1>
+                        <h2 style="color: #374151;">이메일 인증</h2>
                     </div>
-                    
-                    <p style="font-size: 14px; color: #9ca3af;">
-                        인증코드는 5분간 유효합니다.
-                    </p>
-                </div>
                 
-                <div style="text-align: center; margin-top: 30px;">
-                    <p style="font-size: 12px; color: #9ca3af;">
-                        본 이메일은 발신전용입니다. 문의사항이 있으시면 고객센터로 연락해주세요.
-                    </p>
+                    <div style="background-color: #f9fafb; padding: 30px; border-radius: 8px; text-align: center;">
+                        <p style="font-size: 16px; color: #6b7280; margin-bottom: 20px;">
+                            회원가입을 완료하기 위해 아래 인증코드를 입력해주세요.
+                        </p>
+                
+                        <div style="background-color: #10b981; color: white; font-size: 32px; font-weight: bold; 
+                                    padding: 20px; border-radius: 8px; letter-spacing: 8px; margin: 20px 0;">
+                            %s
+                        </div>
+                
+                        <p style="font-size: 14px; color: #9ca3af;">
+                            인증코드는 5분간 유효합니다.
+                        </p>
+                    </div>
+                
+                    <div style="text-align: center; margin-top: 30px;">
+                        <p style="font-size: 12px; color: #9ca3af;">
+                            본 이메일은 발신전용입니다. 문의사항이 있으시면 고객센터로 연락해주세요.
+                        </p>
+                    </div>
                 </div>
-            </div>
-            """.formatted(code);
+                """.formatted(code);
     }
 
     /**
@@ -294,47 +299,47 @@ public class EmailService {
      */
     private String createPasswordResetEmailContent(String code) {
         return """
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="color: #ef4444;">OneToDay</h1>
-                    <h2 style="color: #374151;">비밀번호 재설정</h2>
-                </div>
-                
-                <div style="background-color: #fef2f2; padding: 30px; border-radius: 8px; text-align: center; border: 1px solid #fecaca;">
-                    <p style="font-size: 16px; color: #6b7280; margin-bottom: 20px;">
-                        비밀번호 재설정을 위해 아래 인증코드를 입력해주세요.
-                    </p>
-                    
-                    <div style="background-color: #ef4444; color: white; font-size: 32px; font-weight: bold; 
-                                padding: 20px; border-radius: 8px; letter-spacing: 8px; margin: 20px 0;">
-                        %s
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h1 style="color: #ef4444;">OneToDay</h1>
+                        <h2 style="color: #374151;">비밀번호 재설정</h2>
                     </div>
-                    
-                    <p style="font-size: 14px; color: #9ca3af;">
-                        인증코드는 5분간 유효하며, 인증 후 10분간 비밀번호를 변경할 수 있습니다.
-                    </p>
-                    
-                    <div style="background-color: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px; border: 1px solid #fbbf24;">
-                        <p style="font-size: 13px; color: #92400e; margin: 0;">
-                            ⚠️ 본인이 요청하지 않은 경우, 즉시 고객센터로 연락해주세요.
+                
+                    <div style="background-color: #fef2f2; padding: 30px; border-radius: 8px; text-align: center; border: 1px solid #fecaca;">
+                        <p style="font-size: 16px; color: #6b7280; margin-bottom: 20px;">
+                            비밀번호 재설정을 위해 아래 인증코드를 입력해주세요.
+                        </p>
+                
+                        <div style="background-color: #ef4444; color: white; font-size: 32px; font-weight: bold; 
+                                    padding: 20px; border-radius: 8px; letter-spacing: 8px; margin: 20px 0;">
+                            %s
+                        </div>
+                
+                        <p style="font-size: 14px; color: #9ca3af;">
+                            인증코드는 5분간 유효하며, 인증 후 10분간 비밀번호를 변경할 수 있습니다.
+                        </p>
+                
+                        <div style="background-color: #fef3c7; padding: 15px; border-radius: 6px; margin-top: 20px; border: 1px solid #fbbf24;">
+                            <p style="font-size: 13px; color: #92400e; margin: 0;">
+                                ⚠️ 본인이 요청하지 않은 경우, 즉시 고객센터로 연락해주세요.
+                            </p>
+                        </div>
+                    </div>
+                
+                    <div style="text-align: center; margin-top: 30px;">
+                        <p style="font-size: 12px; color: #9ca3af;">
+                            본 이메일은 발신전용입니다. 보안을 위해 타인과 인증코드를 공유하지 마세요.
                         </p>
                     </div>
                 </div>
-                
-                <div style="text-align: center; margin-top: 30px;">
-                    <p style="font-size: 12px; color: #9ca3af;">
-                        본 이메일은 발신전용입니다. 보안을 위해 타인과 인증코드를 공유하지 마세요.
-                    </p>
-                </div>
-            </div>
-            """.formatted(code);
+                """.formatted(code);
     }
-    // EmailService.java에 추가할 메소드
+
 
     /**
      * 문의하기 이메일 전송
      */
-    public void sendInquiryEmail(InquiryEmailReq req) {
+    public void sendInquiryEmail(MunheEmailReq req) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -362,7 +367,7 @@ public class EmailService {
     /**
      * 문의 이메일 내용 구성
      */
-    private String buildInquiryEmailContent(InquiryEmailReq req) {
+    private String buildInquiryEmailContent(MunheEmailReq req) {
         StringBuilder html = new StringBuilder();
         html.append("<html><body>");
         html.append("<div style='max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;'>");
@@ -417,4 +422,30 @@ public class EmailService {
                 .replace("\"", "&quot;")
                 .replace("'", "&#39;");
     }
+
+    @Transactional
+    public void sendMunheEmail(MunheEmailReq req, Long userId) {
+        // DB에 저장
+        Munhe munhe = new Munhe();
+        munhe.setUserId(userId);
+        munhe.setSubject(req.getSubject());
+        munhe.setContent(req.getMessage());
+        // userId로 User 테이블에서 이메일 조회
+        if (userId != null) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다"));
+            munhe.setSenderEmail(user.getEmail());
+            munhe.setSenderName(user.getNickName());
+        } else {
+            munhe.setSenderEmail(req.getSenderEmail());
+            munhe.setSenderName(req.getSenderName());
+        }
+        Munhe savedMunhe = munheRepository.save(munhe);
+        log.info("문의 DB 저장 완료. ID: {}, 사용자: {}", savedMunhe.getId(), userId);
+
+        // 이메일 전송
+        sendInquiryEmail(req);
+        log.info("문의 이메일 전송 완료");
+    }
+
 }
