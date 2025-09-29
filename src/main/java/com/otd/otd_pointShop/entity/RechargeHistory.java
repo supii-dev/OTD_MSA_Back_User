@@ -2,32 +2,35 @@ package com.otd.otd_pointShop.entity;
 
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
-import jdk.jfr.Enabled;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Enabled
-@Data
 @Entity
-@Table(name = "point_purchase_history")
-public class PurchaseHistory {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "point_recharge_history")
+public class RechargeHistory {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long purchaseId;
+    private Long rechargeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "point_id", nullable = false)
-    private Point point;
+    @Column(nullable = false)
+    private Integer amount;
 
-    private LocalDateTime purchaseTime;
+    @Column(nullable = false)
+    private LocalDateTime rechargeTime;
 
     @PrePersist
     public void prePersist() {
-        this.purchaseTime = LocalDateTime.now();
+        this.rechargeTime = LocalDateTime.now();
     }
 }

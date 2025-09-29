@@ -1,11 +1,11 @@
 package com.otd.otd_pointShop.application.purchase.model;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Getter
+@Data
 @Builder
 public class PurchasePostRes {
     private Long purchaseId;
