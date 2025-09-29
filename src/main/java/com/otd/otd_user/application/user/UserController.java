@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,9 +31,12 @@ public class UserController {
         return "Hello from OTD-USER Service!";
     }
 
-    @PostMapping("/join")
-    public ResultResponse<?> join(@Valid @RequestPart UserJoinReq req
-            , @RequestPart(required = false) MultipartFile pic) {
+    @PostMapping(
+            value = "/join",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE // ← multipart만 받겠다고 명시
+    )
+    public ResultResponse<?> join( @Valid @RequestPart("req") UserJoinReq req,                  // ← 파트 이름 명시
+                                   @RequestPart(value = "pic", required = false) MultipartFile pic) {
         log.info("pic: {}", pic != null ? pic.getOriginalFilename() : pic);
         userService.join(req, pic);
         return new ResultResponse<>("", 1);

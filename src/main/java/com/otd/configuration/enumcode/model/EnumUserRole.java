@@ -21,16 +21,6 @@ public enum EnumUserRole implements EnumMapperType {
     private final String value; // 예: "USER, user" (콤마로 구분된 허용 토큰)
 
     /**
-     * JSON 직렬화 시 어떤 문자열을 내보낼지 결정.
-     * 여기서는 value의 첫 토큰(예: "USER")만 반환하도록 했습니다.
-     * 필요에 따라 name() 등으로 바꿔도 됩니다.
-     */
-    @JsonValue
-    public String jsonValue() {
-        return firstToken(value);
-    }
-
-    /**
      * JSON 역직렬화: "user", "USER", "USER_1", "01" 등 다양한 입력을 허용.
      */
     @JsonCreator
