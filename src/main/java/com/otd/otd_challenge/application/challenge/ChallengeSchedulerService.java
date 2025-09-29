@@ -35,7 +35,6 @@ public class ChallengeSchedulerService {
   private final ChallengeSettlementRepository challengeSettlementRepository;
   private final TierService tierService;
   private final ChallengeRoleRepository challengeRoleRepository;
-  private final ChallengeService challengeService;
 
   @Transactional
   public void setSettlement(LocalDate startDate, LocalDate endDate, String type){
@@ -78,13 +77,19 @@ public class ChallengeSchedulerService {
               case 3 -> 50;
               default -> 0;
             };
+            String formatName = switch (progress.getRank()){
+              case 1 -> "1위_reward_" + progress.getName();
+              case 2 -> "2위_reward_" + progress.getName();
+              case 3 -> "3위_reward_" + progress.getName();
+              default -> progress.getName();
+            };
 
             if (rankPoint > 0) {
               ChallengePointHistory chRank = ChallengePointHistory.builder()
                       .user(user)
                       .challengeDefinition(cd)
                       .point(rankPoint)
-                      .reason(progress.getName()+"_rank_reward")
+                      .reason(formatName)
                       .build();
               challengePointRepository.save(chRank);
               totalPoint += rankPoint;
@@ -95,13 +100,16 @@ public class ChallengeSchedulerService {
         if(dto.getType().equals("personal")){
           int endDateOfMonth = dto.getEndDate().getDayOfMonth();
           int attendancePoint = 0;
-
+          String formatted = "";
           if(progress.getTotalRecord() == endDateOfMonth){
             attendancePoint = 100;
+            formatted = "개근_reward_";
           }else if(progress.getTotalRecord() >= 25){
             attendancePoint = 70;
+            formatted = "25일 이상_reward_";
           }else if(progress.getTotalRecord() >= 20){
             attendancePoint = 50;
+            formatted = "20일 이상_reward_";
           }
 
           if(attendancePoint > 0){
@@ -109,7 +117,7 @@ public class ChallengeSchedulerService {
                     .user(user)
                     .challengeDefinition(cd)
                     .point(attendancePoint)
-                    .reason(progress.getName()+"_attendance_reward")
+                    .reason(formatted + progress.getName())
                     .build();
             challengePointRepository.save(chRank);
             totalPoint += attendancePoint;

@@ -6,10 +6,7 @@ import com.otd.configuration.util.FormattedTime;
 import com.otd.otd_challenge.application.challenge.Repository.*;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.application.challenge.model.detail.*;
-import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
-import com.otd.otd_challenge.application.challenge.model.home.ChallengeMissionCompleteGetRes;
-import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
-import com.otd.otd_challenge.application.challenge.model.home.UserInfoGetRes;
+import com.otd.otd_challenge.application.challenge.model.home.*;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSuccessDto;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
@@ -319,10 +316,10 @@ public class ChallengeService {
                             default -> 0;
                         };
                         String formatName = switch (progress.getRank()){
-                            case 1 -> "1위";
-                            case 2 -> "2위";
-                            case 3 -> "3위";
-                            default -> "";
+                            case 1 -> "1위_reward_" + progress.getName();
+                            case 2 -> "2위_reward_" + progress.getName();
+                            case 3 -> "3위_reward_" + progress.getName();
+                            default -> progress.getName();
                         };
 
                         if (rankPoint > 0) {
@@ -330,7 +327,7 @@ public class ChallengeService {
                                 .user(user)
                                 .challengeDefinition(cd)
                                 .point(rankPoint)
-                                .reason("reward_" + formatName)
+                                .reason(formatName)
                                 .build();
                             challengePointRepository.save(chRank);
                             totalPoint += rankPoint;
@@ -344,13 +341,13 @@ public class ChallengeService {
                     String formatted = "";
                     if(progress.getTotalRecord() == endDateOfMonth){
                         attendancePoint = 100;
-                        formatted = "개근";
+                        formatted = "개근_reward_";
                     }else if(progress.getTotalRecord() >= 25){
                         attendancePoint = 70;
-                        formatted = "25일 이상";
+                        formatted = "25일 이상_reward_";
                     }else if(progress.getTotalRecord() >= 20){
                         attendancePoint = 50;
-                        formatted = "20일 이상";
+                        formatted = "20일 이상_reward_";
                     }
 
                     if(attendancePoint > 0){
@@ -358,7 +355,7 @@ public class ChallengeService {
                             .user(user)
                             .challengeDefinition(cd)
                             .point(attendancePoint)
-                            .reason("reward_" + formatted + progress.getName())
+                            .reason(formatted + progress.getName())
                             .build();
                         challengePointRepository.save(chRank);
                         totalPoint += attendancePoint;
@@ -385,5 +382,40 @@ public class ChallengeService {
             }
         }
         return new ResultResponse<>("정산완료", 1);
+    }
+
+    public List<MainHomeGetRes> getMainHomeChallenge(Long userId, MainHomGetReq req) {
+        req.setUserId(userId);
+        List<MainHomeGetRes> res = challengeMapper.findAllMyChallenge(req);
+
+        for (MainHomeGetRes pr : res) {
+            if (pr.getType().equals("personal")){
+                // 이번달 총 일수 구하기
+                LocalDate now  = LocalDate.now();
+                int month = now.lengthOfMonth();
+                int targetDays = 15;
+                if (pr.getTotalRecord() >= targetDays) {
+                    pr.setPercent(100.0);
+                } else {
+                    double percentage = ((double) pr.getTotalRecord() / targetDays) * 100;
+                    pr.setPercent(Math.round(percentage * 10) / 10.0);
+                }
+                pr.setFormatedName(pr.getName() + "(" + pr.getGoal() + pr.getUnit() + ")");
+            } else {
+                if (pr.getGoal() > pr.getTotalRecord()) {
+                    double percentage = ((double) pr.getTotalRecord() / pr.getGoal()) * 100;
+                    pr.setPercent(Math.round(percentage * 10) / 10.0);
+                } else {
+                    pr.setPercent(100.0);
+                }
+
+                if (pr.getUnit().equals("분")){
+                    pr.setFormatedName(pr.getName() + "(" + FormattedTime.formatMinutes(pr.getGoal()) + ")");
+                } else {
+                    pr.setFormatedName(pr.getName() + "(" + pr.getGoal() + pr.getUnit() + ")");
+                }
+            }
+        }
+        return res;
     }
 }
