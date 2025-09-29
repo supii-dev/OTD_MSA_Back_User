@@ -34,8 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.prometheus.client.Counter.build;
-
 
 @Slf4j
 @Service
@@ -320,13 +318,19 @@ public class ChallengeService {
                             case 3 -> 50;
                             default -> 0;
                         };
+                        String formatName = switch (progress.getRank()){
+                            case 1 -> "1위";
+                            case 2 -> "2위";
+                            case 3 -> "3위";
+                            default -> "";
+                        };
 
                         if (rankPoint > 0) {
                             ChallengePointHistory chRank = ChallengePointHistory.builder()
                                 .user(user)
                                 .challengeDefinition(cd)
                                 .point(rankPoint)
-                                .reason("rank_reward_" + progress.getName())
+                                .reason("reward_" + formatName)
                                 .build();
                             challengePointRepository.save(chRank);
                             totalPoint += rankPoint;
@@ -337,13 +341,16 @@ public class ChallengeService {
                 if(dto.getType().equals("personal")){
                     int endDateOfMonth = dto.getEndDate().getDayOfMonth();
                     int attendancePoint = 0;
-
+                    String formatted = "";
                     if(progress.getTotalRecord() == endDateOfMonth){
                         attendancePoint = 100;
+                        formatted = "개근";
                     }else if(progress.getTotalRecord() >= 25){
                         attendancePoint = 70;
+                        formatted = "25일 이상";
                     }else if(progress.getTotalRecord() >= 20){
                         attendancePoint = 50;
+                        formatted = "20일 이상";
                     }
 
                     if(attendancePoint > 0){
@@ -351,7 +358,7 @@ public class ChallengeService {
                             .user(user)
                             .challengeDefinition(cd)
                             .point(attendancePoint)
-                            .reason("attendance_reward_" + progress.getName())
+                            .reason("reward_" + formatted + progress.getName())
                             .build();
                         challengePointRepository.save(chRank);
                         totalPoint += attendancePoint;

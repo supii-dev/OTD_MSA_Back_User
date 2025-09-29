@@ -1,8 +1,5 @@
 package com.otd.otd_challenge.application.challenge;
 
-import com.otd.configuration.model.ResultResponse;
-import com.otd.otd_challenge.application.challenge.model.ChallengeDefinitionGetRes;
-import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgressGetRes;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.otd_challenge.application.challenge.Repository.ChallengeDefinitionRepository;
 import com.otd.otd_challenge.application.challenge.Repository.ChallengePointRepository;
@@ -16,7 +13,6 @@ import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeSettlementLog;
 import com.otd.otd_user.application.user.UserRepository;
-import com.otd.otd_user.application.user.UserService;
 import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
