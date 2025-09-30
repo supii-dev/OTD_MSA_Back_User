@@ -6,6 +6,7 @@ import com.otd.otd_pointShop.application.point.model.*;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
@@ -45,7 +46,19 @@ public class PointshopController {
         }
     }
 
-    @GetMapping("/list")
+    @GetMapping("/point/page")
+    public ResponseEntity<?> getPointPageWithItemPage(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @PageableDefault(page = 0, size = 10) Pageable pageable
+    ) {
+        if(userPrincipal == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+        Page<PointGetRes> resultPage = pointshopService.pointGetResList(userPrincipal.getSignedUserId(), pageable);
+        return ResponseEntity.ok(resultPage);
+    }
+
+    @GetMapping("/point/list")
     public ResponseEntity<?> getPointList (
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PageableDefault(page = 0, size = 10) Pageable pageable
@@ -57,7 +70,7 @@ public class PointshopController {
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/keyword")
+    @GetMapping("/point/keyword")
     public ResultResponse<?> getPointKeywordByUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "") String keyword,
@@ -93,7 +106,7 @@ public class PointshopController {
         }
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/point/delete")
     public ResponseEntity<?> deletePointItem(
             @RequestParam("pointId") Long pointId,
             HttpSession session

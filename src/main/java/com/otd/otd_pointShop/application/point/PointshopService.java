@@ -11,6 +11,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PointshopService {
 
-    @Value("${upload.point-pic}")
+    @Value("${upload.pointshop-pic}")
     private String uploadDir;
 
     private final UserRepository userRepository;
@@ -86,21 +88,31 @@ public class PointshopService {
                 .toList();
     }
 
-    public List<PointGetRes> pointGetResList(Long userId, Pageable pageable) {
-        Page<Point> page = pointRepository.findByUser_UserId(userId, pageable);
-        return page.getContent().stream().map(point -> {
-            List<String> imageUrls = pointImageRepository.findByPoint_PointId(point.getPointId())
-                    .stream().map(PointImage::getImageUrl).toList();
+    public Page<PointGetRes> pointGetResList(Long userId, Pageable pageable) {
+        // 포인트 목록 페이징 조회
+        Page<Point> pointPage = pointRepository.findByUser_UserId(userId, pageable);
 
-            return PointGetRes.builder()
-                    .pointId(point.getPointId())
-                    .pointItemName(point.getPointItemName())
-                    .pointItemContent(point.getPointItemContent())
-                    .pointScore(point.getPointScore())
-                    .createdAt(point.getCreatedAt())
-                    .images(imageUrls)
-                    .build();
+        // 각 포인트 이미지 페이징 (최대 10장)
+        List<PointGetRes> pointGetResList = pointPage.getContent().stream().map(point -> {
+               PageRequest imagePageRequest = PageRequest.of(0,10);
+               Page<PointImage> imagePage = pointImageRepository.findByPoint_PointId(point.getPointId(), imagePageRequest);
+
+                    List<String> imageUrls = imagePage.getContent().stream()
+                            .map(PointImage::getImageUrl)
+                            .toList();
+
+                return PointGetRes.builder()
+                        .pointId(point.getPointId())
+                        .pointItemName(point.getPointItemName())
+                        .pointItemContent(point.getPointItemContent())
+                        .pointScore(point.getPointScore())
+                        .createdAt(point.getCreatedAt())
+                        .images(imageUrls)
+                        .build();
         }).toList();
+
+        // 최종 page 포장 후 반환
+        return new PageImpl<>(pointGetResList, pageable, pointPage.getTotalElements());
     }
 
     public Set<String> getPointKeywordByUser(Long userId, String keyword, Pageable pageable) {
