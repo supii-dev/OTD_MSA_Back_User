@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PointshopService {
 
-    @Value("${upload.pointshop-pic}")
+    @Value("${constants.file.pointshop-pic}")
     private String uploadDir;
 
     private final UserRepository userRepository;
