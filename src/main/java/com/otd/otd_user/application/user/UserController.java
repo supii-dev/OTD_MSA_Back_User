@@ -11,13 +11,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.context.annotation.ComponentScan;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.Map;
@@ -30,7 +31,7 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
     private final JwtTokenManager jwtTokenManager;
-
+    private final PointService pointService;
 
     @PostMapping(
             value = "/join",
@@ -115,5 +116,10 @@ public class UserController {
     public ResultResponse<?> deleteProfilePic(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         userService.deleteProfilePic(userPrincipal.getSignedUserId());
         return new ResultResponse<>("프로파일 사진 삭제 완료", null);
+    }
+    @GetMapping("/pointhistory/{userId}")
+    public ResultResponse<?> getPointHistory(@PathVariable Long userId) {
+        PointHistoryResponseDTO response = pointService.getPointHistory(userId);
+        return new ResultResponse<>("포인트 내역 조회 성공", response);
     }
 }
