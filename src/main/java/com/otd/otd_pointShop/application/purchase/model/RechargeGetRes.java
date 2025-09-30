@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 @Builder
 public class RechargeGetRes {
     private Long rechargeId;
-    private Long userId;
-    private String userName;
     private Integer amount;
     private LocalDateTime rechargeTime;
 }

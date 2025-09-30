@@ -33,7 +33,9 @@ public class UserPrincipal implements UserDetails, OAuth2User {
     }
 
     public boolean hasRole(String roleName) {
-        return authorities.contains(new SimpleGrantedAuthority("ROLE_" + roleName));
+        return authorities.stream()
+                .anyMatch(anyMatch ->
+                        anyMatch.getAuthority().equals("ROLE_" + roleName));
     }
 
     public Long getSignedUserId() {

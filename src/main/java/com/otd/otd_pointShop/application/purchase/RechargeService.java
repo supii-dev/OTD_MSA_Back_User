@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.lettuce.core.ZAggregateArgs.Builder.sum;
+
 @Service
 @RequiredArgsConstructor
 public class RechargeService {
@@ -23,22 +25,24 @@ public class RechargeService {
     private final RechargeHistoryRepository rechargeHistoryRepository;
     private final UserRepository userRepository;
 
+    // (관리자) 포인트 충전
     @Transactional
     public RechargePostRes rechargePoint(Long userId, RechargePostReq req) {
-        if (req.getAmount() == null || req.getAmount() <= 0) {
+        Integer amount = req.getAmount();
+        if ( amount== null || amount <= 0) {
             throw new IllegalArgumentException("충전 포인트는 1 이상이어야 합니다.");
         }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다"));
 
-        // 포인트 충전
-        pointBalanceService.pointIncrement(userId, req.getAmount());
+        // redis 포인트 충전
+        pointBalanceService.pointIncrement(userId, amount);
 
         // 충전 이력 저장
         RechargeHistory rechargeHistory = RechargeHistory.builder()
                 .user(user)
-                .amount(req.getAmount())
+                .amount(amount)
                 .build();
 
         rechargeHistoryRepository.save(rechargeHistory);
@@ -50,25 +54,40 @@ public class RechargeService {
                 .build();
     }
 
+    // (관리자) 전체 충전 이력 조회
     public List<RechargeGetRes> getRechargeHistories() {
         return rechargeHistoryRepository.findAll().stream()
-                .map(h -> RechargeGetRes.builder()
-                        .rechargeId(h.getRechargeId())
-                        .amount(h.getAmount())
-                        .rechargeTime(h.getRechargeTime())
+                .map(history -> RechargeGetRes.builder()
+                        .rechargeId(history.getRechargeId())
+                        .amount(history.getAmount())
+                        .rechargeTime(history.getRechargeTime())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 
+    // (관리자) 총 포인트 통계
+    public Integer getTotalRechargeAmount() {
+        return rechargeHistoryRepository.findAll().stream()
+                .mapToInt(RechargeHistory::getAmount)
+                .sum();
+    }
+
+    // (관리자) 특정 유저 충전 이력 조회
     public List<RechargePostRes> getRechargeHistoryByUserId(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자 없음"));
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다"));
+
         return rechargeHistoryRepository.findByUser_UserId(userId).stream().map(history ->
                 RechargePostRes.builder()
                         .rechargeId(history.getRechargeId())
                         .amount(history.getAmount())
                         .rechargeTime(history.getRechargeTime())
-                        .build()
-        ).toList();
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // 포인트 잔액 조회
+    public Integer getBalance(Long userId) {
+        return pointBalanceService.getPointBalance(userId);
     }
 }

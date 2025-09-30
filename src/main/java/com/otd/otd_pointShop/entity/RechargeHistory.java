@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Table(name = "point_recharge_history")
 public class RechargeHistory {
 
@@ -28,9 +28,4 @@ public class RechargeHistory {
 
     @Column(nullable = false)
     private LocalDateTime rechargeTime;
-
-    @PrePersist
-    public void prePersist() {
-        this.rechargeTime = LocalDateTime.now();
-    }
 }
