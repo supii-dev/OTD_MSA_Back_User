@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
-public interface PointMapper {
+public interface PointshopMapper {
     // 유저별 포인트 목록 조회
     List<Point> findAllByUserId(
         @Param("userId") Long userId,

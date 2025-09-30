@@ -6,7 +6,6 @@ import com.otd.otd_pointShop.entity.PointImage;
 import com.otd.otd_pointShop.repository.PointRepository;
 import com.otd.otd_pointShop.repository.PointImageRepository;
 import com.otd.otd_user.application.user.UserRepository;
-import com.otd.otd_user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class PointService {
+public class PointshopService {
 
     @Value("${upload.point-pic}")
     private String uploadDir;
