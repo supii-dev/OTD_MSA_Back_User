@@ -163,9 +163,16 @@ public class UserService {
     public String patchProfilePic(long signedUserId, MultipartFile pic) {
         User user = userRepository.findById(signedUserId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."));
-        imgUploadManager.removeProfileDirectory(signedUserId);
-        String savedFileName = imgUploadManager.saveProfilePic(signedUserId, pic);
+
+        // myFileManager 사용 (회원가입과 동일)
+        myFileManager.removeProfileDirectory(signedUserId);
+        String savedFileName = myFileManager.saveProfilePic(signedUserId, pic);
+
         user.setPic(savedFileName);
+        userRepository.save(user); // 명시적 저장
+
+        log.info("프로필 사진 업데이트 완료 - userId: {}, pic: {}", signedUserId, savedFileName);
+
         return savedFileName;
     }
 
