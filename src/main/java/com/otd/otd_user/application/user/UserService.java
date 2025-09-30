@@ -71,6 +71,10 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public void updateRefreshToken(Long userId, String refreshToken) {
+        userRepository.updateRefreshToken(userId, refreshToken);
+    }
 
     public UserLoginDto login(UserLoginReq req) {
         User user = userRepository.findByUidAndProviderType(req.getUid(), SignInProviderType.LOCAL);
@@ -88,10 +92,11 @@ public class UserService {
 
         UserLoginRes userLoginRes = UserLoginRes.builder()
                 .userId(user.getUserId())
-                .nickName(user.getNickName() == null ? user.getName() : user.getNickName())
+                .nickName(user.getNickName())
                 .pic(user.getPic())
                 .point(user.getPoint())
                 .xp(user.getXp())
+                .email(user.getEmail())
                 .challengeRole(challengeRoles)
                 .build();
 
@@ -149,19 +154,8 @@ public class UserService {
         return userMapper.countByNickname(nickname) == 0;
     }
 
-    public boolean isDuplicateUser(String ci, String di) {
-        int count = 0;
-        if (ci != null && !ci.isEmpty()) {
-            count += userMapper.countByCi(ci);
-        }
-        if (di != null && !di.isEmpty()) {
-            count += userMapper.countByDi(di);
-        }
-        return count > 0;
-    }
 
     public UserProfileGetRes getProfileUser(long signedUserId) {
-        // MyBatis 사용 (복잡한 조회)
         return userMapper.findProfileByUserId(signedUserId);
     }
 

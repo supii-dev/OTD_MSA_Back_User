@@ -1,5 +1,7 @@
 package com.otd.otd_challenge.application.challenge.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +21,11 @@ public class ChallengeDefinitionGetRes {
     private String unit;
     private int xp;
 
+    @JsonIgnore
+    private String tierCode;
+
+    private EnumChallengeRole tier;
+    private boolean available;
 //    @Value("${constants.file.challenge-pic}")
 //    private String imgPath;
 //

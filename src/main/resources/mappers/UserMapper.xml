@@ -8,8 +8,12 @@
         created_at as createdAt,
         uid,
         nick_name as nickName,
-        `point`,
-        `name`
+        email,
+        phone,
+        birth_date as birthDate,
+        gender,
+        point,
+        name
         FROM user
         WHERE user_id = #{signedUserId}
     </select>
