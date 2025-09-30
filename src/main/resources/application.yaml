@@ -1,6 +1,6 @@
 constants:
   file:
-    upload-directory: /home/green/download/challenge/
+    upload-directory: /home/green/download
     challenge: /files/
 #   upload-directory: D:/kjh/project_2/upload/challenge
     challenge-pic: /files/
@@ -159,6 +159,8 @@ spring:
   servlet:
     multipart:
       max-file-size: 15MB
+      enabled: true
+      max-request-size: 15MB
   sql:
     init:
       mode: always

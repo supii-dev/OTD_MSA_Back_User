@@ -10,8 +10,6 @@ public interface UserMapper {
     UserProfileGetRes findProfileByUserId(long signedUserId);
     int countByUid(String uid);
     int countByNickname(String nickname);
-    int countByCi(String ci);
-    int countByDi(String di);
     UserLoginRes findRoleByUserId(long signedUserId);
 
 }

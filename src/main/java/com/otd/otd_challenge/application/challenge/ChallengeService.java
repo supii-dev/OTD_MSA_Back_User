@@ -1,16 +1,18 @@
 package com.otd.otd_challenge.application.challenge;
 
-import com.otd.configuration.constants.ConstFile;
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.util.FormattedTime;
+import com.otd.otd_challenge.application.challenge.Repository.*;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.application.challenge.model.detail.*;
-import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
-import com.otd.otd_challenge.application.challenge.model.home.ChallengeMissionCompleteGetRes;
-import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
-import com.otd.otd_challenge.application.challenge.model.home.UserInfoGetRes;
+import com.otd.otd_challenge.application.challenge.model.home.*;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
+import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSuccessDto;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
+import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeProgress;
+import com.otd.otd_challenge.entity.ChallengeSettlementLog;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
@@ -38,6 +40,7 @@ public class ChallengeService {
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
     private final ChallengeProgressRepository challengeProgressRepository;
     private final UserRepository userRepository;
+    private final ChallengeSettlementRepository challengeSettlementRepository;
     @Value("${constants.file.challenge}")
     private String imgPath;
     private void addImgPath(List<?> list) {
@@ -93,12 +96,16 @@ public class ChallengeService {
         List<ChallengeProgressGetRes> personal = new ArrayList<>();
         List<ChallengeProgressGetRes> competition = new ArrayList<>();
         int successCount = (success != null) ? success : 0;
+
+        EnumChallengeRole cr = userInfo.getChallengeRole();
+
         UserInfoGetRes uInfo = UserInfoGetRes.builder()
                 .userId(userId)
                 .name(userInfo.getName())
                 .nickName(userInfo.getNickName())
                 .pic(userInfo.getPic())
                 .xp(userInfo.getXp())
+                .challengeRole(cr)
                 .point(userInfo.getPoint()).build();
 
         addImgPath(weekly);
@@ -121,10 +128,22 @@ public class ChallengeService {
                 .build();
     }
 
+    // CD쪽 DB tier와 챌린지 등급 매핑
+    private void mapChallengeTier(List<ChallengeDefinitionGetRes> challenges, EnumChallengeRole userRole) {
+        challenges.forEach(cd -> {
+            EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(cd.getTierCode()); // 문자열 그대로 변환
+            cd.setTier(challengeRole);
+            cd.setAvailable(userRole.isHigherOrEqual(challengeRole));
+        });
+    }
     public List<ChallengeDefinitionGetRes> getChallengeList(Long userId, ChallengeProgressGetReq req) {
         req.setUserId(userId);
         List<ChallengeDefinitionGetRes> res = challengeMapper.findByType(req);
         addImgPath(res);
+        User user = userRepository.findByUserId(userId);
+        EnumChallengeRole userRole = user.getChallengeRole();
+        mapChallengeTier(res, userRole);
+
         return res;
     }
 
@@ -132,7 +151,9 @@ public class ChallengeService {
         req.setUserId(userId);
         List<ChallengeDefinitionGetRes> res = challengeMapper.findByTypeForCompetition(req);
         addImgPath(res);
-
+        User user = userRepository.findByUserId(userId);
+        EnumChallengeRole userRole = user.getChallengeRole();
+        mapChallengeTier(res, userRole);
         return res.stream()
                     .collect(Collectors.groupingBy(ChallengeDefinitionGetRes::getName));
     }
@@ -248,5 +269,153 @@ public class ChallengeService {
         challengeProgressRepository.save(challengeProgress);
 
         return new ResultResponse<>("저장 되었습니다.",challengeProgress);
+    }
+
+    // 정산 테스트
+    private final ChallengeSettlementMapper challengeSettlementMapper;
+    private final ChallengePointRepository challengePointRepository;
+    private final TierService tierService;
+    private final ChallengeRoleRepository challengeRoleRepository;
+    @Transactional
+    public ResultResponse<?> setSettlement(ChallengeSettlementDto dto){
+        List<Long> userIds = challengeSettlementMapper.findByUserId(dto);
+
+        for (Long userId : userIds) {
+            User user = userRepository.findById(userId).orElseThrow();
+
+            ChallengeSettlementDto userDto = ChallengeSettlementDto.builder()
+                .userId(userId)
+                .startDate(dto.getStartDate())
+                .endDate(dto.getEndDate())
+                .type(dto.getType())
+                .build();
+
+            List<ChallengeSuccessDto> challengeProgress = challengeSettlementMapper.findProgressChallengeByUserId(userDto);
+
+            for (ChallengeSuccessDto progress : challengeProgress) {
+                ChallengeDefinition cd = challengeDefinitionRepository.findById(progress.getCdId()).orElseThrow();
+
+                int totalPoint = 0;
+
+                totalPoint += progress.getReward();
+
+                ChallengePointHistory ch = ChallengePointHistory.builder()
+                    .user(user).challengeDefinition(cd)
+                    .point(progress.getReward())
+                    .reason(progress.getType()+"_"+progress.getName())
+                    .build();
+
+                challengePointRepository.save(ch);
+
+                if(dto.getType().equals("weekly") || dto.getType().equals("competition")){
+                    if(progress.getRank() <= 3) {
+                        int rankPoint = switch (progress.getRank()) {
+                            case 1 -> 100;
+                            case 2 -> 70;
+                            case 3 -> 50;
+                            default -> 0;
+                        };
+                        String formatName = switch (progress.getRank()){
+                            case 1 -> "1위_reward_" + progress.getName();
+                            case 2 -> "2위_reward_" + progress.getName();
+                            case 3 -> "3위_reward_" + progress.getName();
+                            default -> progress.getName();
+                        };
+
+                        if (rankPoint > 0) {
+                            ChallengePointHistory chRank = ChallengePointHistory.builder()
+                                .user(user)
+                                .challengeDefinition(cd)
+                                .point(rankPoint)
+                                .reason(formatName)
+                                .build();
+                            challengePointRepository.save(chRank);
+                            totalPoint += rankPoint;
+                        }
+                    }
+                }
+
+                if(dto.getType().equals("personal")){
+                    int endDateOfMonth = dto.getEndDate().getDayOfMonth();
+                    int attendancePoint = 0;
+                    String formatted = "";
+                    if(progress.getTotalRecord() == endDateOfMonth){
+                        attendancePoint = 100;
+                        formatted = "개근_reward_";
+                    }else if(progress.getTotalRecord() >= 25){
+                        attendancePoint = 70;
+                        formatted = "25일 이상_reward_";
+                    }else if(progress.getTotalRecord() >= 20){
+                        attendancePoint = 50;
+                        formatted = "20일 이상_reward_";
+                    }
+
+                    if(attendancePoint > 0){
+                        ChallengePointHistory chRank = ChallengePointHistory.builder()
+                            .user(user)
+                            .challengeDefinition(cd)
+                            .point(attendancePoint)
+                            .reason(formatted + progress.getName())
+                            .build();
+                        challengePointRepository.save(chRank);
+                        totalPoint += attendancePoint;
+                    }
+                }
+                ChallengeSettlementLog log = ChallengeSettlementLog.builder().
+                    user(user).challengeDefinition(cd).type(progress.getType()+"_"+progress.getName()).totalXp(progress.getXp()).totalPoint(totalPoint).build();
+
+                challengeSettlementRepository.save(log);
+
+                int sumPoint = user.getPoint() + totalPoint;
+                int sumXp = user.getXp() + progress.getXp();
+
+
+                user.setPoint(sumPoint);
+                user.setXp(sumXp);
+
+                EnumChallengeRole myRole = user.getChallengeRole();
+
+                EnumChallengeRole newRole = tierService.checkTierUp(myRole, sumXp);
+                if (newRole != myRole) {
+                    challengeRoleRepository.updateChallengeRole(user.getUserId(), newRole);
+                }
+            }
+        }
+        return new ResultResponse<>("정산완료", 1);
+    }
+
+    public List<MainHomeGetRes> getMainHomeChallenge(Long userId, MainHomGetReq req) {
+        req.setUserId(userId);
+        List<MainHomeGetRes> res = challengeMapper.findAllMyChallenge(req);
+
+        for (MainHomeGetRes pr : res) {
+            if (pr.getType().equals("personal")){
+                // 이번달 총 일수 구하기
+                LocalDate now  = LocalDate.now();
+                int month = now.lengthOfMonth();
+                int targetDays = 15;
+                if (pr.getTotalRecord() >= targetDays) {
+                    pr.setPercent(100.0);
+                } else {
+                    double percentage = ((double) pr.getTotalRecord() / targetDays) * 100;
+                    pr.setPercent(Math.round(percentage * 10) / 10.0);
+                }
+                pr.setFormatedName(pr.getName() + "(" + pr.getGoal() + pr.getUnit() + ")");
+            } else {
+                if (pr.getGoal() > pr.getTotalRecord()) {
+                    double percentage = ((double) pr.getTotalRecord() / pr.getGoal()) * 100;
+                    pr.setPercent(Math.round(percentage * 10) / 10.0);
+                } else {
+                    pr.setPercent(100.0);
+                }
+
+                if (pr.getUnit().equals("분")){
+                    pr.setFormatedName(pr.getName() + "(" + FormattedTime.formatMinutes(pr.getGoal()) + ")");
+                } else {
+                    pr.setFormatedName(pr.getName() + "(" + pr.getGoal() + pr.getUnit() + ")");
+                }
+            }
+        }
+        return res;
     }
 }

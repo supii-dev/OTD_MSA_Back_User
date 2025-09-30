@@ -28,7 +28,6 @@ public class FormattedTime {
             return mins + "분";
         }
     }
-
     public static int fetchYear() {
         LocalDate localDate = LocalDate.now();
         return localDate.getYear();
