@@ -20,7 +20,6 @@ public enum EnumUserRole implements EnumMapperType {
     private final String code;
     private final String value; // 예: "USER, user" (콤마로 구분된 허용 토큰)
 
-
     /**
      * JSON 역직렬화: "user", "USER", "USER_1", "01" 등 다양한 입력을 허용.
      */
