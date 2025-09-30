@@ -2,6 +2,7 @@ package com.otd.otd_admin.application.admin;
 
 import com.otd.otd_admin.application.admin.Repository.AdminPointRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminUserRepository;
+import com.otd.otd_admin.application.admin.model.AgeCountRes;
 import com.otd.otd_admin.application.admin.model.GenderCountRes;
 import com.otd.otd_challenge.application.challenge.ChallengeMapper;
 import com.otd.otd_challenge.application.challenge.Repository.ChallengeDefinitionRepository;
@@ -30,15 +31,19 @@ public class AdminService {
         return adminUserRepository.findAll();
     }
 
-    public final List<ChallengeDefinition> getChallenges() {
+    public List<ChallengeDefinition> getChallenges() {
         return challengeDefinitionRepository.findAll();
     }
 
-    public final List<ChallengePointHistory> getPointHistory() {
+    public List<ChallengePointHistory> getPointHistory() {
         return adminPointRepository.findAll();
     }
 
-    public  final List<GenderCountRes> getGenderCount() {
+    public List<GenderCountRes> getGenderCount() {
         return adminUserRepository.countUserByGender();
+    }
+
+    public List<AgeCountRes> getAgeCount() {
+        return adminMapper.groupByAge();
     }
 }

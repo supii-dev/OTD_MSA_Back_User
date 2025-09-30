@@ -10,6 +10,4 @@ import lombok.*;
 public class GenderCountRes {
     private String gender;
     private Long count;
-
-
 }

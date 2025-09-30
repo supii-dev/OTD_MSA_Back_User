@@ -1,6 +1,7 @@
 package com.otd.otd_admin.application.admin;
 
 import com.otd.otd_admin.application.admin.model.AdminUserGetRes;
+import com.otd.otd_admin.application.admin.model.AgeCountRes;
 import com.otd.otd_admin.application.admin.model.GenderCountRes;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
@@ -46,9 +47,15 @@ public class AdminController {
 
 
 
+
     // 대시보드쪽
     @GetMapping("/gender")
     public List<GenderCountRes> getGenderCount() {
         return adminService.getGenderCount();
+    }
+
+    @GetMapping("/agegroup")
+    public List<AgeCountRes> getAgeGroup() {
+        return adminService.getAgeCount();
     }
 }
