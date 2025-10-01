@@ -1,5 +1,6 @@
 package com.otd.otd_challenge.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,6 +22,7 @@ public class ChallengeProgress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cpId;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

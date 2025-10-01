@@ -1,6 +1,7 @@
 package com.otd.otd_challenge.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otd.otd_user.entity.CreatedAt;
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
@@ -20,6 +21,7 @@ public class ChallengePointHistory extends CreatedAt {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long chId;
 
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "user_id", nullable = false)
   private User user;

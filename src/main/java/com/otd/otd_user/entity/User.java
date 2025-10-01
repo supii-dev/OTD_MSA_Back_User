@@ -35,7 +35,6 @@ public class User extends UpdatedAt{
     private String nickName;
 
     @Column(length = 100)
-    @JsonIgnore
     private String pic;
 
     @Column(length = 30)
