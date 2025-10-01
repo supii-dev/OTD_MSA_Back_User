@@ -1,8 +1,8 @@
 constants:
   file:
-    upload-directory: /home/green/download/challenge/
-    challenge: /home/green/download/challenge/
-    profile-pic: /profile
+    upload-directory: /home/green/download
+    challenge: /files/
+    profile-pic: /profile/
   feign-client:
     weather-api:
       url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
@@ -156,6 +156,8 @@ spring:
   servlet:
     multipart:
       max-file-size: 15MB
+      enabled: true
+      max-request-size: 15MB
   sql:
     init:
       mode: always

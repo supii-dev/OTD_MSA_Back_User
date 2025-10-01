@@ -1,5 +1,6 @@
 package com.otd.otd_challenge.entity;
 
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,4 +36,8 @@ public class ChallengeDefinition {
 
     @Column(nullable = false, length = 4)
     private int xp;
+
+    @Convert(converter = EnumChallengeRole.CodeConverter.class)
+    @Column(nullable = false, length = 10)
+    private EnumChallengeRole tier;
 }

@@ -9,10 +9,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum SignInProviderType implements EnumMapperType {
-      LOCAL("01", "로컬")
-    , KAKAO("02", "카카오")
-    , NAVER("03", "네이버")
-    , GOOGLE("04", "구글");
+      LOCAL("01", "LOCAL")
+    , KAKAO("02", "KAKAO")
+    , NAVER("03", "NAVER")
+    , GOOGLE("04", "GOOGLE");
 
     private final String code;
     private final String value;
