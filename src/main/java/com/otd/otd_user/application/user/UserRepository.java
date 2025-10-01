@@ -21,4 +21,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query("UPDATE User u Set u.refreshToken = :refreshToken WHERE u.userId = :userId")
     void updateRefreshToken(Long userId, String refreshToken);
+
+    // 포인트 조회용 쿼리
+    @Query("SELECT u.point FROM User u WHERE u.userId = :userId")
+    Optional<Integer> findPointByUserId(Long userId);
 }
