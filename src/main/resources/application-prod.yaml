@@ -4,12 +4,8 @@ constants:
   jwt:
     refresh-token-cookie-path: /otd-api/api/user/reissue
 
-eureka:
-  client:
-    enabled: false
-
 server:
-  port: 8082
+  port: 8080
 
 management:
   endpoint:
