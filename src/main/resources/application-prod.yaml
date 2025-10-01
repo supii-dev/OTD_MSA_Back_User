@@ -9,7 +9,7 @@ eureka:
     enabled: false
 
 server:
-  port: 8082
+  port: 8080
 
 management:
   endpoint:
