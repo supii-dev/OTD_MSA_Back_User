@@ -164,12 +164,11 @@ public class UserService {
         User user = userRepository.findById(signedUserId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."));
 
-        // myFileManager 사용 (회원가입과 동일)
         myFileManager.removeProfileDirectory(signedUserId);
         String savedFileName = myFileManager.saveProfilePic(signedUserId, pic);
 
         user.setPic(savedFileName);
-        userRepository.save(user); // 명시적 저장
+        userRepository.save(user);
 
         log.info("프로필 사진 업데이트 완료 - userId: {}, pic: {}", signedUserId, savedFileName);
 
@@ -184,4 +183,64 @@ public class UserService {
         user.setPic(null);
     }
 
+    @Transactional
+    public void updateNickname(Long userId, String nickname) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."));
+
+        if (nickname == null || nickname.trim().isEmpty()) {
+            throw new IllegalArgumentException("닉네임을 입력해주세요.");
+        }
+        if (nickname.length() < 2 || nickname.length() > 10) {
+            throw new IllegalArgumentException("닉네임은 2~10자여야 합니다.");
+        }
+        if (user.getNickName().equals(nickname)) {
+            throw new IllegalArgumentException("현재 닉네임과 동일합니다.");
+        }
+
+
+        if (!isNicknameAvailable(nickname)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용중인 닉네임입니다.");
+        }
+
+        user.setNickName(nickname);
+        log.info("닉네임 변경 완료 - userId: {}, 새 닉네임: {}", userId, nickname);
+    }
+    @Transactional
+    public void updateEmail(Long userId, String email) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."));
+
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("이메일을 입력해주세요.");
+        }
+
+        // 이메일 형식 검증
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        if (!email.matches(emailRegex)) {
+            throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다.");
+        }
+
+        // 현재 이메일과 동일한지 확인
+        if (user.getEmail().equals(email)) {
+            throw new IllegalArgumentException("현재 이메일과 동일합니다.");
+        }
+
+        // 이메일 중복 확인
+        if (userRepository.existsByEmail(email)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용중인 이메일입니다.");
+        }
+
+        // 이메일 인증 확인
+        if (!emailService.canResetPassword(email)) {
+            throw new IllegalArgumentException("이메일 인증을 완료해주세요.");
+        }
+
+        user.setEmail(email);
+        userRepository.save(user);
+
+        emailService.removePasswordResetPermission(email);
+
+        log.info("이메일 변경 완료 - userId: {}, 새 이메일: {}", userId, email);
+    }
 }
