@@ -4,10 +4,6 @@ constants:
   jwt:
     refresh-token-cookie-path: /otd-api/api/user/reissue
 
-eureka:
-  client:
-    enabled: false
-
 server:
   port: 8080
 
@@ -20,6 +16,8 @@ management:
       exposure:
         include: "*"
 
+
+spring:
   cloud:
     kubernetes:
       discovery:
