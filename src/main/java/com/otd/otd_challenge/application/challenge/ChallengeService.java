@@ -25,10 +25,7 @@ import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -417,5 +414,25 @@ public class ChallengeService {
             }
         }
         return res;
+    }
+    @Transactional
+    public void updateProgress(ChallengeProgressUpdateReq req) {
+        List<ChallengeProgress> progresses =
+                challengeProgressRepository.findActiveProgress(
+                        req.getUserId(),
+                        req.getName(),
+                        req.getRecordDate()
+                );
+
+        for (ChallengeProgress cp : progresses) {
+
+            double newTotal = cp.getTotalRecord() + req.getRecord();
+            cp.setTotalRecord(newTotal);
+
+            double goal = cp.getChallengeDefinition().getCdGoal();
+            if (newTotal >= goal) {
+                cp.setSuccess(true);
+            }
+        }
     }
 }

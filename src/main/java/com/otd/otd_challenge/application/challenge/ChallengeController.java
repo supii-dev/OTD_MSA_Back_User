@@ -107,4 +107,9 @@ public class ChallengeController {
                                                @ModelAttribute MainHomGetReq req) {
         return challengeService.getMainHomeChallenge(userPrincipal.getSignedUserId(), req);
     }
+
+    @PostMapping("/progress/update")
+    public void patchProgress(@RequestBody ChallengeProgressUpdateReq req) {
+        challengeService.updateProgress(req);
+    }
 }

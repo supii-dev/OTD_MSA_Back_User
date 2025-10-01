@@ -27,9 +27,7 @@
         INNER JOIN challenge_definition cd
         ON cd.cd_id = cp.cd_id
         WHERE cp.user_id = #{userId}
-        AND Year(cp.start_date) = #{year}
-        AND Month(cp.start_date) = #{month}
-        AND DAY(cp.start_date) > #{day}
+        AND cp.start_date > #{date}
         AND cd.cd_type = "weekly"
     </select>
     <select id="findByType">
@@ -37,10 +35,12 @@
         cd.cd_name AS name, cd.cd_type AS type, cd.cd_reward AS reward, cd.cd_unit AS unit, tier AS tierCode
         FROM challenge_definition cd
         WHERE cd.cd_id NOT IN(SELECT cp.cd_id FROM challenge_progress cp WHERE cp.user_id = #{userId}
-                                                                        AND YEAR(cp.start_date) = #{year}
-                                                                        AND MONTH(cp.start_date) = #{month}
+                                                                        <if test="type == 'competition' || type == 'personal'">
+                                                                            AND YEAR(cp.start_date) = #{year}
+                                                                            AND MONTH(cp.start_date) = #{month}
+                                                                        </if>
                                                                         <if test="type == 'weekly'">
-                                                                            AND Day(cp.start_date) > #{day}
+                                                                            AND cp.start_date > #{date}
                                                                         </if>)
         AND cd.cd_type = #{type}
     </select>
@@ -53,10 +53,12 @@
                             INNER JOIN challenge_progress cp
                             ON cd.cd_id = cp.cd_id AND cd.cd_type = #{type}
                             WHERE cp.user_id = #{userId}
-                            AND YEAR(cp.start_date) = #{year}
-                            AND MONTH(cp.start_date) = #{month}
+                            <if test="type == 'competition' || type == 'personal'">
+                                AND YEAR(cp.start_date) = #{year}
+                                AND MONTH(cp.start_date) = #{month}
+                            </if>
                             <if test="type == 'weekly'">
-                                AND Day(cp.start_date) > #{day}
+                                AND cp.start_date > #{date}
                             </if>)
         AND cd_type = #{type};
     </select>
@@ -67,10 +69,12 @@
         RANK() OVER (ORDER BY cp.total_record DESC) AS my_rank
         FROM challenge_progress cp
         WHERE cp.cd_id = #{cdId}
-        AND YEAR(cp.start_date) = #{year}
-        AND MONTH(cp.start_date) = #{month}
+        <if test="type == 'competition' || type == 'personal'">
+            AND YEAR(cp.start_date) = #{year}
+            AND MONTH(cp.start_date) = #{month}
+        </if>
         <if test="type == 'weekly'">
-            AND Day(cp.start_date) > #{day}
+            AND cp.start_date > #{date}
         </if>)
         SELECT
         r.cp_id, cd.cd_id AS cdId, cd.cd_name AS `name`, r.user_id,cd.cd_goal AS goal,
@@ -89,10 +93,12 @@
         INNER JOIN challenge_progress cp
         ON u.user_id = cp.user_id
         WHERE cp.cd_id = #{cdId}
-        AND Year(cp.start_date) = #{year}
-        AND Month(cp.start_date) = #{month}
+        <if test="type == 'competition' || type == 'personal'">
+            AND YEAR(cp.start_date) = #{year}
+            AND MONTH(cp.start_date) = #{month}
+        </if>
         <if test="type == 'weekly'">
-            AND Day(cp.start_date) > #{day}
+            AND cp.start_date > #{date}
         </if>
         LIMIT 5;
     </select>
@@ -104,10 +110,12 @@
         FROM challenge_progress cp
         INNER JOIN user u ON u.user_id = cp.user_id
         WHERE cp.cd_id = #{cdId}
+        <if test="type == 'competition' || type == 'personal'">
         AND YEAR(cp.start_date) = #{year}
         AND MONTH(cp.start_date) = #{month}
+        </if>
         <if test="type == 'weekly'">
-            AND Day(cp.start_date) > #{day}
+        AND cp.start_date > #{date}
         </if>)
         SELECT
         r.user_id, r.nick_name, r.pic, r.total_record, r.rank
@@ -159,10 +167,9 @@
         INNER JOIN challenge_progress cp
         ON cp.cd_id = cd.cd_id
         WHERE cp.user_id = #{userId}
-        AND Year(cp.start_date) = #{year}
-        AND Month(cp.start_date) = #{month}
-        AND ((cd.cd_type = 'weekly' AND Day(cp.start_date) > #{day})
-        OR (cd.cd_type = 'competition') OR (cd.cd_type = 'personal'))
+        AND ((cd.cd_type = 'weekly' AND cp.start_date >= #{date})
+        OR (cd.cd_type = 'competition' AND YEAR(cp.start_date) = #{year} AND MONTH(cp.start_date) = #{month})
+        OR (cd.cd_type = 'personal' AND YEAR(cp.start_date) = #{year} AND MONTH(cp.start_date) = #{month}))
         ORDER BY
         CASE cd.cd_type
         WHEN 'competition' THEN 1
