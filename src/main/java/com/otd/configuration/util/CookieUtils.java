@@ -64,7 +64,10 @@ public class CookieUtils {
     }
 
     public String getValue(HttpServletRequest request, String name) {
+
         Cookie cookie = getCookie(request, name);
+
+//        log.info("cookie  : " + cookie.getValue());
         if(cookie == null) { return null; }
         return cookie.getValue();
     }
@@ -91,7 +94,7 @@ public class CookieUtils {
 
     private Cookie getCookie(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies(); //쿠키가 req에 여러개가 있을 수 있기 때문에 배열로 리턴
-
+        log.info("cookie  : " + cookies);
         if (cookies != null && cookies.length > 0) { //쿠키에 뭔가 담겨져 있다면
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals(name)) { //쿠키에 담긴 이름이 같은게 있다면

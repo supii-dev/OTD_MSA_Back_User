@@ -72,6 +72,7 @@ public class JwtTokenManager {
     }
 
     public String getRefreshTokenFromCookie(HttpServletRequest request) {
+        log.info("request cookie : " + request.getCookies());
         return cookieUtils.getValue(request, constJwt.getRefreshTokenCookieName());
     }
 
