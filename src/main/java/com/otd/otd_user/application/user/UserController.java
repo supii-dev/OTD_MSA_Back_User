@@ -13,12 +13,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.context.annotation.ComponentScan;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.Map;
@@ -83,6 +82,25 @@ public class UserController {
         boolean isAvailable = userService.isNicknameAvailable(nickname);
         return new ResultResponse<>("닉네임 중복 확인", Map.of("isAvailable", isAvailable));
     }
+    // 닉네임 수정
+    @PatchMapping("/nickname")
+    public ResponseEntity<?> updateNickname(
+            @Valid @RequestBody NicknameUpdateDto request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        if (!userService.isNicknameAvailable(request.getNickname())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "이미 사용중인 닉네임입니다."));
+        }
+
+        userService.updateNickname(userPrincipal.getSignedUserId(), request.getNickname());
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "닉네임이 변경되었습니다.",
+                "data", Map.of("nickname", request.getNickname())
+        ));
+    }
 
     @PostMapping("/logout")
     public ResultResponse<?> logout(HttpServletResponse response) {
@@ -122,4 +140,6 @@ public class UserController {
         PointHistoryResponseDTO response = pointService.getPointHistory(userId);
         return new ResultResponse<>("포인트 내역 조회 성공", response);
     }
+
+
 }

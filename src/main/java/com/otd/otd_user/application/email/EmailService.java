@@ -447,5 +447,19 @@ public class EmailService {
         sendInquiryEmail(req);
         log.info("문의 이메일 전송 완료");
     }
+    public boolean isEmailAvailable(String email) {
+        return !userRepository.existsByEmail(email);
+    }
+    @Transactional
+    public void updateEmail(Long userId, String newEmail) {
+        if (!isEmailAvailable(newEmail)) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        user.setEmail(newEmail);
+        userRepository.save(user);
+    }
 }
