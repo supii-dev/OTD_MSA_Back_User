@@ -2,7 +2,10 @@ constants:
   file:
     upload-directory: /home/green/download
     challenge: /files/
-    profile-pic: /profile/
+#   upload-directory: D:/kjh/project_2/upload/challenge
+    challenge-pic: /files/
+    profile-pic: /profile
+    pointshop-pic: /pointshop
   feign-client:
     weather-api:
       url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
@@ -163,7 +166,7 @@ spring:
       mode: always
 
 server:
-  port: 8082
+  port: 8080
   servlet:
     encoding:
       charset: UTF-8
