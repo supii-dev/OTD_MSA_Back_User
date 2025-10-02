@@ -32,6 +32,12 @@ public class UserPrincipal implements UserDetails, OAuth2User {
         //this.authorities = roles.stream().map(role -> new SimpleGrantedAuthority(String.format("ROLE_%s", role.name()))).toList();
     }
 
+    public boolean hasRole(String roleName) {
+        return authorities.stream()
+                .anyMatch(anyMatch ->
+                        anyMatch.getAuthority().equals("ROLE_" + roleName));
+    }
+
     public Long getSignedUserId() {
         return jwtUser.getSignedUserId();
     }
