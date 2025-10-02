@@ -86,6 +86,7 @@ public class User extends UpdatedAt{
             this.userRoles.add(userRole);
         }
     }
+
     public EnumChallengeRole getChallengeRole() {
         return this.userRoles.stream()
                 .map(userRole -> userRole.getUserRoleIds().getChallengeCode())

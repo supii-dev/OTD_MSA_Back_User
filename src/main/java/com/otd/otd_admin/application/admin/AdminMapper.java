@@ -1,5 +1,6 @@
 package com.otd.otd_admin.application.admin;
 
+import com.otd.otd_admin.application.admin.model.AdminUserGetRes;
 import com.otd.otd_admin.application.admin.model.AgeCountRes;
 import org.apache.ibatis.annotations.Mapper;
 

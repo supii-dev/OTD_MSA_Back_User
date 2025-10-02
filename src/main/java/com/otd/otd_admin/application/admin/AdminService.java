@@ -1,8 +1,11 @@
 package com.otd.otd_admin.application.admin;
 
+import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.otd_admin.application.admin.Repository.AdminPointRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminUserRepository;
 import com.otd.otd_admin.application.admin.model.AdminUserDetailGetRes;
+import com.otd.otd_admin.application.admin.model.AdminUserGetRes;
 import com.otd.otd_admin.application.admin.model.AgeCountRes;
 import com.otd.otd_admin.application.admin.model.GenderCountRes;
 import com.otd.otd_challenge.application.challenge.ChallengeMapper;
@@ -15,6 +18,7 @@ import com.otd.otd_challenge.entity.ChallengeProgress;
 import com.otd.otd_user.application.user.UserMapper;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
+import com.otd.otd_user.entity.UserRoleIds;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,7 +42,7 @@ public class AdminService {
     private final UserRepository userRepository;
 
     public List<User> getUsers() {
-        return adminUserRepository.findAll();
+        return userRepository.findAll();
     }
 
     public List<ChallengeDefinition> getChallenges() {
