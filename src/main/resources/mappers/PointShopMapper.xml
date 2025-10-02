@@ -19,7 +19,7 @@
         SELECT COUNT(*) FROM point WHERE user_id = #{userId}
     </select>
 
-    <select id="findAllByUserId" resultMap="PointWithImagesMap">
+    <select id="findAllByUserId" resultMap="pointGetResMap">
         SELECT
             p.point_id, p.point_item_name, p.point_item_content, p.point_item_images,
             i.image_id, i.image_url
@@ -30,7 +30,7 @@
         LIMIT #{offset}, #{pageSize}
     </select>
 
-    <select id="findOneByUserIdAndPointId" resultMap="PointWithImagesMap">
+    <select id="findOneByUserIdAndPointId" resultMap="pointGetResMap">
         SELECT
             p.point_id, p.point_item_name, p.point_item_content, p.point_item_images,
             i.image_id, i.image_url
