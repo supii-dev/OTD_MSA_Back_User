@@ -135,6 +135,7 @@
         FROM challenge_progress cp
         LEFT JOIN challenge_record cr
         ON cr.cp_id = cp.cp_id
+        AND cr.rec_date BETWEEN cp.start_date AND cp.end_date
         INNER JOIN challenge_definition cd
         ON cd.cd_id = cp.cd_id
         WHERE cp.user_id = #{userId}

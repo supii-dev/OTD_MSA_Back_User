@@ -20,9 +20,22 @@ public interface ChallengeProgressRepository extends JpaRepository<ChallengeProg
     @Query("SELECT cp FROM ChallengeProgress cp " +
             "WHERE cp.user.userId = :userId " +
             "AND cp.challengeDefinition.cdName = :name " +
-            "AND :recordDate >= cp.endDate")
+            "AND :recordDate <= cp.endDate")
     List<ChallengeProgress> findActiveProgress(
             @Param("userId") Long userId,
             @Param("name") String name,
             @Param("recordDate") LocalDate recordDate);
+
+    @Query("SELECT cp FROM ChallengeProgress cp " +
+            "WHERE cp.user.userId = :userId " +
+            "AND cp.challengeDefinition.cdType = 'personal' " +
+            "AND cp.challengeDefinition.cdName = :personalName " +
+            "AND cp.startDate <= :recordDate " +
+            "AND cp.endDate >= :recordDate")
+    List<ChallengeProgress> findActiveProgressByType(
+            @Param("userId") Long userId,
+            String personalName,
+            @Param("recordDate") LocalDate recordDate
+    );
+
 }

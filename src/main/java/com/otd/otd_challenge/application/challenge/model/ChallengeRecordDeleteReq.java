@@ -7,11 +7,10 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class ChallengeProgressUpdateReq {
+public class ChallengeRecordDeleteReq {
     private Long userId;
     private Long recordId;
     private String name;
-    private Double record;
     private LocalDate recordDate;
     private LocalDate today;
 }

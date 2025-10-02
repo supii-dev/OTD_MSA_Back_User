@@ -16,13 +16,9 @@ import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSet
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -112,4 +108,10 @@ public class ChallengeController {
     public void patchProgress(@RequestBody ChallengeProgressUpdateReq req) {
         challengeService.updateProgress(req);
     }
+
+    @DeleteMapping("/record/delete")
+    public void deleteRecord(@RequestBody ChallengeRecordDeleteReq req) {
+        challengeService.deleteRecord(req);
+    }
+
 }

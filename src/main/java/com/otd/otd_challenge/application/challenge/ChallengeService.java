@@ -1,6 +1,7 @@
 package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.configuration.feignclient.ExerciseClient;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.util.FormattedTime;
 import com.otd.otd_challenge.application.challenge.Repository.*;
@@ -9,10 +10,7 @@ import com.otd.otd_challenge.application.challenge.model.detail.*;
 import com.otd.otd_challenge.application.challenge.model.home.*;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSuccessDto;
-import com.otd.otd_challenge.entity.ChallengeDefinition;
-import com.otd.otd_challenge.entity.ChallengePointHistory;
-import com.otd.otd_challenge.entity.ChallengeProgress;
-import com.otd.otd_challenge.entity.ChallengeSettlementLog;
+import com.otd.otd_challenge.entity.*;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
@@ -38,6 +36,8 @@ public class ChallengeService {
     private final ChallengeProgressRepository challengeProgressRepository;
     private final UserRepository userRepository;
     private final ChallengeSettlementRepository challengeSettlementRepository;
+    private final ChallengeRecordRepository challengeRecordRepository;
+    private final ExerciseClient exerciseClient;
     @Value("${constants.file.challenge}")
     private String imgPath;
     private void addImgPath(List<?> list) {
@@ -417,21 +417,119 @@ public class ChallengeService {
     }
     @Transactional
     public void updateProgress(ChallengeProgressUpdateReq req) {
-        List<ChallengeProgress> progresses =
+        String personalName = "운동하기";
+        // 월간 개인챌린지 조회
+        List<ChallengeProgress> personalProgresses =
+                challengeProgressRepository.findActiveProgressByType(
+                        req.getUserId(),
+                        personalName,
+                        req.getToday()
+                );
+        // 운동 이름과 같은 챌린지 조회
+        List<ChallengeProgress> mapProgresses =
                 challengeProgressRepository.findActiveProgress(
                         req.getUserId(),
                         req.getName(),
-                        req.getRecordDate()
+                        req.getToday()
                 );
+
+        List<ChallengeProgress> progresses = new ArrayList<>();
+        progresses.addAll(personalProgresses);
+        progresses.addAll(mapProgresses);
 
         for (ChallengeProgress cp : progresses) {
 
-            double newTotal = cp.getTotalRecord() + req.getRecord();
-            cp.setTotalRecord(newTotal);
+            if (cp.getChallengeDefinition().getCdType().equals("personal")
+                    && cp.getChallengeDefinition().getCdName().equals(personalName)) {
+                boolean exist = challengeRecordRepository
+                        .existsByChallengeProgressAndRecDate(cp ,req.getRecordDate());
 
-            double goal = cp.getChallengeDefinition().getCdGoal();
-            if (newTotal >= goal) {
-                cp.setSuccess(true);
+                if (!exist) {
+                    ChallengeRecord cr = ChallengeRecord.builder()
+                            .challengeProgress(cp)
+                            .recDate(req.getRecordDate())
+                            .recordId(req.getRecordId())
+                            .recValue(req.getRecord())
+                            .build();
+
+                    challengeRecordRepository.save(cr);
+                    cp.setTotalRecord(cp.getTotalRecord() + 1);
+
+                    int goal = 15;
+                    if (cp.getTotalRecord() >= goal) {
+                        cp.setSuccess(true);
+                    }
+                }
+
+            } else {
+                ChallengeRecord cr = ChallengeRecord.builder()
+                        .challengeProgress(cp)
+                        .recDate(req.getRecordDate())
+                        .recordId(req.getRecordId())
+                        .recValue(req.getRecord()).build();
+
+                challengeRecordRepository.save(cr);
+
+                double newTotal = cp.getTotalRecord() + req.getRecord();
+                cp.setTotalRecord(newTotal);
+
+                double goal = cp.getChallengeDefinition().getCdGoal();
+                if (newTotal >= goal) {
+                    cp.setSuccess(true);
+                }
+            }
+        }
+    }
+
+    @Transactional
+    public void deleteRecord(ChallengeRecordDeleteReq req) {
+        //일반 챌린지(progress) 조회
+        List<ChallengeProgress> mapProgresses =
+                challengeProgressRepository.findActiveProgress(
+                        req.getUserId(),
+                        req.getName(),
+                        req.getToday()
+                );
+
+        for (ChallengeProgress cp : mapProgresses) {
+            ChallengeRecord cr = challengeRecordRepository
+                    .findByChallengeProgressAndRecordId(cp, req.getRecordId());
+
+            if (cr != null) {
+                cp.setTotalRecord(cp.getTotalRecord() - cr.getRecValue());
+                challengeRecordRepository.delete(cr);
+
+                if (cp.getTotalRecord() < cp.getChallengeDefinition().getCdGoal()) {
+                    cp.setSuccess(false);
+                }
+            }
+        }
+
+        // 개인 챌린지(progress) 조회
+        String personalName = "운동하기";
+        List<ChallengeProgress> personalProgresses =
+                challengeProgressRepository.findActiveProgressByType(
+                        req.getUserId(),
+                        personalName,
+                        req.getToday()
+                );
+
+        for (ChallengeProgress cp : personalProgresses) {
+            // 이 날짜에 남아있는 운동 기록 개수를 exercise 서버에 물어봄
+            int count = exerciseClient.getAllExerciseRecordCount(req.getUserId(), req.getRecordDate());
+
+            if (count == 0) {
+                // 오늘 운동 기록이 완전히 없으면 personal도 삭제
+                ChallengeRecord crPersonal = challengeRecordRepository
+                        .findByChallengeProgressAndRecDate(cp, req.getRecordDate());
+
+                    challengeRecordRepository.delete(crPersonal);
+                    cp.setTotalRecord(cp.getTotalRecord() - 1);
+
+                    if (cp.getTotalRecord() < 15) {
+                        cp.setSuccess(false);
+                    }
+
             }
         }
     }
