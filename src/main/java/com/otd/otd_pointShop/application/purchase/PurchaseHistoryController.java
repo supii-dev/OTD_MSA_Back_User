@@ -5,6 +5,7 @@ import com.otd.otd_pointShop.application.point.model.PointApiResponse;
 import com.otd.otd_pointShop.application.purchase.model.PurchasePointChargeReq;
 import com.otd.otd_pointShop.application.purchase.model.PurchasePostReq;
 import com.otd.otd_pointShop.application.purchase.model.PurchasePostRes;
+import com.otd.otd_user.application.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,7 +19,7 @@ import java.util.List;
 public class PurchaseHistoryController {
 
     private final PurchaseHistoryService purchaseHistoryService;
-    private final PointBalanceService pointBalanceService;
+    private final UserRepository userRepository;
 
     @PostMapping
     public ResponseEntity<?> purchase(
@@ -42,17 +43,23 @@ public class PurchaseHistoryController {
         }
 
         Long userId = userPrincipal.getSignedUserId();
-        pointBalanceService.pointIncrement(userId, req.getAmount());
+        int amount = req.getAmount();
+        if (amount <= 0) {
+            return ResponseEntity.badRequest().body("1이상의 금액을 충전해야 합니다.");
+        }
+
+        userRepository.updatePointByUserId(amount, userId);
+
         return ResponseEntity.ok(new PointApiResponse<>(true, "포인트가 충전되었습니다."));
     }
 
     @GetMapping
     public ResponseEntity<?> getPurchases(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        if(userPrincipal ==null) {
+        if(userPrincipal == null) {
             return ResponseEntity.status(401).body(new PointApiResponse<>(false, "로그인이 필요합니다."));
-    }
+        }
 
-    List<PurchasePostRes> purchases = purchaseHistoryService.getUserPurchases(userPrincipal.getSignedUserId());
+        List<PurchasePostRes> purchases = purchaseHistoryService.getUserPurchases(userPrincipal.getSignedUserId());
         return ResponseEntity.ok(new PointApiResponse<>(true, purchases));
     }
 }

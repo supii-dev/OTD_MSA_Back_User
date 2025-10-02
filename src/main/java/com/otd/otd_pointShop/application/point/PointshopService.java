@@ -36,40 +36,6 @@ public class PointshopService {
     private final PointRepository pointRepository;
     private final PointImageRepository pointImageRepository;
 
-    private static final String POINT_NOT_FOUND = "포인트를 찾을 수 없습니다";
-    private static final String UNAUTHORIZED_ACCESS = "접근 권한이 없습니다";
-
-    private void validateImageExtension(MultipartFile file) {
-        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (!List.of("jpg", "jpeg", "png", "gif", "bmp").contains(extension.toLowerCase())) {
-            throw new IllegalArgumentException("지원하지 않는 이미지 형식입니다.");
-        }
-    }
-
-    private List<PointImage> storeImages(MultipartFile[] images, Point point) {
-        List<PointImage> imagesList = new ArrayList<>();
-        if (images == null || images.length == 0) return imagesList;
-
-        for (MultipartFile file : images) {
-            validateImageExtension(file);
-            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path savePath = Paths.get(uploadDir, filename);
-
-            try {
-                Files.createDirectories(savePath.getParent());
-                file.transferTo(savePath.toFile());
-            } catch (IOException e) {
-                throw new RuntimeException("이미지 저장에 실패하였습니다", e);
-            }
-
-            PointImage pointImage = new PointImage();
-            pointImage.setImageUrl(filename);
-            pointImage.setPoint(point);
-            imagesList.add(pointImage);
-        }
-        return imagesList;
-    }
-
     public List<PointListRes> getPointListByUser(Long userId, Pageable pageable) {
         Page<Point> page = pointRepository.findByUser_UserId(userId, pageable);
         return page.getContent().stream()
@@ -94,21 +60,21 @@ public class PointshopService {
 
         // 각 포인트 이미지 페이징 (최대 10장)
         List<PointGetRes> pointGetResList = pointPage.getContent().stream().map(point -> {
-               PageRequest imagePageRequest = PageRequest.of(0,10);
-               Page<PointImage> imagePage = pointImageRepository.findByPoint_PointId(point.getPointId(), imagePageRequest);
+            PageRequest imagePageRequest = PageRequest.of(0,10);
+            Page<PointImage> imagePage = pointImageRepository.findByPoint_PointId(point.getPointId(), imagePageRequest);
 
-                    List<String> imageUrls = imagePage.getContent().stream()
-                            .map(PointImage::getImageUrl)
-                            .toList();
+            List<PointImageRes> imageDtoList = imagePage.getContent().stream()
+                    .map(this::toImageDto)
+                    .toList();
 
-                return PointGetRes.builder()
-                        .pointId(point.getPointId())
-                        .pointItemName(point.getPointItemName())
-                        .pointItemContent(point.getPointItemContent())
-                        .pointScore(point.getPointScore())
-                        .createdAt(point.getCreatedAt())
-                        .images(imageUrls)
-                        .build();
+            return PointGetRes.builder()
+                    .pointId(point.getPointId())
+                    .pointItemName(point.getPointItemName())
+                    .pointItemContent(point.getPointItemContent())
+                    .pointScore(point.getPointScore())
+                    .createdAt(point.getCreatedAt())
+                    .images(imageDtoList)
+                    .build();
         }).toList();
 
         // 최종 page 포장 후 반환
@@ -119,15 +85,6 @@ public class PointshopService {
         return pointRepository.findByUser_UserIdAndPointItemContentContaining(userId, keyword, pageable)
                 .stream()
                 .flatMap(p -> extractKeywords(p.getPointItemContent()).stream())
-                .collect(Collectors.toSet());
-    }
-
-    private Set<String> extractKeywords(String content) {
-        if (content == null) return Set.of();
-        return Arrays.stream(content.split("\\s+"))
-                .map(word -> word.replaceAll("[^\\p{IsAlphabetic}\\d]", ""))
-                .filter(word -> word.length() > 1)
-                .map(String::toLowerCase)
                 .collect(Collectors.toSet());
     }
 
@@ -172,5 +129,54 @@ public class PointshopService {
         }
         pointImageRepository.deleteAllByPoint(point);
         pointRepository.delete(point);
+    }
+
+    private PointImageRes toImageDto(PointImage pointImage) {
+        return PointImageRes.builder()
+                .imageId(pointImage.getImageId())
+                .imageUrl(pointImage.getImageUrl())
+                .imageType(pointImage.getImageType())
+                .altText(pointImage.getAltText())
+                .build();
+    }
+
+    private List<PointImage> storeImages(MultipartFile[] images, Point point) {
+        List<PointImage> imagesList = new ArrayList<>();
+        if (images == null || images.length == 0) return imagesList;
+
+        for (MultipartFile file : images) {
+            validateImageExtension(file);
+            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            Path savePath = Paths.get(uploadDir, filename);
+
+            try {
+                Files.createDirectories(savePath.getParent());
+                file.transferTo(savePath.toFile());
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 저장에 실패하였습니다", e);
+            }
+
+            PointImage pointImage = new PointImage();
+            pointImage.setImageUrl(filename);
+            pointImage.setPoint(point);
+            imagesList.add(pointImage);
+        }
+        return imagesList;
+    }
+
+    private void validateImageExtension(MultipartFile file) {
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if (!List.of("jpg", "jpeg", "png", "gif", "bmp").contains(extension.toLowerCase())) {
+            throw new IllegalArgumentException("지원하지 않는 이미지 형식입니다.");
+        }
+    }
+
+    private Set<String> extractKeywords(String content) {
+        if (content == null || content.isBlank()) return Set.of();
+        return Arrays.stream(content.split("\\s+"))
+                .map(word -> word.replaceAll("[^\\p{IsAlphabetic}\\d]", ""))
+                .filter(word -> word.length() > 1)
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
     }
 }

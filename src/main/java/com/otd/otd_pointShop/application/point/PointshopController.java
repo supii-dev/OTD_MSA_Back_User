@@ -25,103 +25,100 @@ import java.util.Set;
 public class PointshopController {
     private final PointshopService pointshopService;
 
+    // 포인트 등록
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addPointItem(
             @RequestPart("data") PointPostReq dto,
             @RequestPart(value = "images", required = false) MultipartFile[] images,
-            HttpSession session
+            @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        Long userId = (Long) session.getAttribute("userId");
-
-        if(userId == null) {
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
-        }
+        Long userId = getLoginUserId(userPrincipal);
         try {
             pointshopService.createPointItem(dto, images, userId);
             log.info("[포인트 등록] 사용자 ID: {}, 제목: {}", userId, dto.getPointItemName());
             return ResponseEntity.ok(new PointApiResponse<>(true, "포인트 아이템 등록 완료"));
         } catch (Exception e) {
-            log.error("사용자 {}가 포인트를 등록하는 데 실패했습니다. 제목: {}", userId, dto.getPointItemName());
-            return ResponseEntity.status(500).body(new PointApiResponse<>(false, "서버 오류: " + e.getMessage()));
+            log.error("포인트 등록 실패 - 사용자 ID: {}, 제목: {}", userId, dto.getPointItemName(), e);
+            return ResponseEntity.internalServerError()
+                    .body(new PointApiResponse<>(false, "서버 오류: " + e.getMessage()));
         }
     }
 
-    @GetMapping("/point/page")
+    // 포인트 전체 조회 (page)
+    @GetMapping("/page")
     public ResponseEntity<?> getPointPageWithItemPage(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-        if(userPrincipal == null) {
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
-        }
-        Page<PointGetRes> resultPage = pointshopService.pointGetResList(userPrincipal.getSignedUserId(), pageable);
+        Long userId = getLoginUserId(userPrincipal);
+        Page<PointGetRes> resultPage = pointshopService.pointGetResList(userId, pageable);
         return ResponseEntity.ok(resultPage);
     }
 
-    @GetMapping("/point/list")
+    // 포인트 요약 리스트 조회
+    @GetMapping("/list")
     public ResponseEntity<?> getPointList (
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-        if(userPrincipal == null) {
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
-        }
-        List<PointListRes> list = pointshopService.getPointListByUser(userPrincipal.getSignedUserId(), pageable);
+        Long userId = getLoginUserId(userPrincipal);
+        List<PointListRes> list = pointshopService.getPointListByUser(userId, pageable);
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/point/keyword")
+    // 키워드 기반 조회
+    @GetMapping("/keyword")
     public ResultResponse<?> getPointKeywordByUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(defaultValue = "") String keyword,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
-        if(userPrincipal == null) {
-            return new ResultResponse<>("로그인이 필요합니다.", null);
-        }
-        Set<String> result = pointshopService.getPointKeywordByUser(
-                userPrincipal.getSignedUserId(), keyword, pageable);
+        Long userId = getLoginUserId(userPrincipal);
+        Set<String> result = pointshopService.getPointKeywordByUser(userId, keyword, pageable);
         return new ResultResponse<>(String.format("rows: %d", result.size()), result);
     }
 
+    // 포인트 수정
     @PutMapping(value = "/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updatePointItem(
             @RequestPart("data") PointPutReq dto,
             @RequestPart(value = "images", required = false) MultipartFile[] images,
-            HttpSession session
+            @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        Long userId = (Long) session.getAttribute("userId");
-
-        if (userId == null) {
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
-        }
-
+        Long userId = getLoginUserId(userPrincipal);
         try {
             pointshopService.updatePointItem(dto, images, userId);
-            log.info("사용자 {}가 포인트를 수정했습니다. point ID: {}", userId, dto.getPointItemName());
+            log.info("[포인트 수정] 사용자 ID: {}, 제목: {}", userId, dto.getPointItemName());
             return ResponseEntity.ok(new PointApiResponse<>(true, "포인트 수정 완료"));
         } catch (Exception e) {
-            log.error("[포인트 수정 실패] 사용자 ID: {}, 제목: {}", userId, dto.getPointItemName(), e);
-            return ResponseEntity.status(500).body(new PointApiResponse<>(false, "서버 오류: " + e.getMessage()));
+            log.error("포인트 수정 실패 - 사용자 ID: {}, 제목: {}", userId, dto.getPointItemName(), e);
+            return ResponseEntity.internalServerError()
+                    .body(new PointApiResponse<>(false, "서버 오류: " + e.getMessage()));
         }
     }
 
+    // 포인트 삭제
     @DeleteMapping("/point/delete")
     public ResponseEntity<?> deletePointItem(
             @RequestParam("pointId") Long pointId,
-            HttpSession session
+            @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
-        Long userId = (Long) session.getAttribute("userId");
-        if(userId == null) {
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
-        }
+        Long userId = getLoginUserId(userPrincipal);
         try {
             pointshopService.deletePointItem(pointId, userId);
             log.info("[포인트 삭제] 사용자 ID: {}, pointId: {}", userId, pointId);
-            return ResponseEntity.ok(new PointApiResponse<>(true, "point ID " + pointId + "가 제거되었습니다."));
+            return ResponseEntity.ok(new PointApiResponse<>(true, "포인트 삭제 완료"));
         } catch (Exception e) {
-            log.error("Point 삭제 중 예외 발생", e);
-            return ResponseEntity.status(500).body(new PointApiResponse<>(false, "서버 내부 오류로 삭제에 실패하였습니다."));
+            log.error("포인트 삭제 실패 - 사용자 ID: {}, pointId: {}", userId, pointId, e);
+            return ResponseEntity.internalServerError()
+                    .body(new PointApiResponse<>(false, "서버 오류로 삭제 실패"));
         }
+    }
+
+    private Long getLoginUserId(UserPrincipal userPrincipal) {
+        if (userPrincipal == null) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+        return userPrincipal.getSignedUserId();
     }
 }

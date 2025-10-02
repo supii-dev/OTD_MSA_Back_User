@@ -21,7 +21,6 @@ public class PurchaseHistoryService {
     private final PurchaseHistoryRepository purchaseHistoryRepository;
     private final PointRepository pointRepository;
     private final UserRepository userRepository;
-    private final PointBalanceService pointBalanceService;
 
     // point 상품 구매
     @Transactional
@@ -30,20 +29,24 @@ public class PurchaseHistoryService {
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         Point point = pointRepository.findById(pointId)
                 .orElseThrow(() -> new EntityNotFoundException("포인트 아이템을 찾을 수 없습니다."));
-        int pointBalance = pointBalanceService.getPointBalance(userId);
+        int pointBalance = user.getPoint();
         int pointPrice = point.getPointScore();
 
         if (pointBalance < pointPrice) {
             throw new IllegalArgumentException("포인트가 부족합니다. 현재 잔액: " + pointBalance + " / 필요 포인트: " + pointPrice);
         }
 
-        pointBalanceService.pointDecrement(userId, pointPrice);
+        // 포인트 차감
+        user.setPoint(pointBalance - pointPrice);
+        userRepository.save(user);
 
+        // 구매 이력 저장
         PurchaseHistory history = new PurchaseHistory();
         history.setUser(user);
         history.setPoint(point);
         purchaseHistoryRepository.save(history);
 
+        // 대표 이미지 추출
         String imageUrl = point.getPointItemImage() != null && !point.getPointItemImage().isEmpty()
                 ? point.getPointItemImage().get(0).getImageUrl()
                 : null;

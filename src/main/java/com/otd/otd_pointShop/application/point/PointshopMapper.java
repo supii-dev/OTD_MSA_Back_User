@@ -1,5 +1,6 @@
 package com.otd.otd_pointShop.application.point;
 
+import com.otd.otd_pointShop.application.point.model.PointGetRes;
 import com.otd.otd_pointShop.entity.Point;
 import com.otd.otd_pointShop.entity.PointImage;
 import org.apache.ibatis.annotations.Mapper;
@@ -30,4 +31,10 @@ public interface PointshopMapper {
         @Param("userId") Long userId,
         @Param("pointId") Long pointId
     );
+
+    List<PointGetRes> findAllByUserId(
+            @Param("userId") Long userId,
+            @Param("offset") int offset,
+            @Param("pageSize") int pageSize);
+    int countPointByUserId(@Param("userId") Long userId);
 }
