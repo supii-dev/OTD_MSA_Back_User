@@ -13,4 +13,5 @@ public class ChallengeRecordDeleteReq {
     private String name;
     private LocalDate recordDate;
     private LocalDate today;
+    private int count;
 }

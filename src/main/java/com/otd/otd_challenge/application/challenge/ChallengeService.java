@@ -1,7 +1,6 @@
 package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
-import com.otd.configuration.feignclient.ExerciseClient;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.util.FormattedTime;
 import com.otd.otd_challenge.application.challenge.Repository.*;
@@ -37,7 +36,6 @@ public class ChallengeService {
     private final UserRepository userRepository;
     private final ChallengeSettlementRepository challengeSettlementRepository;
     private final ChallengeRecordRepository challengeRecordRepository;
-    private final ExerciseClient exerciseClient;
     @Value("${constants.file.challenge}")
     private String imgPath;
     private void addImgPath(List<?> list) {
@@ -415,6 +413,8 @@ public class ChallengeService {
         }
         return res;
     }
+
+    private final int goal = 15;
     @Transactional
     public void updateProgress(ChallengeProgressUpdateReq req) {
         String personalName = "운동하기";
@@ -444,7 +444,7 @@ public class ChallengeService {
                 boolean exist = challengeRecordRepository
                         .existsByChallengeProgressAndRecDate(cp ,req.getRecordDate());
 
-                if (!exist) {
+                if (!exist && req.getCount() != 0) {
                     ChallengeRecord cr = ChallengeRecord.builder()
                             .challengeProgress(cp)
                             .recDate(req.getRecordDate())
@@ -455,7 +455,6 @@ public class ChallengeService {
                     challengeRecordRepository.save(cr);
                     cp.setTotalRecord(cp.getTotalRecord() + 1);
 
-                    int goal = 15;
                     if (cp.getTotalRecord() >= goal) {
                         cp.setSuccess(true);
                     }
@@ -483,7 +482,7 @@ public class ChallengeService {
 
     @Transactional
     public void deleteRecord(ChallengeRecordDeleteReq req) {
-        //일반 챌린지(progress) 조회
+        // progress 조회 및 처리
         List<ChallengeProgress> mapProgresses =
                 challengeProgressRepository.findActiveProgress(
                         req.getUserId(),
@@ -497,6 +496,7 @@ public class ChallengeService {
 
             if (cr != null) {
                 cp.setTotalRecord(cp.getTotalRecord() - cr.getRecValue());
+
                 challengeRecordRepository.delete(cr);
 
                 if (cp.getTotalRecord() < cp.getChallengeDefinition().getCdGoal()) {
@@ -505,7 +505,7 @@ public class ChallengeService {
             }
         }
 
-        // 개인 챌린지(progress) 조회
+        // 개인 챌린지 조회 및 처리
         String personalName = "운동하기";
         List<ChallengeProgress> personalProgresses =
                 challengeProgressRepository.findActiveProgressByType(
@@ -515,21 +515,18 @@ public class ChallengeService {
                 );
 
         for (ChallengeProgress cp : personalProgresses) {
-            // 이 날짜에 남아있는 운동 기록 개수를 exercise 서버에 물어봄
-            int count = exerciseClient.getAllExerciseRecordCount(req.getUserId(), req.getRecordDate());
+            if (req.getCount() == 0) {
+                // 오늘 남은 운동 기록이 없음 → personal 챌린지 기록 삭제
+                ChallengeRecord todayRecords =
+                        challengeRecordRepository.findByChallengeProgressAndRecDate(cp, req.getRecordDate());
 
-            if (count == 0) {
-                // 오늘 운동 기록이 완전히 없으면 personal도 삭제
-                ChallengeRecord crPersonal = challengeRecordRepository
-                        .findByChallengeProgressAndRecDate(cp, req.getRecordDate());
+                cp.setTotalRecord(cp.getTotalRecord() - 1);
+                challengeRecordRepository.delete(todayRecords);
 
-                    challengeRecordRepository.delete(crPersonal);
-                    cp.setTotalRecord(cp.getTotalRecord() - 1);
 
-                    if (cp.getTotalRecord() < 15) {
-                        cp.setSuccess(false);
-                    }
-
+                if (cp.getTotalRecord() <= goal) {
+                    cp.setSuccess(false);
+                }
             }
         }
     }

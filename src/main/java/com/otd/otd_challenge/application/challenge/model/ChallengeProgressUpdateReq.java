@@ -14,4 +14,5 @@ public class ChallengeProgressUpdateReq {
     private Double record;
     private LocalDate recordDate;
     private LocalDate today;
+    private int count;
 }
