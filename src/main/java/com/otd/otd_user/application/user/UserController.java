@@ -140,6 +140,13 @@ public class UserController {
         PointHistoryResponseDTO response = pointService.getPointHistory(userId);
         return new ResultResponse<>("포인트 내역 조회 성공", response);
     }
-
-
+    @DeleteMapping("/account")
+    public ResultResponse<?> deleteUser(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            HttpServletResponse response) {
+        log.info("회원 탈퇴 userId={}", userPrincipal.getSignedUserId());
+        int result = userService.deleteById(userPrincipal.getSignedUserId());
+        jwtTokenManager.logout(response);
+        return new ResultResponse<>("회원 탈퇴 완료", result);
+    }
 }

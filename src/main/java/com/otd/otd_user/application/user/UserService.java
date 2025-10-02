@@ -1,6 +1,7 @@
 package com.otd.otd_user.application.user;
 
 import com.otd.configuration.jwt.JwtTokenManager;
+import com.otd.configuration.model.UserPrincipal;
 import com.otd.configuration.util.MyFileManager;
 import com.otd.configuration.util.MyFileUtils;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
@@ -17,6 +18,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -246,4 +248,15 @@ public class UserService {
 
         log.info("이메일 변경 완료 - userId: {}, 새 이메일: {}", userId, email);
     }
+    @Transactional
+    public int deleteById(long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."));
+
+        userRepository.delete(user);
+        log.info("회원 삭제 완료 - userId: {}", userId);
+        return 1;
+    }
+
 }
