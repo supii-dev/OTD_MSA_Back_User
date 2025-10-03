@@ -2,6 +2,7 @@ constants:
   file:
     upload-directory: /home/green/download
     challenge: /files/
+#   upload-directory: D:/kjh/project_2/upload/challenge
     profile-pic: /profile
     pointshop-pic: /pointshop
   feign-client:
@@ -9,6 +10,8 @@ constants:
       url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
       service-key: fte7et4WjQ2QQTSP51SJ6VZ%2FXA3aDUYv054aZFUsGdrVOKFJxQnmrKJGh%2Box%2FcnwsvpeJmLazXr4je1K01Uoow%3D%3D
       data-type: json
+#    exercise:
+#      url: http://localhost:8082/api/OTD/exercise
   comment:
     start-index: 0
     need-for-view-count: 3 #피드 리스트를 뿌릴 때 실제로 피드당 보여지는 댓글 수
@@ -24,10 +27,8 @@ constants:
 
     access-token-cookie-name: access-token
     access-token-cookie-path: / #모든 경로에서 access-token값이 넘어온다.
-    #    access-token-cookie-validity-seconds: 900 # 15분 (s) 60 * 15
-    #    access-token-validity-milliseconds: 900_000 # 15분 (ms) 60 * 15 * 1000
-    access-token-cookie-validity-seconds: 1_296_000 # 15분 (s) 60 * 15
-    access-token-validity-milliseconds: 1_296_000_000 # 15분 (ms) 60 * 15 * 1000
+    access-token-cookie-validity-seconds: 900 # 15분 (s) 60 * 15
+    access-token-validity-milliseconds: 900_000 # 15분 (ms) 60 * 15 * 1000
 
     refresh-token-cookie-name: refresh-token
     refresh-token-cookie-path: /api/OTD/user/reissue #해당 path때만 refresh-token값이 넘어온다.
@@ -82,9 +83,9 @@ spring:
             enable: true
     default-encoding: UTF-8
   datasource:
-    #    url: jdbc:log4jdbc:mariadb://localhost/otd
-    #    username: root
-    #    password: green502
+#    url: jdbc:log4jdbc:mariadb://localhost/otd
+#    username: root
+#    password: green502
     url: jdbc:log4jdbc:mariadb://112.222.157.157:5012/hsb
     username: hsb
     password: green502
@@ -96,7 +97,7 @@ spring:
     defer-datasource-initialization: true #JPA 테이블 생성 이후 data.sql
     hibernate:
       ddl-auto: update #entity 수정이 파악되면 테이블을 수정한다.
-    #      ddl-auto: create #프로젝트 실행시마다 테이블을 모두 drop 후 create한다.
+#      ddl-auto: create #프로젝트 실행시마다 테이블을 모두 drop 후 create한다.
     properties:
       hibernate:
         jdbc:

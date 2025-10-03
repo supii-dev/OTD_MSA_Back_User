@@ -9,10 +9,7 @@ import com.otd.otd_challenge.application.challenge.model.detail.*;
 import com.otd.otd_challenge.application.challenge.model.home.*;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSuccessDto;
-import com.otd.otd_challenge.entity.ChallengeDefinition;
-import com.otd.otd_challenge.entity.ChallengePointHistory;
-import com.otd.otd_challenge.entity.ChallengeProgress;
-import com.otd.otd_challenge.entity.ChallengeSettlementLog;
+import com.otd.otd_challenge.entity.*;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
@@ -25,10 +22,7 @@ import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -41,6 +35,7 @@ public class ChallengeService {
     private final ChallengeProgressRepository challengeProgressRepository;
     private final UserRepository userRepository;
     private final ChallengeSettlementRepository challengeSettlementRepository;
+    private final ChallengeRecordRepository challengeRecordRepository;
     @Value("${constants.file.challenge}")
     private String imgPath;
     private void addImgPath(List<?> list) {
@@ -417,5 +412,122 @@ public class ChallengeService {
             }
         }
         return res;
+    }
+
+    private final int goal = 15;
+    @Transactional
+    public void updateProgress(ChallengeProgressUpdateReq req) {
+        String personalName = "운동하기";
+        // 월간 개인챌린지 조회
+        List<ChallengeProgress> personalProgresses =
+                challengeProgressRepository.findActiveProgressByType(
+                        req.getUserId(),
+                        personalName,
+                        req.getToday()
+                );
+        // 운동 이름과 같은 챌린지 조회
+        List<ChallengeProgress> mapProgresses =
+                challengeProgressRepository.findActiveProgress(
+                        req.getUserId(),
+                        req.getName(),
+                        req.getToday()
+                );
+
+        List<ChallengeProgress> progresses = new ArrayList<>();
+        progresses.addAll(personalProgresses);
+        progresses.addAll(mapProgresses);
+
+        for (ChallengeProgress cp : progresses) {
+
+            if (cp.getChallengeDefinition().getCdType().equals("personal")
+                    && cp.getChallengeDefinition().getCdName().equals(personalName)) {
+                boolean exist = challengeRecordRepository
+                        .existsByChallengeProgressAndRecDate(cp ,req.getRecordDate());
+
+                if (!exist && req.getCount() != 0) {
+                    ChallengeRecord cr = ChallengeRecord.builder()
+                            .challengeProgress(cp)
+                            .recDate(req.getRecordDate())
+                            .recordId(req.getRecordId())
+                            .recValue(req.getRecord())
+                            .build();
+
+                    challengeRecordRepository.save(cr);
+                    cp.setTotalRecord(cp.getTotalRecord() + 1);
+
+                    if (cp.getTotalRecord() >= goal) {
+                        cp.setSuccess(true);
+                    }
+                }
+
+            } else {
+                ChallengeRecord cr = ChallengeRecord.builder()
+                        .challengeProgress(cp)
+                        .recDate(req.getRecordDate())
+                        .recordId(req.getRecordId())
+                        .recValue(req.getRecord()).build();
+
+                challengeRecordRepository.save(cr);
+
+                double newTotal = cp.getTotalRecord() + req.getRecord();
+                cp.setTotalRecord(newTotal);
+
+                double goal = cp.getChallengeDefinition().getCdGoal();
+                if (newTotal >= goal) {
+                    cp.setSuccess(true);
+                }
+            }
+        }
+    }
+
+    @Transactional
+    public void deleteRecord(ChallengeRecordDeleteReq req) {
+        // progress 조회 및 처리
+        List<ChallengeProgress> mapProgresses =
+                challengeProgressRepository.findActiveProgress(
+                        req.getUserId(),
+                        req.getName(),
+                        req.getToday()
+                );
+
+        for (ChallengeProgress cp : mapProgresses) {
+            ChallengeRecord cr = challengeRecordRepository
+                    .findByChallengeProgressAndRecordId(cp, req.getRecordId());
+
+            if (cr != null) {
+                cp.setTotalRecord(cp.getTotalRecord() - cr.getRecValue());
+
+                challengeRecordRepository.delete(cr);
+
+                if (cp.getTotalRecord() < cp.getChallengeDefinition().getCdGoal()) {
+                    cp.setSuccess(false);
+                }
+            }
+        }
+
+        // 개인 챌린지 조회 및 처리
+        String personalName = "운동하기";
+        List<ChallengeProgress> personalProgresses =
+                challengeProgressRepository.findActiveProgressByType(
+                        req.getUserId(),
+                        personalName,
+                        req.getToday()
+                );
+
+        for (ChallengeProgress cp : personalProgresses) {
+            if (req.getCount() == 0) {
+                // 오늘 남은 운동 기록이 없음 → personal 챌린지 기록 삭제
+                ChallengeRecord todayRecords =
+                        challengeRecordRepository.findByChallengeProgressAndRecDate(cp, req.getRecordDate());
+
+                cp.setTotalRecord(cp.getTotalRecord() - 1);
+                challengeRecordRepository.delete(todayRecords);
+
+
+                if (cp.getTotalRecord() <= goal) {
+                    cp.setSuccess(false);
+                }
+            }
+        }
     }
 }
