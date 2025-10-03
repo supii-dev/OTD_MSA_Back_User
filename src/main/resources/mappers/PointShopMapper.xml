@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.otd.otd_pointShop.application.point.PointshopMapper">
+
+    <resultMap id="pointGetResMap" type="com.otd.otd_pointShop.application.point.model.PointGetRes">
+        <id property="pointId" column="point_id" />
+        <result property="pointItemName" column="point_item_name" />
+        <result property="pointItemContent" column="point_item_content" />
+        <result property="pointItemImages" column="point_item_images" />
+        <result property="createdAt" column="created_at" />
+
+        <collection property="images"
+                    column="image_url"
+                    javaType="java.util.List"
+                    ofType="java.lang.String" />
+    </resultMap>
+
+    <select id="countPointsByUserId" resultType="int">
+        SELECT COUNT(*) FROM point WHERE user_id = #{userId}
+    </select>
+
+    <select id="findAllByUserId" resultMap="pointGetResMap">
+        SELECT
+            p.point_id, p.point_item_name, p.point_item_content, p.point_item_images,
+            i.image_id, i.image_url
+        FROM point p
+        LEFT JOIN point_image i ON p.point_id = i.point_id
+        WHERE p.user_id = #{userId}
+        ORDER BY p.created_at DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="findOneByUserIdAndPointId" resultMap="pointGetResMap">
+        SELECT
+            p.point_id, p.point_item_name, p.point_item_content, p.point_item_images,
+            i.image_id, i.image_url
+        FROM point p
+        LEFT JOIN point_item_images i ON p.point_id = i.point_id
+        WHERE p.point_id = #{pointId}
+        AND p.user_id = #{userId}
+    </select>
+
+    <select id="findPointListByUser" resultType="com.otd.otd_pointShop.application.point.model.PointListRes">
+        SELECT
+        p.point_id AS pointId,
+        p.point_item_name AS pointItemName,
+        p.point_item_content AS pointItemContent,
+        p.point_item_images AS pointItemImages,
+        p.created_at AS createdAt
+        FROM point p
+        WHERE p.user_id = #{userId}
+        ORDER BY p.created_at DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <insert id="savePoint">
+        INSERT INTO point
+        (user_id, point_score, point_item_name, point_item_content, point_item_images)
+        VALUES
+        (#{userId}, #{pointScore}, #{pointItemName}, #{pointItemContent}, #{pointItemImages})
+    </insert>
+
+    <update id="updatePoint">
+        UPDATE point
+        SET point_score = #{pointScore},
+        point_item_name = #{pointItemName},
+        point_item_content = #{pointItemContent},
+        point_item_images = #{pointItemImages}
+        WHERE point_id = #{pointId}
+        AND user_id = #{userId}
+    </update>
+
+    <delete id="deletePoint">
+        DELETE FROM point
+        WHERE point_id = #{pointId}
+        AND user_id = #{userId}
+    </delete>
+
+</mapper>

@@ -2,9 +2,7 @@ package com.otd.configuration.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.cglib.core.Local;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -36,9 +34,8 @@ public class FormattedTime {
         LocalDate localDate = LocalDate.now();
         return localDate.getMonthValue();
     }
-    public static int fetchDay() {
+    public static LocalDate fetchDate() {
         LocalDate localDate = LocalDate.now();
-        LocalDate monday = localDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        return monday.getDayOfMonth() - 1;
+        return localDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
     }
 }

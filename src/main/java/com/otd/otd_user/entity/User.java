@@ -1,6 +1,7 @@
 
 package com.otd.otd_user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.SignInProviderType;
@@ -27,12 +28,14 @@ public class User extends UpdatedAt{
     private String uid;
 
     @Column(nullable = false, length = 100)
+    @JsonIgnore
     private String upw;
 
     @Column(length = 30, name = "nick_name")
     private String nickName;
 
     @Column(length = 100)
+    @JsonIgnore
     private String pic;
 
     @Column(length = 30)
@@ -60,6 +63,7 @@ public class User extends UpdatedAt{
     private int xp;
 
     @Column(length = 300)
+    @JsonIgnore
     private String refreshToken;
 
     // 본인인증 관련 필드 추가
