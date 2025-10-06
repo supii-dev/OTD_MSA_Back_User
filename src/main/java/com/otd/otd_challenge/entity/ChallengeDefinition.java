@@ -41,6 +41,6 @@ public class ChallengeDefinition {
     @Column(nullable = false, length = 10)
     private EnumChallengeRole tier;
 
-    @Column(length = 30, columnDefinition = "VARCHAR(30) DEFAULT'-'")
+    @Column(length = 30, columnDefinition = "VARCHAR(30) DEFAULT '-'")
     private String note;
 }
