@@ -1,31 +1,32 @@
 package com.otd.otd_user.application.user;
 
-import com.otd.configuration.jwt.JwtTokenManager;
-import com.otd.configuration.model.UserPrincipal;
 import com.otd.configuration.util.MyFileManager;
-import com.otd.configuration.util.MyFileUtils;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.otd_user.application.email.EmailService;
 import com.otd.otd_user.application.email.model.PasswordChangeReq;
 import com.otd.otd_user.application.email.model.PasswordResetReq;
+import com.otd.otd_user.application.term.TermsRepository;
 import com.otd.otd_user.application.user.model.*;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.model.JwtUser;
 import com.otd.configuration.security.SignInProviderType;
 import com.otd.configuration.util.ImgUploadManager;
 import com.otd.otd_user.entity.User;
+import com.otd.otd_user.entity.Terms;
+import com.otd.otd_user.entity.UserAgreement;
+import com.otd.otd_user.application.term.TermsRepository;
+import com.otd.otd_user.application.term.UserAgreementRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -37,10 +38,13 @@ public class UserService {
     private final ImgUploadManager imgUploadManager;
     private final EmailService emailService;
     private final MyFileManager myFileManager;
+    private final TermsRepository termsRepository;
+    private final UserAgreementRepository userAgreementRepository;
 
     public boolean isUidAvailable(String uid) {
         return userMapper.countByUid(uid) == 0;
     }
+
     @Transactional
     public void join(UserJoinReq req, MultipartFile pic) {
         String hashedPassword = passwordEncoder.encode(req.getUpw());
@@ -58,19 +62,46 @@ public class UserService {
                 .build();
 
         EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(req.getSurveyAnswers());
-        // 기본 역할 설정
         if (req.getRoles() == null || req.getRoles().isEmpty()) {
             user.addUserRoles(List.of(EnumUserRole.USER_2), challengeRole);
         } else {
             user.addUserRoles(req.getRoles(), challengeRole);
         }
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         if(pic != null) {
-            String savedFileName = myFileManager.saveProfilePic(user.getUserId(), pic);
-            user.setPic(savedFileName);
+            String savedFileName = myFileManager.saveProfilePic(savedUser.getUserId(), pic);
+            savedUser.setPic(savedFileName);
         }
+
+        // 약관 동의 처리 추가
+        if (req.getAgreedTermsIds() != null && !req.getAgreedTermsIds().isEmpty()) {
+            saveUserAgreements(savedUser, req.getAgreedTermsIds(), req.getIpAddress(), req.getUserAgent());
+        }
+
+        log.info("회원가입 완료 - userId: {}, email: {}", savedUser.getUserId(), savedUser.getEmail());
+    }
+
+    // 약관 동의 저장 메서드
+    private void saveUserAgreements(User user, List<Long> termsIds, String ipAddress, String userAgent) {
+        for (Long termsId : termsIds) {
+            Terms terms = termsRepository.findById(termsId)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, "약관을 찾을 수 없습니다. ID: " + termsId));
+
+            UserAgreement agreement = UserAgreement.builder()
+                    .user(user)
+                    .terms(terms)
+                    .agreed(true)
+                    .agreedAt(LocalDateTime.now())
+                    .ipAddress(ipAddress)
+                    .userAgent(userAgent)
+                    .build();
+
+            userAgreementRepository.save(agreement);
+        }
+        log.info("약관 동의 저장 완료 - userId: {}, 동의 약관 수: {}", user.getUserId(), termsIds.size());
     }
 
     @Transactional
