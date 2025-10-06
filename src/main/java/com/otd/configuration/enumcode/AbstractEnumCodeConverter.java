@@ -2,8 +2,10 @@ package com.otd.configuration.enumcode;
 
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 import lombok.RequiredArgsConstructor;
 
+@Converter
 @RequiredArgsConstructor
 public abstract class AbstractEnumCodeConverter<E extends Enum<E> & EnumMapperType>
         implements AttributeConverter<E, String> {

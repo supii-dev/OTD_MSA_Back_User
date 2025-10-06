@@ -27,36 +27,38 @@
         INNER JOIN challenge_definition cd
         ON cd.cd_id = cp.cd_id
         WHERE cp.user_id = #{userId}
-        AND Year(cp.start_date) = #{year}
-        AND Month(cp.start_date) = #{month}
-        AND DAY(cp.start_date) > #{day}
+        AND cp.start_date > #{date}
         AND cd.cd_type = "weekly"
     </select>
     <select id="findByType">
         SELECT cd.cd_id AS id, cd.cd_goal AS goal, cd.cd_image AS image,
-        cd.cd_name AS name, cd.cd_type AS type, cd.cd_reward AS reward, cd.cd_unit AS unit
+        cd.cd_name AS name, cd.cd_type AS type, cd.cd_reward AS reward, cd.cd_unit AS unit, tier AS tierCode
         FROM challenge_definition cd
         WHERE cd.cd_id NOT IN(SELECT cp.cd_id FROM challenge_progress cp WHERE cp.user_id = #{userId}
-                                                                        AND YEAR(cp.start_date) = #{year}
-                                                                        AND MONTH(cp.start_date) = #{month}
+                                                                        <if test="type == 'competition' || type == 'personal'">
+                                                                            AND YEAR(cp.start_date) = #{year}
+                                                                            AND MONTH(cp.start_date) = #{month}
+                                                                        </if>
                                                                         <if test="type == 'weekly'">
-                                                                            AND Day(cp.start_date) > #{day}
+                                                                            AND cp.start_date > #{date}
                                                                         </if>)
         AND cd.cd_type = #{type}
     </select>
     <select id="findByTypeForCompetition">
         SELECT cd_id AS id, cd_goal AS goal, cd_image AS image,
-        cd_name AS name, cd_type AS type, cd_reward AS reward, cd_unit AS unit
+        cd_name AS name, cd_type AS type, cd_reward AS reward, cd_unit AS unit, tier AS tierCode
         FROM challenge_definition
         WHERE cd_name NOT IN(SELECT cd.cd_name
                             FROM challenge_definition cd
                             INNER JOIN challenge_progress cp
                             ON cd.cd_id = cp.cd_id AND cd.cd_type = #{type}
                             WHERE cp.user_id = #{userId}
-                            AND YEAR(cp.start_date) = #{year}
-                            AND MONTH(cp.start_date) = #{month}
+                            <if test="type == 'competition' || type == 'personal'">
+                                AND YEAR(cp.start_date) = #{year}
+                                AND MONTH(cp.start_date) = #{month}
+                            </if>
                             <if test="type == 'weekly'">
-                                AND Day(cp.start_date) > #{day}
+                                AND cp.start_date > #{date}
                             </if>)
         AND cd_type = #{type};
     </select>
@@ -67,8 +69,13 @@
         RANK() OVER (ORDER BY cp.total_record DESC) AS my_rank
         FROM challenge_progress cp
         WHERE cp.cd_id = #{cdId}
-        AND YEAR(cp.start_date) = #{year}
-        AND MONTH(cp.start_date) = #{month} )
+        <if test="type == 'competition' || type == 'personal'">
+            AND YEAR(cp.start_date) = #{year}
+            AND MONTH(cp.start_date) = #{month}
+        </if>
+        <if test="type == 'weekly'">
+            AND cp.start_date > #{date}
+        </if>)
         SELECT
         r.cp_id, cd.cd_id AS cdId, cd.cd_name AS `name`, r.user_id,cd.cd_goal AS goal,
         r.total_record, cd.cd_reward AS reward, r.my_rank, cd.cd_unit AS unit,
@@ -86,10 +93,12 @@
         INNER JOIN challenge_progress cp
         ON u.user_id = cp.user_id
         WHERE cp.cd_id = #{cdId}
-        AND Year(cp.start_date) = #{year}
-        AND Month(cp.start_date) = #{month}
+        <if test="type == 'competition' || type == 'personal'">
+            AND YEAR(cp.start_date) = #{year}
+            AND MONTH(cp.start_date) = #{month}
+        </if>
         <if test="type == 'weekly'">
-            AND Day(cp.start_date) > #{day}
+            AND cp.start_date > #{date}
         </if>
         LIMIT 5;
     </select>
@@ -101,8 +110,13 @@
         FROM challenge_progress cp
         INNER JOIN user u ON u.user_id = cp.user_id
         WHERE cp.cd_id = #{cdId}
+        <if test="type == 'competition' || type == 'personal'">
         AND YEAR(cp.start_date) = #{year}
-        AND MONTH(cp.start_date) = #{month} )
+        AND MONTH(cp.start_date) = #{month}
+        </if>
+        <if test="type == 'weekly'">
+        AND cp.start_date > #{date}
+        </if>)
         SELECT
         r.user_id, r.nick_name, r.pic, r.total_record, r.rank
         FROM ranking r
@@ -121,6 +135,7 @@
         FROM challenge_progress cp
         LEFT JOIN challenge_record cr
         ON cr.cp_id = cp.cp_id
+        AND cr.rec_date BETWEEN cp.start_date AND cp.end_date
         INNER JOIN challenge_definition cd
         ON cd.cd_id = cp.cd_id
         WHERE cp.user_id = #{userId}
@@ -146,5 +161,21 @@
         WHERE user_id = #{userId}
         AND success_date = CURRENT_DATE;
     </select>
-
+    <select id="findAllMyChallenge">
+        SELECT cd.cd_id, cd.cd_goal AS goal, cp.total_record, cd.cd_name AS `name`
+             , cd.cd_unit AS unit, cd.cd_type AS type
+        FROM challenge_definition cd
+        INNER JOIN challenge_progress cp
+        ON cp.cd_id = cd.cd_id
+        WHERE cp.user_id = #{userId}
+        AND ((cd.cd_type = 'weekly' AND cp.start_date >= #{date})
+        OR (cd.cd_type = 'competition' AND YEAR(cp.start_date) = #{year} AND MONTH(cp.start_date) = #{month})
+        OR (cd.cd_type = 'personal' AND YEAR(cp.start_date) = #{year} AND MONTH(cp.start_date) = #{month}))
+        ORDER BY
+        CASE cd.cd_type
+        WHEN 'competition' THEN 1
+        WHEN 'personal' THEN 2
+        WHEN 'weekly' THEN 3
+        ELSE 4 END;
+    </select>
 </mapper>

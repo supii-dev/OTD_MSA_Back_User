@@ -1,6 +1,7 @@
 
 package com.otd.otd_user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.SignInProviderType;
@@ -17,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class User extends UpdatedAt{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,12 +28,14 @@ public class User extends UpdatedAt{
     private String uid;
 
     @Column(nullable = false, length = 100)
+    @JsonIgnore
     private String upw;
 
     @Column(length = 30, name = "nick_name")
     private String nickName;
 
     @Column(length = 100)
+    @JsonIgnore
     private String pic;
 
     @Column(length = 30)
@@ -58,7 +62,8 @@ public class User extends UpdatedAt{
     @Column(columnDefinition = "int DEFAULT 0")
     private int xp;
 
-    @Column(length = 100)
+    @Column(length = 300)
+    @JsonIgnore
     private String refreshToken;
 
     // 본인인증 관련 필드 추가
@@ -82,5 +87,10 @@ public class User extends UpdatedAt{
             this.userRoles.add(userRole);
         }
     }
-
+    public EnumChallengeRole getChallengeRole() {
+        return this.userRoles.stream()
+                .map(userRole -> userRole.getUserRoleIds().getChallengeCode())
+                .findFirst() // 유저가 가진 챌린지 Role 하나만 꺼냄
+                .orElse(EnumChallengeRole.TBD);
+    }
 }

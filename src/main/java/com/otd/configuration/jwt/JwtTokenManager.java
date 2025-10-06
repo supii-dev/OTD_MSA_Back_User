@@ -23,9 +23,11 @@ public class JwtTokenManager {
     private final CookieUtils cookieUtils; //쿠키 관련
     private final JwtTokenProvider jwtTokenProvider; //JWT 관련
 
-    public void issue(HttpServletResponse response, JwtUser jwtUser) {
+    public String issue(HttpServletResponse response, JwtUser jwtUser) {
+        String refreshToken = generateRefreshToken(jwtUser);
         setAccessTokenInCookie(response, jwtUser);
         setRefreshTokenInCookie(response, jwtUser);
+        return refreshToken;
     }
 
     public String generateAccessToken(JwtUser jwtUser) {

@@ -11,11 +11,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import java.util.Map;
+
 
 @Slf4j
 @RestController
@@ -24,16 +30,14 @@ import java.util.Map;
 public class UserController {
     private final UserService userService;
     private final JwtTokenManager jwtTokenManager;
+    private final PointService pointService;
 
-    @GetMapping("/")
-    public String healthCheck() {
-        return "Hello from OTD-USER Service!";
-    }
-
-    @PostMapping("/join")
-    public ResultResponse<?> join(@Valid @RequestPart UserJoinReq req
-            , @RequestPart(required = false) MultipartFile pic) {
-        log.info("req: {}", req);
+    @PostMapping(
+            value = "/join",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE // ← multipart만 받겠다고 명시
+    )
+    public ResultResponse<?> join( @Valid @RequestPart("req") UserJoinReq req,                  // ← 파트 이름 명시
+                                   @RequestPart(value = "pic", required = false) MultipartFile pic) {
         log.info("pic: {}", pic != null ? pic.getOriginalFilename() : pic);
         userService.join(req, pic);
         return new ResultResponse<>("", 1);
@@ -43,7 +47,9 @@ public class UserController {
     public ResultResponse<?> login(@Valid @RequestBody UserLoginReq req, HttpServletResponse response) {
         log.info("req: {}", req);
         UserLoginDto userloginDto = userService.login(req);
-        jwtTokenManager.issue(response, userloginDto.getJwtUser());
+        String refreshToken = jwtTokenManager.issue(response, userloginDto.getJwtUser());
+
+        userService.updateRefreshToken(userloginDto.getUserLoginRes().getUserId(), refreshToken);
         return new ResultResponse<>("로그인 성공", userloginDto.getUserLoginRes());
     }
 
@@ -75,6 +81,25 @@ public class UserController {
     public ResultResponse<?> checkNicknameDuplicate(@PathVariable String nickname) {
         boolean isAvailable = userService.isNicknameAvailable(nickname);
         return new ResultResponse<>("닉네임 중복 확인", Map.of("isAvailable", isAvailable));
+    }
+    // 닉네임 수정
+    @PatchMapping("/nickname")
+    public ResponseEntity<?> updateNickname(
+            @Valid @RequestBody NicknameUpdateDto request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        if (!userService.isNicknameAvailable(request.getNickname())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "이미 사용중인 닉네임입니다."));
+        }
+
+        userService.updateNickname(userPrincipal.getSignedUserId(), request.getNickname());
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "닉네임이 변경되었습니다.",
+                "data", Map.of("nickname", request.getNickname())
+        ));
     }
 
     @PostMapping("/logout")
@@ -110,4 +135,11 @@ public class UserController {
         userService.deleteProfilePic(userPrincipal.getSignedUserId());
         return new ResultResponse<>("프로파일 사진 삭제 완료", null);
     }
+    @GetMapping("/pointhistory/{userId}")
+    public ResultResponse<?> getPointHistory(@PathVariable Long userId) {
+        PointHistoryResponseDTO response = pointService.getPointHistory(userId);
+        return new ResultResponse<>("포인트 내역 조회 성공", response);
+    }
+
+
 }
