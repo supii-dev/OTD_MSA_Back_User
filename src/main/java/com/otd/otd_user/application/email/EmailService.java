@@ -606,4 +606,130 @@ public class EmailService {
         log.info("비밀번호 재설정 완료: {}", email);
     }
 
+    /**
+     * 아이디 찾기용 이메일 인증코드 발송
+     */
+    @Transactional
+    public void sendFindIdCode(String email) {
+        // 1. 이메일 존재 여부 체크
+        if (!userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("등록되지 않은 이메일입니다.");
+        }
+
+        // 2. 기존 인증 정보 삭제
+        emailVerificationRepository.deleteByEmailAndType(email, EmailVerification.VerificationType.FIND_ID);
+
+        // 3. 인증코드 생성 및 저장
+        String verificationCode = generateRandomCode();
+        EmailVerification verification = new EmailVerification();
+        verification.setEmail(email);
+        verification.setCode(verificationCode);
+        verification.setType(EmailVerification.VerificationType.FIND_ID);
+        verification.setExpiresAt(LocalDateTime.now().plusMinutes(CODE_EXPIRY_MINUTES));
+
+        emailVerificationRepository.save(verification);
+
+        // 4. 이메일 발송
+        sendFindIdEmail(email, verificationCode);
+
+        log.info("아이디 찾기용 이메일 인증코드 발송 완료: {}", email);
+    }
+
+    /**
+     * 아이디 찾기 인증코드 검증
+     */
+    @Transactional
+    public boolean verifyFindIdCode(String email, String code) {
+        Optional<EmailVerification> verificationOpt = emailVerificationRepository
+                .findTopByEmailAndTypeOrderByCreatedAtDesc(email, EmailVerification.VerificationType.FIND_ID);
+
+        if (verificationOpt.isEmpty()) {
+            log.warn("아이디 찾기 인증코드가 존재하지 않습니다: {}", email);
+            return false;
+        }
+
+        EmailVerification verification = verificationOpt.get();
+
+        if (!verification.canVerify()) {
+            log.warn("아이디 찾기 인증코드가 만료되었거나 이미 인증되었습니다: {}", email);
+            return false;
+        }
+
+        if (!verification.getCode().equals(code)) {
+            log.warn("아이디 찾기 인증코드 불일치: {}", email);
+            return false;
+        }
+
+        // 인증 성공 처리
+        verification.setVerified(true);
+        verification.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+        emailVerificationRepository.save(verification);
+
+        log.info("아이디 찾기 인증 성공: {}", email);
+        return true;
+    }
+
+    /**
+     * 이메일로 사용자 아이디 조회
+     */
+    public String getUserIdByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        return user.getUid();
+    }
+
+    /**
+     * 아이디 찾기용 이메일 발송
+     */
+    private void sendFindIdEmail(String email, String code) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("[OneToDay] 아이디 찾기 인증코드");
+            helper.setText(createFindIdEmailContent(code), true);
+            helper.setFrom("hwangsubin93@gmail.com");
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            log.error("아이디 찾기 이메일 발송 실패: {}", email, e);
+            throw new RuntimeException("이메일 발송에 실패했습니다.");
+        }
+    }
+
+    /**
+     * 아이디 찾기용 이메일 HTML 템플릿
+     */
+    private String createFindIdEmailContent(String code) {
+        return """
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #3b82f6;">OneToDay</h1>
+                    <h2 style="color: #374151;">아이디 찾기 인증</h2>
+                </div>
+            
+                <div style="background-color: #eff6ff; padding: 30px; border-radius: 8px; text-align: center; border: 1px solid #bfdbfe;">
+                    <p style="font-size: 16px; color: #6b7280; margin-bottom: 20px;">
+                        아이디 찾기를 위해 아래 인증코드를 입력해주세요.
+                    </p>
+            
+                    <div style="background-color: #3b82f6; color: white; font-size: 32px; font-weight: bold; 
+                                padding: 20px; border-radius: 8px; letter-spacing: 8px; margin: 20px 0;">
+                        %s
+                    </div>
+            
+                    <p style="font-size: 14px; color: #9ca3af;">
+                        인증코드는 5분간 유효합니다.
+                    </p>
+                </div>
+            
+                <div style="text-align: center; margin-top: 30px;">
+                    <p style="font-size: 12px; color: #9ca3af;">
+                        본 이메일은 발신 전용입니다. 문의사항이 있으시면 고객센터로 연락해주세요.
+                    </p>
+                </div>
+            </div>
+            """.formatted(code);
+    }
 }
