@@ -35,6 +35,7 @@ public class User extends UpdatedAt{
     private String nickName;
 
     @Column(length = 100)
+    @JsonIgnore
     private String pic;
 
     @Column(length = 30)
@@ -65,6 +66,10 @@ public class User extends UpdatedAt{
     @JsonIgnore
     private String refreshToken;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAgreement> agreements = new ArrayList<>();
+
     // 본인인증 관련 필드 추가
 //    @Column(length = 88, name = "ci")
 //    private String ci; // 연계정보 (Connecting Information)
@@ -86,7 +91,6 @@ public class User extends UpdatedAt{
             this.userRoles.add(userRole);
         }
     }
-
     public EnumChallengeRole getChallengeRole() {
         return this.userRoles.stream()
                 .map(userRole -> userRole.getUserRoleIds().getChallengeCode())

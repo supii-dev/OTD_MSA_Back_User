@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -29,6 +30,7 @@ public class EmailService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final UserRepository userRepository;
     private final MunheRepository munheRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private static final int CODE_EXPIRY_MINUTES = 5;
     private static final int VERIFICATION_STATUS_EXPIRY_MINUTES = 30;
@@ -238,6 +240,25 @@ public class EmailService {
             throw new RuntimeException("이메일 발송에 실패했습니다.");
         }
     }
+    /**
+     * 이메일 변경용 인증 이메일 발송
+     */
+    private void sendEmailUpdateVerification(String email, String code) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(email);
+            helper.setSubject("[OneToDay] 이메일 변경 인증코드");
+            helper.setText(createEmailUpdateVerificationContent(code), true);
+            helper.setFrom("hwangsubin93@gmail.com");
+
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            log.error("이메일 변경 인증 이메일 발송 실패: {}", email, e);
+            throw new RuntimeException("이메일 발송에 실패했습니다.");
+        }
+    }
 
     /**
      * 비밀번호 재설정용 이메일 발송
@@ -292,6 +313,40 @@ public class EmailService {
                     </div>
                 </div>
                 """.formatted(code);
+    }
+    /**
+     * 이메일 변경용 이메일 HTML 템플릿
+     */
+    private String createEmailUpdateVerificationContent(String code) {
+        return """
+            <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #3b82f6;">OneToDay</h1>
+                    <h2 style="color: #374151;">이메일 변경 인증</h2>
+                </div>
+            
+                <div style="background-color: #eff6ff; padding: 30px; border-radius: 8px; text-align: center; border: 1px solid #bfdbfe;">
+                    <p style="font-size: 16px; color: #6b7280; margin-bottom: 20px;">
+                        이메일 변경을 완료하기 위해 아래 인증코드를 입력해주세요.
+                    </p>
+            
+                    <div style="background-color: #3b82f6; color: white; font-size: 32px; font-weight: bold; 
+                                padding: 20px; border-radius: 8px; letter-spacing: 8px; margin: 20px 0;">
+                        %s
+                    </div>
+            
+                    <p style="font-size: 14px; color: #9ca3af;">
+                        인증코드는 5분간 유효합니다.
+                    </p>
+                </div>
+            
+                <div style="text-align: center; margin-top: 30px;">
+                    <p style="font-size: 12px; color: #9ca3af;">
+                        본 이메일은 발신전용입니다. 문의사항이 있으시면 고객센터로 연락해주세요.
+                    </p>
+                </div>
+            </div>
+            """.formatted(code);
     }
 
     /**
@@ -462,4 +517,93 @@ public class EmailService {
         user.setEmail(newEmail);
         userRepository.save(user);
     }
+    /**
+     * 이메일 변경용 인증코드 발송
+     */
+    @Transactional
+    public void sendEmailUpdateCode(String newEmail, Long userId) {
+        // 1. 이메일 중복 체크
+        if (userRepository.existsByEmail(newEmail)) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        // 2. 기존 인증 정보 삭제
+        emailVerificationRepository.deleteByEmailAndType(newEmail, EmailVerification.VerificationType.EMAIL_UPDATE);
+
+        // 3. 인증코드 생성 및 저장
+        String verificationCode = generateRandomCode();
+        EmailVerification verification = new EmailVerification();
+        verification.setEmail(newEmail);
+        verification.setCode(verificationCode);
+        verification.setType(EmailVerification.VerificationType.EMAIL_UPDATE);
+        verification.setExpiresAt(LocalDateTime.now().plusMinutes(CODE_EXPIRY_MINUTES));
+
+        emailVerificationRepository.save(verification);
+
+        // 4. 이메일 발송
+        sendEmailUpdateVerification(newEmail, verificationCode);
+
+        log.info("이메일 변경 인증코드 발송 완료: {} (사용자ID: {})", newEmail, userId);
+    }
+
+    /**
+     * 이메일 변경 코드 검증
+     */
+    @Transactional
+    public boolean verifyEmailUpdateCode(String email, String code) {
+        Optional<EmailVerification> verificationOpt = emailVerificationRepository
+                .findTopByEmailAndTypeOrderByCreatedAtDesc(email, EmailVerification.VerificationType.EMAIL_UPDATE);
+
+        if (verificationOpt.isEmpty()) {
+            log.warn("이메일 변경 인증코드가 존재하지 않습니다: {}", email);
+            return false;
+        }
+
+        EmailVerification verification = verificationOpt.get();
+
+        if (!verification.canVerify()) {
+            log.warn("이메일 변경 인증코드가 만료되었거나 이미 인증되었습니다: {}", email);
+            return false;
+        }
+
+        if (!verification.getCode().equals(code)) {
+            log.warn("이메일 변경 인증코드 불일치: {}", email);
+            return false;
+        }
+
+        // 인증 성공 처리
+        verification.setVerified(true);
+        verification.setExpiresAt(LocalDateTime.now().plusMinutes(10)); // 10분간 변경 권한
+        emailVerificationRepository.save(verification);
+
+        log.info("이메일 변경 인증 성공: {}", email);
+        return true;
+    }
+
+    /**
+     * 이메일 변경 권한 확인
+     */
+    public boolean canUpdateEmail(String email) {
+        Optional<EmailVerification> verificationOpt = emailVerificationRepository
+                .findVerifiedByEmailAndType(email, EmailVerification.VerificationType.EMAIL_UPDATE, LocalDateTime.now());
+        return verificationOpt.isPresent();
+    }
+
+    /**
+     * 비밀번호 재설정 (이메일 인증 완료 후)
+     */
+    @Transactional
+    public void resetPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다"));
+
+        user.setUpw(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // 비밀번호 재설정 권한 삭제
+        removePasswordResetPermission(email);
+
+        log.info("비밀번호 재설정 완료: {}", email);
+    }
+
 }

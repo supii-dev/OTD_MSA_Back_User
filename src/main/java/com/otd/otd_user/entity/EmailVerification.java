@@ -39,7 +39,8 @@ public class EmailVerification {
 
     public enum VerificationType {
         SIGNUP,           // 회원가입용
-        PASSWORD_RESET    // 비밀번호 재설정용
+        PASSWORD_RESET,    // 비밀번호 재설정용
+        EMAIL_UPDATE //이메일수정용
     }
 
     // 만료 여부 확인
