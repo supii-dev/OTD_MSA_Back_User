@@ -38,7 +38,7 @@ public class AdminController {
         return adminService.getPointHistory();
     }
 
-    @GetMapping("user/detail/{userId}")
+    @GetMapping("user/{userId}")
     public AdminUserDetailGetRes getUserDetail(@PathVariable Long userId) {
         return adminService.getUserDetail(userId);
     }
