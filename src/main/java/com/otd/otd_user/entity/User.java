@@ -70,13 +70,6 @@ public class User extends UpdatedAt{
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAgreement> agreements = new ArrayList<>();
 
-    // 본인인증 관련 필드 추가
-//    @Column(length = 88, name = "ci")
-//    private String ci; // 연계정보 (Connecting Information)
-//
-//    @Column(length = 64, name = "di")
-//    private String di; // 중복가입확인정보 (Duplication Information)
-
     //cascade는 자식과 나랑 모든 연결 (내가 영속성되면 자식도 영속성되고, 내가 삭제되면 자식도 삭제 된다. 등등)
     //ohphanRemoval은 userRoles에서 자식을 하나 제거함. 그러면 DB에도 뺀 자식은 삭제처리가 된다.
     @Builder.Default

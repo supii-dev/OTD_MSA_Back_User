@@ -166,5 +166,38 @@ import java.util.Map;
                 "message", "비밀번호가 변경되었습니다."
         ));
     }
+    /**
+     * 아이디 찾기용 이메일 인증코드 발송
+     */
+    @PostMapping("/send-find-id-code")
+    public ResultResponse<?> sendFindIdCode(@Valid @RequestBody EmailSendReq req) {
+        log.info("아이디 찾기용 이메일 인증코드 발송 요청: {}", req.getEmail());
+        emailService.sendFindIdCode(req.getEmail());
+        return new ResultResponse<>("아이디 찾기 인증코드가 발송되었습니다.", null);
+    }
+
+    /**
+     * 아이디 찾기용 인증코드 검증 및 아이디 반환
+     */
+    @PostMapping("/verify-find-id-code")
+    public ResponseEntity<?> verifyFindIdCode(@Valid @RequestBody EmailCodeVerifyReq req) {
+        log.info("아이디 찾기용 인증코드 검증 요청: {}", req.getEmail());
+
+        boolean isValid = emailService.verifyFindIdCode(req.getEmail(), req.getCode());
+
+        if (!isValid) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", "인증코드가 일치하지 않습니다."));
+        }
+
+        // 인증 성공 시 아이디 조회
+        String userId = emailService.getUserIdByEmail(req.getEmail());
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "userId", userId,
+                "message", "인증이 완료되었습니다."
+        ));
+    }
 }
 

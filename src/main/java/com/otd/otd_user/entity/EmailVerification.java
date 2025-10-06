@@ -24,7 +24,7 @@ public class EmailVerification {
     private String code;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "type", nullable = false, length = 20)
     private VerificationType type;
 
     @Column(nullable = false)
@@ -40,8 +40,9 @@ public class EmailVerification {
     public enum VerificationType {
         SIGNUP,           // 회원가입용
         PASSWORD_RESET,    // 비밀번호 재설정용
-        EMAIL_UPDATE //이메일수정용
-    }
+        EMAIL_UPDATE, //이메일수정용
+        FIND_ID //아이디찾기
+        }
 
     // 만료 여부 확인
     public boolean isExpired() {
