@@ -97,4 +97,22 @@ public class AdminService {
         userRepository.save(user);
         return new ResultResponse("유저 정보가 수정되었습니다.", user.getUserId());
     }
+
+    @Transactional
+    public ResultResponse<?> putChallengeDetail(AdminChallengePutReq req) {
+        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(req.getCdId());
+        if (cd == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 챌린지를 찾을 수 없습니다.");
+        }
+        cd.setNote(req.getNote());
+        cd.setCdGoal(req.getCdGoal());
+        cd.setCdName(req.getCdName());
+        cd.setCdImage(req.getCdImage());
+        cd.setCdReward(req.getCdReward());
+        cd.setCdType(req.getCdType());
+        cd.setCdUnit(req.getCdUnit());
+        cd.setXp(req.getXp());
+        cd.setTier(req.getTier());
+        return new ResultResponse("유저 정보가 수정되었습니다.", req.getCdId());
+    }
 }

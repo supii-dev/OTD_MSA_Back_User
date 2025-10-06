@@ -45,7 +45,12 @@ public class AdminController {
         return adminService.putUserDetail(req);
     }
 
-
+    @PutMapping("/{cdId}")
+    public ResultResponse<?> putChallenge(@PathVariable Long cdId,
+                                          @RequestBody AdminChallengePutReq req){
+        req.setCdId(cdId);
+        return adminService.putChallengeDetail(req);
+    }
 
 
 
