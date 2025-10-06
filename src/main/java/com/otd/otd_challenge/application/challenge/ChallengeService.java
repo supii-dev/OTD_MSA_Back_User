@@ -480,6 +480,22 @@ public class ChallengeService {
                         }
                     }
                 }
+                else if (cdName.equals("칼로리 소비")){
+                    if (!exist && req.getTotalKcal() >= cp.getChallengeDefinition().getCdGoal()){
+                        ChallengeRecord cr = ChallengeRecord.builder()
+                                .challengeProgress(cp)
+                                .recDate(req.getRecordDate())
+                                .recordId(req.getRecordId())
+                                .recValue(300)
+                                .build();
+                        challengeRecordRepository.save(cr);
+
+                        cp.setTotalRecord(cp.getTotalRecord() + 1);
+                        if (cp.getTotalRecord() >= cp.getChallengeDefinition().getCdGoal()) {
+                            cp.setSuccess(true);
+                        }
+                    }
+                }
             } else {
                 ChallengeRecord cr = ChallengeRecord.builder()
                         .challengeProgress(cp)
@@ -538,16 +554,28 @@ public class ChallengeService {
         // Personal 챌린지 삭제 처리
         for (ChallengeProgress cp : exerciseProgress) {
             if (cp == null) continue; // 안전장치
+            String cdName = cp.getChallengeDefinition().getCdName();
+            ChallengeRecord cr =
+                    challengeRecordRepository.findByChallengeProgressAndRecDate(
+                            cp, req.getRecordDate());
+            if (req.getCount() == 0 && !cdName.equals("칼로리 소비")) {
 
-            if (req.getCount() == 0) {
-                ChallengeRecord todayRecords =
-                        challengeRecordRepository.findByChallengeProgressAndRecDate(cp, req.getRecordDate());
-
-                if (todayRecords != null) { // null check 추가
+                if (cr != null) { // null check 추가
                     cp.setTotalRecord(cp.getTotalRecord() - 1);
-                    challengeRecordRepository.delete(todayRecords);
+                    challengeRecordRepository.delete(cr);
 
-                    if (cp.getTotalRecord() <= goal) {
+                    if (cp.getTotalRecord() < goal) {
+                        cp.setSuccess(false);
+                    }
+                }
+            } else if ("칼로리 소비".equals(cdName)
+                    && cp.getChallengeDefinition().getCdGoal() > req.getTotalKcal()) {
+
+                if (cr != null) {
+                    cp.setTotalRecord(cp.getTotalRecord() - 1);
+                    challengeRecordRepository.delete(cr);
+
+                    if (cp.getTotalRecord() < goal) {
                         cp.setSuccess(false);
                     }
                 }
