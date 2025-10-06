@@ -7,9 +7,11 @@ import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMis
 import com.otd.otd_challenge.application.challenge.model.home.MainHomGetReq;
 import com.otd.otd_challenge.application.challenge.model.home.MainHomeGetRes;
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementDto;
+import com.otd.otd_challenge.entity.ChallengeProgress;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface ChallengeMapper {
@@ -26,4 +28,5 @@ public interface ChallengeMapper {
     int saveMissionRecordByUserIdAndCpId(Long userId, Long cdId);
     List<ChallengeMissionCompleteGetRes> findByUserIdAndMissionComplete(Long userId);
     List<MainHomeGetRes> findAllMyChallenge(MainHomGetReq req);
+    Optional<ChallengeProgress> findByUserIdAndCdId(Long userId, Long cdId);
 }
