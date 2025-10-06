@@ -15,4 +15,23 @@
         FROM user
         GROUP BY ageGroup;
     </select>
+
+    <select id="findAll">
+        SELECT u.user_id,
+            u.created_at,
+            u.birth_date,
+            u.email, u.gender,
+            u.`name`,
+            u.nick_name,
+            u.phone, u.pic,
+            u.`point`,
+            u.provider_type,
+            u.uid,
+            u.xp,
+            ur.challenge_code AS challengeRole,
+            ur.role_code AS userRole
+        FROM user u
+        JOIN user_role ur
+        ON u.user_id = ur.user_id;
+    </select>
 </mapper>
