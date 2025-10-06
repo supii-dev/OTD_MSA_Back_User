@@ -11,8 +11,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import java.util.List;
-
 public interface ChallengeProgressRepository extends JpaRepository<ChallengeProgress, Long> {
 
     @Modifying
@@ -24,7 +22,7 @@ public interface ChallengeProgressRepository extends JpaRepository<ChallengeProg
             "WHERE cp.user.userId = :userId " +
             "AND cp.challengeDefinition.cdName = :name " +
             "AND :recordDate <= cp.endDate")
-    List<ChallengeProgress> findActiveProgress(
+    Optional<ChallengeProgress> findActiveProgress(
             @Param("userId") Long userId,
             @Param("name") String name,
             @Param("recordDate") LocalDate recordDate);
@@ -32,16 +30,21 @@ public interface ChallengeProgressRepository extends JpaRepository<ChallengeProg
     @Query("SELECT cp FROM ChallengeProgress cp " +
             "WHERE cp.user.userId = :userId " +
             "AND cp.challengeDefinition.cdType = 'personal' " +
-            "AND cp.challengeDefinition.cdName = :personalName " +
             "AND cp.startDate <= :recordDate " +
             "AND cp.endDate >= :recordDate")
     List<ChallengeProgress> findActiveProgressByType(
             @Param("userId") Long userId,
-            String personalName,
             @Param("recordDate") LocalDate recordDate
     );
 
 
     @Query("SELECT cp FROM ChallengeProgress cp WHERE cp.user.userId = :userId")
     List<ChallengeProgress> findByUserId(Long userId);
+
+    @Query("SELECT cp.challengeDefinition.cdName FROM ChallengeProgress cp " +
+            "WHERE cp.user.userId = :userId " +
+            "AND cp.startDate <= :recordDate " +
+            "AND cp.endDate >= :recordDate")
+    List<String> findActiveChallengeNames(@Param("userId") Long userId
+                                        , @Param("recordDate") LocalDate recordDate);
 }

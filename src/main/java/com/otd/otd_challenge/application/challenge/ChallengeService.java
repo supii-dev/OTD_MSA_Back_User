@@ -418,57 +418,75 @@ public class ChallengeService {
     }
 
     private final int goal = 15;
+    String doExercise = "운동하기";
     @Transactional
     public int updateProgressEx(ExerciseDataReq req) {
-        String personalName = "운동하기";
         // 월간 개인챌린지 조회
         List<ChallengeProgress> personalProgresses =
                 challengeProgressRepository.findActiveProgressByType(
                         req.getUserId(),
-                        personalName,
                         req.getToday()
                 );
         // 운동 이름과 같은 챌린지 조회
-        List<ChallengeProgress> mapProgresses =
+        ChallengeProgress mapProgresses =
                 challengeProgressRepository.findActiveProgress(
                         req.getUserId(),
                         req.getName(),
                         req.getToday()
-                );
+                ).orElse(null);
 
         List<ChallengeProgress> progresses = new ArrayList<>();
-        progresses.addAll(personalProgresses);
-        progresses.addAll(mapProgresses);
+        if (personalProgresses != null)progresses.addAll(personalProgresses);
+        if (mapProgresses != null)progresses.add(mapProgresses);
 
         for (ChallengeProgress cp : progresses) {
 
-            if (cp.getChallengeDefinition().getCdType().equals("personal")
-                    && cp.getChallengeDefinition().getCdName().equals(personalName)) {
-                boolean exist = challengeRecordRepository
-                        .existsByChallengeProgressAndRecDate(cp ,req.getRecordDate());
+            String cdName = cp.getChallengeDefinition().getCdName();
+            String cdType = cp.getChallengeDefinition().getCdType();
 
-                if (!exist && req.getCount() != 0) {
-                    ChallengeRecord cr = ChallengeRecord.builder()
-                            .challengeProgress(cp)
-                            .recDate(req.getRecordDate())
-                            .recordId(req.getRecordId())
-                            .recValue(req.getRecord())
-                            .build();
+            boolean exist = challengeRecordRepository
+                    .existsByChallengeProgressAndRecDate(cp, req.getRecordDate());
 
-                    challengeRecordRepository.save(cr);
-                    cp.setTotalRecord(cp.getTotalRecord() + 1);
+            if (cdType.equals("personal")) {
+                // 운동하기 챌린지인 경우: 어떤 운동이든 하루 한 번만 +1
+                if (cdName.equals("운동하기")) {
+                    if (!exist) {
+                        ChallengeRecord cr = ChallengeRecord.builder()
+                                .challengeProgress(cp)
+                                .recDate(req.getRecordDate())
+                                .recordId(req.getRecordId())
+                                .recValue(1.0)
+                                .build();
+                        challengeRecordRepository.save(cr);
 
-                    if (cp.getTotalRecord() >= goal) {
-                        cp.setSuccess(true);
+                        cp.setTotalRecord(cp.getTotalRecord() + 1);
+                        if (cp.getTotalRecord() >= goal) cp.setSuccess(true);
                     }
                 }
+                // 일반 개인 챌린지 (계단오르기, 요가 등)
+                else if (cdName.equals(req.getName())) {
+                    if (!exist) {
+                        ChallengeRecord cr = ChallengeRecord.builder()
+                                .challengeProgress(cp)
+                                .recDate(req.getRecordDate())
+                                .recordId(req.getRecordId())
+                                .recValue(1.0)
+                                .build();
+                        challengeRecordRepository.save(cr);
 
+                        cp.setTotalRecord(cp.getTotalRecord() + 1);
+                        if (cp.getTotalRecord() >= cp.getChallengeDefinition().getCdGoal()) {
+                            cp.setSuccess(true);
+                        }
+                    }
+                }
             } else {
                 ChallengeRecord cr = ChallengeRecord.builder()
                         .challengeProgress(cp)
                         .recDate(req.getRecordDate())
                         .recordId(req.getRecordId())
-                        .recValue(req.getRecord()).build();
+                        .recValue(req.getRecord())
+                        .build();
 
                 challengeRecordRepository.save(cr);
 
@@ -476,9 +494,7 @@ public class ChallengeService {
                 cp.setTotalRecord(newTotal);
 
                 double goal = cp.getChallengeDefinition().getCdGoal();
-                if (newTotal >= goal) {
-                    cp.setSuccess(true);
-                }
+                if (newTotal >= goal) cp.setSuccess(true);
             }
         }
         return 1;
@@ -486,83 +502,98 @@ public class ChallengeService {
 
     @Transactional
     public int deleteRecord(ChallengeRecordDeleteReq req) {
-        // progress 조회 및 처리
-        List<ChallengeProgress> mapProgresses =
+
+        // 운동 이름과 같은 챌린지 조회
+        ChallengeProgress mapProgresses =
                 challengeProgressRepository.findActiveProgress(
                         req.getUserId(),
                         req.getName(),
                         req.getToday()
-                );
+                ).orElse(null);
 
-        for (ChallengeProgress cp : mapProgresses) {
+        if (mapProgresses != null &&
+                mapProgresses.getChallengeDefinition() != null &&
+                !"personal".equals(mapProgresses.getChallengeDefinition().getCdType())) {
+
             ChallengeRecord cr = challengeRecordRepository
-                    .findByChallengeProgressAndRecordId(cp, req.getRecordId());
+                    .findByChallengeProgressAndRecordId(mapProgresses, req.getRecordId());
 
             if (cr != null) {
-                cp.setTotalRecord(cp.getTotalRecord() - cr.getRecValue());
-
+                mapProgresses.setTotalRecord(mapProgresses.getTotalRecord() - cr.getRecValue());
                 challengeRecordRepository.delete(cr);
 
-                if (cp.getTotalRecord() < cp.getChallengeDefinition().getCdGoal()) {
-                    cp.setSuccess(false);
+                if (mapProgresses.getTotalRecord() < mapProgresses.getChallengeDefinition().getCdGoal()) {
+                    mapProgresses.setSuccess(false);
                 }
             }
         }
 
-        // 개인 챌린지 조회 및 처리
-        String personalName = "운동하기";
-        List<ChallengeProgress> personalProgresses =
+        //  개인 챌린지 조회
+        List<ChallengeProgress> exerciseProgress =
                 challengeProgressRepository.findActiveProgressByType(
                         req.getUserId(),
-                        personalName,
                         req.getToday()
                 );
 
-        for (ChallengeProgress cp : personalProgresses) {
+        // Personal 챌린지 삭제 처리
+        for (ChallengeProgress cp : exerciseProgress) {
+            if (cp == null) continue; // 안전장치
+
             if (req.getCount() == 0) {
-                // 오늘 남은 운동 기록이 없음 → personal 챌린지 기록 삭제
                 ChallengeRecord todayRecords =
                         challengeRecordRepository.findByChallengeProgressAndRecDate(cp, req.getRecordDate());
 
-                cp.setTotalRecord(cp.getTotalRecord() - 1);
-                challengeRecordRepository.delete(todayRecords);
+                if (todayRecords != null) { // null check 추가
+                    cp.setTotalRecord(cp.getTotalRecord() - 1);
+                    challengeRecordRepository.delete(todayRecords);
 
-
-                if (cp.getTotalRecord() <= goal) {
-                    cp.setSuccess(false);
+                    if (cp.getTotalRecord() <= goal) {
+                        cp.setSuccess(false);
+                    }
                 }
             }
         }
+
         return 1;
     }
+
 
     @Transactional
     public int updateProgressMeal(MealDataReq req) {
         List<ChallengeProgress> personalProgresses =
                 challengeProgressRepository.findActiveProgressByType(
                         req.getUserId(),
-                        req.getName(),
                         req.getToday()
                 );
 
         for (ChallengeProgress cp : personalProgresses) {
+            String cdName = cp.getChallengeDefinition().getCdName();
 
-            if (cp.getChallengeDefinition().getCdGoal() <= req.getTotalProtein()){
-                boolean exist = challengeRecordRepository
-                        .existsByChallengeProgressAndRecDate(cp ,req.getMealDay());
+            // 챌린지 이름 매칭 (정확히 일치해야 함)
+            if (cdName.equals(req.getName())) {
 
-                if (!exist && cp.getStartDate().isBefore(req.getMealDay())){
-                    ChallengeRecord cr = ChallengeRecord.builder()
-                            .challengeProgress(cp)
-                            .recValue(req.getTotalProtein())
-                            .recDate(req.getMealDay())
-                            .build();
+                // 단백질량이 목표 이상인 경우 한 번 더 체크
+                if (cp.getChallengeDefinition().getCdGoal() <= req.getTotalProtein()) {
 
-                    challengeRecordRepository.save(cr);
-                    cp.setTotalRecord(cp.getTotalRecord() + 1);
+                    // 오늘 날짜가 챌린지 기간 안이고, 기록이 아직 없는 경우
+                    boolean exist = challengeRecordRepository
+                            .existsByChallengeProgressAndRecDate(cp, req.getMealDay());
 
-                    if (cp.getTotalRecord() >= goal) {
-                        cp.setSuccess(true);
+                    if (!exist && !cp.getStartDate().isAfter(req.getMealDay()) &&
+                            !cp.getEndDate().isBefore(req.getMealDay())) {
+
+                        ChallengeRecord cr = ChallengeRecord.builder()
+                                .challengeProgress(cp)
+                                .recValue(req.getTotalProtein())
+                                .recDate(req.getMealDay())
+                                .build();
+
+                        challengeRecordRepository.save(cr);
+                        cp.setTotalRecord(cp.getTotalRecord() + 1);
+
+                        if (cp.getTotalRecord() >= goal) {
+                            cp.setSuccess(true);
+                        }
                     }
                 }
             }
