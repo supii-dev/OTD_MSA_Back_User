@@ -566,12 +566,22 @@ public class ChallengeService {
                         req.getToday()
                 );
 
-            for (ChallengeProgress cp : personalProgresses) {
-                if (cp.getChallengeDefinition().getCdGoal() <= req.getTotalProtein()){
-                    boolean exist = challengeRecordRepository
-                            .existsByChallengeProgressAndRecDate(cp ,req.getMealDay());
+        for (ChallengeProgress cp : personalProgresses) {
+            String cdName = cp.getChallengeDefinition().getCdName();
 
-                    if (!exist && cp.getStartDate().isBefore(req.getMealDay())){
+            // 챌린지 이름 매칭 (정확히 일치해야 함)
+            if (cdName.equals(req.getName())) {
+
+                // 단백질량이 목표 이상인 경우 한 번 더 체크
+                if (cp.getChallengeDefinition().getCdGoal() <= req.getTotalProtein()) {
+
+                    // 오늘 날짜가 챌린지 기간 안이고, 기록이 아직 없는 경우
+                    boolean exist = challengeRecordRepository
+                            .existsByChallengeProgressAndRecDate(cp, req.getMealDay());
+
+                    if (!exist && !cp.getStartDate().isAfter(req.getMealDay()) &&
+                            !cp.getEndDate().isBefore(req.getMealDay())) {
+
                         ChallengeRecord cr = ChallengeRecord.builder()
                                 .challengeProgress(cp)
                                 .recValue(req.getTotalProtein())
@@ -585,10 +595,9 @@ public class ChallengeService {
                             cp.setSuccess(true);
                         }
                     }
-
+                }
             }
-            }
-
+        }
         return 1;
     }
 }
