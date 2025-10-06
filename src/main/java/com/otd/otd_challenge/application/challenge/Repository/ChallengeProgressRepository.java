@@ -11,9 +11,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.List;
+
 public interface ChallengeProgressRepository extends JpaRepository<ChallengeProgress, Long> {
 
     @Modifying
+    @Transactional
     @Query("UPDATE ChallengeProgress SET isSuccess = true WHERE cpId = :cpId")
     int updateIsSuccess(@Param("cpId") Long cpId);
 
@@ -38,4 +41,7 @@ public interface ChallengeProgressRepository extends JpaRepository<ChallengeProg
             @Param("recordDate") LocalDate recordDate
     );
 
+
+    @Query("SELECT cp FROM ChallengeProgress cp WHERE cp.user.userId = :userId")
+    List<ChallengeProgress> findByUserId(Long userId);
 }

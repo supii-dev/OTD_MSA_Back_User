@@ -35,7 +35,6 @@ public class User extends UpdatedAt{
     private String nickName;
 
     @Column(length = 100)
-    @JsonIgnore
     private String pic;
 
     @Column(length = 30)
@@ -80,6 +79,7 @@ public class User extends UpdatedAt{
             this.userRoles.add(userRole);
         }
     }
+
     public EnumChallengeRole getChallengeRole() {
         return this.userRoles.stream()
                 .map(userRole -> userRole.getUserRoleIds().getChallengeCode())
