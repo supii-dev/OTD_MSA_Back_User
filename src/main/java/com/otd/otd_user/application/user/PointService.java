@@ -36,20 +36,15 @@ public class PointService {
     private final UserMapper userMapper;
 
     public PointHistoryResponseDTO getPointHistory(Long userId) {
-        log.info("===== 포인트 내역 조회 시작 =====");
-        log.info("요청 userId: {}", userId);
-
         // 사용자 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        log.info("사용자 조회 성공 - nickName: {}, point: {}", user.getNickName(), user.getPoint());
 
         // 포인트 내역 조회
         List<ChallengePointHistory> histories =
                 userChallengePointRepository.findByUserUserIdOrderByCreatedAtDesc(userId);
 
-        log.info("조회된 포인트 내역 개수: {}", histories.size());
 
         // 데이터가 있으면 첫 번째 항목 로그 출력
         if (!histories.isEmpty()) {
@@ -70,8 +65,6 @@ public class PointService {
                         .build())
                 .collect(Collectors.toList());
 
-        log.info("DTO 변환 완료: {} 건", historyDTOs.size());
-        log.info("===== 포인트 내역 조회 종료 =====");
 
         // 응답 생성
         return PointHistoryResponseDTO.builder()
