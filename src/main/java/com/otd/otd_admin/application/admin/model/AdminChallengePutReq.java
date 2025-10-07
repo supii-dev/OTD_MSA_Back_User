@@ -9,7 +9,7 @@ import lombok.Setter;
 public class AdminChallengePutReq {
     private Long cdId;
     private String cdName;
-    private Long cdGoal;
+    private int cdGoal;
     private String cdImage;
     private int cdReward;
     private String cdType;
