@@ -44,4 +44,8 @@ public class UserJoinReq{
 
     private List<EnumUserRole> roles;
     private int surveyAnswers; // 챌린지 설문 총 점수
+
+    private List<Long> agreedTermsIds; //약관관련
+    private String ipAddress;
+    private String userAgent;
 }

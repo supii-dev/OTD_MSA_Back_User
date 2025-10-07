@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @ToString
@@ -12,7 +14,7 @@ public class MainHomGetReq {
     private Long userId;
     private int year;
     private int month;
-    private int day;
+    private LocalDate date;
 
     public int getYear() {
         return FormattedTime.fetchYear();
@@ -20,7 +22,7 @@ public class MainHomGetReq {
     public int getMonth() {
         return FormattedTime.fetchMonth();
     }
-    public int getDay() {
-        return FormattedTime.fetchDay();
+    public LocalDate getDate() {
+        return FormattedTime.fetchDate();
     }
 }

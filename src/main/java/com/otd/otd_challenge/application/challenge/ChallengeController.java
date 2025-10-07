@@ -2,11 +2,15 @@ package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.model.UserPrincipal;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeProgressRepository;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeDetailDayGetRes;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeDetailPerGetRes;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgressGetReq;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeSuccessPutReq;
+import com.otd.otd_challenge.application.challenge.model.feignClient.ChallengeRecordDeleteReq;
+import com.otd.otd_challenge.application.challenge.model.feignClient.ExerciseDataReq;
+import com.otd.otd_challenge.application.challenge.model.feignClient.MealDataReq;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeRecordMissionPostReq;
 import com.otd.otd_challenge.application.challenge.model.home.MainHomGetReq;
@@ -16,13 +20,13 @@ import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSet
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +38,7 @@ public class ChallengeController {
 
     private final ChallengeService challengeService;
     private final ChallengeSchedulerService challengeSchedulerService;
-
+    private final ChallengeProgressRepository challengeProgressRepository;
 
 
     @GetMapping("/list")
@@ -106,5 +110,41 @@ public class ChallengeController {
     public List<MainHomeGetRes> getMyChallenge(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                                @ModelAttribute MainHomGetReq req) {
         return challengeService.getMainHomeChallenge(userPrincipal.getSignedUserId(), req);
+    }
+
+    @PostMapping("/progress/exercise")
+    public ResponseEntity<Integer> patchExerciseProgress(@RequestBody ExerciseDataReq req) {
+        int result = challengeService.updateProgressEx(req);
+        if (result > 0) {
+            return ResponseEntity.ok(result); // 200 + 1
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result); // 400 + 0
+        }
+    }
+
+    @DeleteMapping("/record/delete")
+    public ResponseEntity<Integer> deleteRecord(@RequestBody ChallengeRecordDeleteReq req) {
+        int result = challengeService.deleteRecord(req);
+        if (result > 0) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+
+    @PostMapping("/progress/meal")
+    public ResponseEntity<Integer> patchMealProgress(@RequestBody MealDataReq req) {
+        int result = challengeService.updateProgressMeal(req);
+        if (result > 0) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+    }
+    @GetMapping("/progress/challenges/{userId}")
+    public ResponseEntity<List<String>> getActiveChallengeNames(@PathVariable Long userId
+            , @RequestParam("recordDate") LocalDate recordDate) {
+        List<String> challengeNames = challengeProgressRepository.findActiveChallengeNames(userId, recordDate);
+        return ResponseEntity.ok(challengeNames);
     }
 }

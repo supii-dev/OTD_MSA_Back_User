@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @EqualsAndHashCode
 @Builder
+@Setter
 @DynamicInsert
 public class ChallengeProgress {
 
