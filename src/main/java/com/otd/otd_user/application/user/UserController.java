@@ -1,5 +1,8 @@
 package com.otd.otd_user.application.user;
 
+import com.otd.otd_challenge.application.challenge.ChallengeService;
+import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgressGetReq;
+import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
 import com.otd.otd_user.application.email.model.PasswordChangeReq;
 import com.otd.otd_user.application.email.model.PasswordResetReq;
 import com.otd.otd_user.application.user.model.*;
@@ -28,6 +31,7 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenManager jwtTokenManager;
     private final PointService pointService;
+    private final ChallengeService challengeService;
 
     @PostMapping(
             value = "/join",
@@ -176,5 +180,13 @@ public class UserController {
         int result = userService.deleteById(userPrincipal.getSignedUserId());
         jwtTokenManager.logout(response);
         return new ResultResponse<>("회원 탈퇴 완료", result);
+    }
+    //전체 미션 완료 내역 조회
+    @GetMapping("/missions/complete")
+    public ResultResponse<?> getAllMissionComplete(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        ChallengeProgressGetReq req = new ChallengeProgressGetReq();
+        // 필요한 경우 날짜 설정
+        ChallengeHomeGetRes response = pointService.getSelectedListAll(userPrincipal.getSignedUserId(), req);
+        return new ResultResponse<>("미션 완료 내역 조회 성공", response);
     }
 }
