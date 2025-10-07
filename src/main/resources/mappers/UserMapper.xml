@@ -24,4 +24,10 @@
     <select id="countByNickname" parameterType="string" resultType="int">
         SELECT COUNT(*) FROM user WHERE nick_name = #{nickname}
     </select>
+    <select id="findAllMissionCompleteByUserId">
+        SELECT cm_id, user_id, cd_id, success_date
+        FROM challenge_mission
+        WHERE user_id = #{userId}
+        ORDER BY success_date DESC
+    </select>
 </mapper>
