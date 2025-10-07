@@ -29,7 +29,7 @@ public class ChallengeDefinition {
     private String cdImage;
 
     @Column(nullable = false)
-    private Long cdGoal;
+    private int cdGoal;
 
     @Column(nullable = false, length = 10)
     private String cdUnit;
