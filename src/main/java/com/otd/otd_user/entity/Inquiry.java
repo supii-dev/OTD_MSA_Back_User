@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Munhe {
+public class Inquiry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

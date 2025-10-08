@@ -3,7 +3,7 @@ package com.otd.otd_user.application.email;
 import com.otd.otd_user.application.email.model.MunheEmailReq;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.EmailVerification;
-import com.otd.otd_user.entity.Munhe;
+import com.otd.otd_user.entity.Inquiry;
 import com.otd.otd_user.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -481,22 +481,22 @@ public class EmailService {
     @Transactional
     public void sendMunheEmail(MunheEmailReq req, Long userId) {
         // DB에 저장
-        Munhe munhe = new Munhe();
-        munhe.setUserId(userId);
-        munhe.setSubject(req.getSubject());
-        munhe.setContent(req.getMessage());
+        Inquiry inquiry = new Inquiry();
+        inquiry.setUserId(userId);
+        inquiry.setSubject(req.getSubject());
+        inquiry.setContent(req.getMessage());
         // userId로 User 테이블에서 이메일 조회
         if (userId != null) {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다"));
-            munhe.setSenderEmail(user.getEmail());
-            munhe.setSenderName(user.getNickName());
+            inquiry.setSenderEmail(user.getEmail());
+            inquiry.setSenderName(user.getNickName());
         } else {
-            munhe.setSenderEmail(req.getSenderEmail());
-            munhe.setSenderName(req.getSenderName());
+            inquiry.setSenderEmail(req.getSenderEmail());
+            inquiry.setSenderName(req.getSenderName());
         }
-        Munhe savedMunhe = munheRepository.save(munhe);
-        log.info("문의 DB 저장 완료. ID: {}, 사용자: {}", savedMunhe.getId(), userId);
+        Inquiry savedInquiry = munheRepository.save(inquiry);
+        log.info("문의 DB 저장 완료. ID: {}, 사용자: {}", savedInquiry.getId(), userId);
 
         // 이메일 전송
         sendInquiryEmail(req);

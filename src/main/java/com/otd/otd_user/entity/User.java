@@ -28,14 +28,12 @@ public class User extends UpdatedAt{
     private String uid;
 
     @Column(nullable = false, length = 100)
-    @JsonIgnore
     private String upw;
 
     @Column(length = 30, name = "nick_name")
     private String nickName;
 
     @Column(length = 100)
-    @JsonIgnore
     private String pic;
 
     @Column(length = 30)
@@ -47,11 +45,11 @@ public class User extends UpdatedAt{
     @Column(length = 1)
     private String gender; // 성별 (M: 남성, F: 여성)
 
-    @Column(length = 100, unique = true)
-    private String email; // 이메일 (고유값으로 설정)
+    @Column(length = 100)
+    private String email;
 
     @Column(length = 30)
-    private String phone; // 휴대폰번호
+    private String phone;
 
     @Column(length = 2)
     private SignInProviderType providerType;
@@ -63,7 +61,6 @@ public class User extends UpdatedAt{
     private int xp;
 
     @Column(length = 300)
-    @JsonIgnore
     private String refreshToken;
 
     @Builder.Default
