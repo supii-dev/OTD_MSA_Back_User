@@ -65,6 +65,7 @@ public class User extends UpdatedAt{
     @JsonIgnore
     private String refreshToken;
 
+    @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAgreement> agreements = new ArrayList<>();
