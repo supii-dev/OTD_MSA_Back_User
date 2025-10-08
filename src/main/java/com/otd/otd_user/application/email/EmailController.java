@@ -41,6 +41,36 @@ import java.util.Map;
             return new ResultResponse<>("인증코드가 일치하지 않습니다.", Map.of("verified", false));
         }
     }
+    /**
+     * 이메일 변경용 인증코드 발송
+     */
+    @PostMapping("/send-email-update-code")
+    public ResultResponse<?> sendEmailUpdateCode(
+            @Valid @RequestBody EmailSendReq req,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        log.info("이메일 변경 인증코드 발송 요청: {} (사용자ID: {})",
+                req.getEmail(), userPrincipal.getSignedUserId());
+        emailService.sendEmailUpdateCode(req.getEmail(), userPrincipal.getSignedUserId());
+        return new ResultResponse<>("이메일 변경 인증코드가 발송되었습니다.", null);
+    }
+
+    /**
+     * 이메일 변경용 인증코드 검증
+     */
+    @PostMapping("/verify-email-update-code")
+    public ResultResponse<?> verifyEmailUpdateCode(
+            @Valid @RequestBody EmailVerifyReq req,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        log.info("이메일 변경 인증코드 검증 요청: {}", req.getEmail());
+        boolean isValid = emailService.verifyEmailUpdateCode(req.getEmail(), req.getCode());
+        if (isValid) {
+            return new ResultResponse<>("인증이 완료되었습니다. 이메일을 변경할 수 있습니다.",
+                    Map.of("verified", true));
+        } else {
+            return new ResultResponse<>("인증코드가 일치하지 않습니다.",
+                    Map.of("verified", false));
+        }
+    }
 
     /**
      * 비밀번호 재설정용 이메일 인증코드 발송
@@ -78,12 +108,12 @@ import java.util.Map;
     /**
      * 문의하기 이메일 전송
      */
-    @PostMapping("/sendMunhe")
-    public ResultResponse<?> sendInquiryEmail(@Valid @RequestBody MunheEmailReq req, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    @PostMapping("/sendInquiry")
+    public ResultResponse<?> sendInquiryEmail(@Valid @RequestBody InquiryEmailReq req, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = userPrincipal.getSignedUserId();
         log.info("문의하기 처리 시작: 제목={}, 보낸이={}, 사용자ID={}", req.getSubject(), req.getSenderName(), userId);
         try {
-            emailService.sendMunheEmail(req, userId);
+            emailService.sendInquiryEmail(req, userId);
             return new ResultResponse<>("문의가 성공적으로 전송되었습니다.", Map.of("success", true, "timestamp", System.currentTimeMillis()));
         } catch (Exception e) {
             log.error("문의하기 이메일 전송 실패", e);
@@ -92,13 +122,82 @@ import java.util.Map;
     }
 
     @PatchMapping("/email-update")
-    public ResponseEntity<?> updateEmail(@Valid @RequestBody EmailUpdateDto request, @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        // 이미 사용중인 이메일인지 확인
+    public ResponseEntity<?> updateEmail(
+            @Valid @RequestBody EmailUpdateDto request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        // 1. 이메일 중복 체크
         if (!emailService.isEmailAvailable(request.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "이미 사용중인 이메일입니다."));
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "이미 사용중인 이메일입니다."));
         }
+
+        // 2. 인증 완료 여부 확인 (새로 추가!)
+        if (!emailService.canUpdateEmail(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "이메일 인증이 필요합니다."));
+        }
+
+        // 3. 이메일 변경
         emailService.updateEmail(userPrincipal.getSignedUserId(), request.getEmail());
-        return ResponseEntity.ok(Map.of("success", true, "message", "이메일이 변경되었습니다.", "data", Map.of("email", request.getEmail())));
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "이메일이 변경되었습니다.",
+                "data", Map.of("email", request.getEmail())
+        ));
+    }
+    /**
+     * 비밀번호 재설정 (인증 완료 후)
+     */
+    @PatchMapping("/password-reset")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetDto request) {
+        // 1. 인증 완료 여부 확인
+        if (!emailService.canResetPassword(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "이메일 인증이 필요합니다."));
+        }
+
+        // 2. 비밀번호 변경
+        emailService.resetPassword(request.getEmail(), request.getNewPassword());
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "비밀번호가 변경되었습니다."
+        ));
+    }
+    /**
+     * 아이디 찾기용 이메일 인증코드 발송
+     */
+    @PostMapping("/send-find-id-code")
+    public ResultResponse<?> sendFindIdCode(@Valid @RequestBody EmailSendReq req) {
+        log.info("아이디 찾기용 이메일 인증코드 발송 요청: {}", req.getEmail());
+        emailService.sendFindIdCode(req.getEmail());
+        return new ResultResponse<>("아이디 찾기 인증코드가 발송되었습니다.", null);
+    }
+
+    /**
+     * 아이디 찾기용 인증코드 검증 및 아이디 반환
+     */
+    @PostMapping("/verify-find-id-code")
+    public ResponseEntity<?> verifyFindIdCode(@Valid @RequestBody EmailCodeVerifyReq req) {
+        log.info("아이디 찾기용 인증코드 검증 요청: {}", req.getEmail());
+
+        boolean isValid = emailService.verifyFindIdCode(req.getEmail(), req.getCode());
+
+        if (!isValid) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", "인증코드가 일치하지 않습니다."));
+        }
+
+        // 인증 성공 시 아이디 조회
+        String userId = emailService.getUserIdByEmail(req.getEmail());
+
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "userId", userId,
+                "message", "인증이 완료되었습니다."
+        ));
     }
 }
 

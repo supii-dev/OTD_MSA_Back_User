@@ -2,6 +2,7 @@ package com.otd.otd_challenge.application.challenge;
 
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.model.UserPrincipal;
+import com.otd.otd_challenge.application.challenge.Repository.ChallengeProgressRepository;
 import com.otd.otd_challenge.application.challenge.model.*;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeDetailDayGetRes;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeDetailPerGetRes;
@@ -19,11 +20,13 @@ import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSet
 import com.otd.otd_challenge.application.challenge.model.settlement.ChallengeSettlementGetRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +38,7 @@ public class ChallengeController {
 
     private final ChallengeService challengeService;
     private final ChallengeSchedulerService challengeSchedulerService;
-
+    private final ChallengeProgressRepository challengeProgressRepository;
 
 
     @GetMapping("/list")
@@ -137,5 +140,11 @@ public class ChallengeController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
         }
+    }
+    @GetMapping("/progress/challenges/{userId}")
+    public ResponseEntity<List<String>> getActiveChallengeNames(@PathVariable Long userId
+            , @RequestParam("recordDate") LocalDate recordDate) {
+        List<String> challengeNames = challengeProgressRepository.findActiveChallengeNames(userId, recordDate);
+        return ResponseEntity.ok(challengeNames);
     }
 }
