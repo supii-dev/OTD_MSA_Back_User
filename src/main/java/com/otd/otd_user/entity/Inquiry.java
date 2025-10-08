@@ -37,5 +37,5 @@ public class Inquiry {
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
-    private MunheStatus status = MunheStatus.PENDING;
+    private InquiryStatus status = InquiryStatus.PENDING;
 }
