@@ -108,12 +108,12 @@ import java.util.Map;
     /**
      * 문의하기 이메일 전송
      */
-    @PostMapping("/sendMunhe")
-    public ResultResponse<?> sendInquiryEmail(@Valid @RequestBody MunheEmailReq req, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    @PostMapping("/sendInquiry")
+    public ResultResponse<?> sendInquiryEmail(@Valid @RequestBody InquiryEmailReq req, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = userPrincipal.getSignedUserId();
         log.info("문의하기 처리 시작: 제목={}, 보낸이={}, 사용자ID={}", req.getSubject(), req.getSenderName(), userId);
         try {
-            emailService.sendMunheEmail(req, userId);
+            emailService.sendInquiryEmail(req, userId);
             return new ResultResponse<>("문의가 성공적으로 전송되었습니다.", Map.of("success", true, "timestamp", System.currentTimeMillis()));
         } catch (Exception e) {
             log.error("문의하기 이메일 전송 실패", e);

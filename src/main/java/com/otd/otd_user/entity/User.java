@@ -41,16 +41,16 @@ public class User extends UpdatedAt{
     private String name;
 
     @Column(name = "birth_date")
-    private String birthDate; // 생년월일
+    private String birthDate;
 
     @Column(length = 1)
-    private String gender; // 성별 (M: 남성, F: 여성)
+    private String gender;
 
-    @Column(length = 100, unique = true)
-    private String email; // 이메일 (고유값으로 설정)
+    @Column(length = 100)
+    private String email;
 
     @Column(length = 30)
-    private String phone; // 휴대폰번호
+    private String phone;
 
     @Column(length = 2)
     private SignInProviderType providerType;
