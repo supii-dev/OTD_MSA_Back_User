@@ -18,12 +18,12 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
 
-    @GetMapping("/users")
+    @GetMapping("/user")
     public List<User> getUsers() {
         return adminService.getUsers();
     }
 
-    @GetMapping("/challenges")
+    @GetMapping("/challenge")
     public List<ChallengeDefinition> getChallenges() {
         return adminService.getChallenges();
     }

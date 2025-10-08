@@ -15,4 +15,5 @@ public class ExerciseDataReq {
     private LocalDate recordDate;
     private LocalDate today;
     private int count;
+    private int totalKcal;
 }
