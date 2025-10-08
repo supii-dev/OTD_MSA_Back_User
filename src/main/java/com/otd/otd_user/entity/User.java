@@ -28,6 +28,7 @@ public class User extends UpdatedAt{
     private String uid;
 
     @Column(nullable = false, length = 100)
+    @JsonIgnore
     private String upw;
 
     @Column(length = 30, name = "nick_name")
@@ -40,10 +41,10 @@ public class User extends UpdatedAt{
     private String name;
 
     @Column(name = "birth_date")
-    private String birthDate; // 생년월일
+    private String birthDate;
 
     @Column(length = 1)
-    private String gender; // 성별 (M: 남성, F: 여성)
+    private String gender;
 
     @Column(length = 100)
     private String email;
@@ -61,6 +62,7 @@ public class User extends UpdatedAt{
     private int xp;
 
     @Column(length = 300)
+    @JsonIgnore
     private String refreshToken;
 
     @Builder.Default
