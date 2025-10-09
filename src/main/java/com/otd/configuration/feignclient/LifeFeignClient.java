@@ -11,9 +11,9 @@ import java.util.List;
 
 @FeignClient(name = "life", url = "${constants.feign-client.life.url}")
 public interface LifeFeignClient {
-    @PostMapping("/challenge/names")
+    @PostMapping("/exercise/challenge/names")
     void sendActiveChallengeNames(@RequestBody List<String> challengeNames);
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/admin2/{userId}")
     ResultResponse<?> deleteUserData(@PathVariable("userId") Long userId);
 }
