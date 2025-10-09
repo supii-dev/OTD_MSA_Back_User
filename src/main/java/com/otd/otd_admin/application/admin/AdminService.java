@@ -3,6 +3,7 @@ package com.otd.otd_admin.application.admin;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.model.ResultResponse;
+import com.otd.otd_admin.application.admin.Repository.AdminInquiryRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminPointRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminUserRepository;
 import com.otd.otd_admin.application.admin.model.*;
@@ -16,6 +17,7 @@ import com.otd.otd_challenge.entity.ChallengeProgress;
 import com.otd.otd_user.application.user.UserMapper;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.application.user.model.UserRoleRepository;
+import com.otd.otd_user.entity.Inquiry;
 import com.otd.otd_user.entity.User;
 import com.otd.otd_user.entity.UserRole;
 import com.otd.otd_user.entity.UserRoleIds;
@@ -45,6 +47,7 @@ public class AdminService {
     private final AdminPointRepository adminPointRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AdminInquiryRepository adminInquiryRepository;
 
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -56,6 +59,10 @@ public class AdminService {
 
     public List<ChallengePointHistory> getPointHistory() {
         return adminPointRepository.findAll();
+    }
+
+    public List<Inquiry> getInquiry() {
+        return adminInquiryRepository.findAll();
     }
 
     public List<GenderCountRes> getGenderCount() {
@@ -95,7 +102,7 @@ public class AdminService {
         userRole.getUserRoleIds().setChallengeCode(req.getChallengeRole());
         userRoleRepository.save(userRole);
         userRepository.save(user);
-        return new ResultResponse("유저 정보가 수정되었습니다.", user.getUserId());
+        return new ResultResponse<>("유저 정보가 수정되었습니다.", user.getUserId());
     }
 
     @Transactional
@@ -113,6 +120,16 @@ public class AdminService {
         cd.setCdUnit(req.getCdUnit());
         cd.setXp(req.getXp());
         cd.setTier(req.getTier());
-        return new ResultResponse("유저 정보가 수정되었습니다.", req.getCdId());
+        return new ResultResponse<>("챌린지 정보가 수정되었습니다.", req.getCdId());
+    }
+
+    @Transactional
+    public ResultResponse<?> removeChallenge(Long cdId) {
+        int result = challengeDefinitionRepository.deleteByCdId(cdId);
+        if (result == 1) {
+            return new ResultResponse<>("챌린지 삭제가 되었습니다.", result);
+        } else {
+            return new ResultResponse<>("챌린지 삭제에 실패하였습니다.", result);
+        }
     }
 }

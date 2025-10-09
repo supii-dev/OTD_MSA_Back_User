@@ -4,6 +4,7 @@ import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_admin.application.admin.model.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
+import com.otd.otd_user.entity.Inquiry;
 import com.otd.otd_user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,11 @@ public class AdminController {
         return adminService.getPointHistory();
     }
 
+    @GetMapping("/qna")
+    public List<Inquiry> getInquiry() {
+        return adminService.getInquiry();
+    }
+
     @GetMapping("user/{userId}")
     public AdminUserDetailGetRes getUserDetail(@PathVariable Long userId) {
         return adminService.getUserDetail(userId);
@@ -45,15 +51,15 @@ public class AdminController {
         return adminService.putUserDetail(req);
     }
 
-    @PutMapping("/{cdId}")
-    public ResultResponse<?> putChallenge(@PathVariable Long cdId,
-                                          @RequestBody AdminChallengePutReq req){
-        req.setCdId(cdId);
+    @PutMapping("/challenge/modify")
+    public ResultResponse<?> putChallenge(@RequestBody AdminChallengePutReq req){
         return adminService.putChallengeDetail(req);
     }
 
-
-
+    @DeleteMapping("/challenge/{cdId}")
+    public ResultResponse<?> deleteChallenge(@PathVariable Long cdId) {
+        return adminService.removeChallenge(cdId);
+    }
 
     // 대시보드쪽
     @GetMapping("/gender")

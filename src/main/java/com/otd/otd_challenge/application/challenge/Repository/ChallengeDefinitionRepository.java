@@ -12,4 +12,6 @@ public interface ChallengeDefinitionRepository extends JpaRepository<ChallengeDe
     ChallengeDefinition findByCdId(Long cdId);
 
     List<ChallengeDefinition> findByCdName(String cdName);
+
+    int deleteByCdId(Long cdId);
 }
