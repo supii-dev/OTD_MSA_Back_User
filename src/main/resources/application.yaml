@@ -35,6 +35,9 @@ constants:
     # refresh-token-cookie-path: / #해당 path때만 refresh-token값이 넘어온다.
     refresh-token-cookie-validity-seconds: 1_296_000 # 15일 (s) 60 * 60 * 24 * 15
     refresh-token-validity-milliseconds: 1_296_000_000 # 15일 (ms) 60 * 60 * 24 * 15 * 1000
+
+    register-token:
+      expiration-time: 1800000  # 30분 (밀리초)
   oauth2:
     base-uri: /oauth2/authorization #FE 소셜로그인 요청할 때 사용할 주소값
     # 플랫폼과 통신을 3번 정도 하는데 각 통신들이 하나의 작업을 위한 트랜잭션이라는 것을

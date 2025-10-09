@@ -37,6 +37,7 @@ public class Inquiry {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    @Convert(converter = EnumInquiryStatus.CodeConverter.class)
     private EnumInquiryStatus status = EnumInquiryStatus.PENDING;
 }
