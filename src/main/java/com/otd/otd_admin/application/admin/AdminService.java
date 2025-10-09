@@ -73,6 +73,14 @@ public class AdminService {
         return adminMapper.groupByAge();
     }
 
+    public List<TierCountRes> getTierCount() {
+        return adminMapper.countByTier();
+    }
+
+    public List<ChallengeSuccessRateCountRes> getChallengeSuccessRateCount() {
+        return adminMapper.countByChallengeType();
+    }
+
     public AdminUserDetailGetRes getUserDetail(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         List<ChallengeProgress> cp = challengeProgressRepository.findByUserId(user.getUserId());

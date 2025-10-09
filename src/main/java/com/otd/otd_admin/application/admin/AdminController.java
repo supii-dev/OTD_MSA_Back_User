@@ -19,24 +19,10 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
 
+    // 유저
     @GetMapping("/user")
     public List<User> getUsers() {
         return adminService.getUsers();
-    }
-
-    @GetMapping("/challenge")
-    public List<ChallengeDefinition> getChallenges() {
-        return adminService.getChallenges();
-    }
-
-    @GetMapping("/point")
-    public List<ChallengePointHistory> getPointHistory() {
-        return adminService.getPointHistory();
-    }
-
-    @GetMapping("/qna")
-    public List<Inquiry> getInquiry() {
-        return adminService.getInquiry();
     }
 
     @GetMapping("user/{userId}")
@@ -51,6 +37,12 @@ public class AdminController {
         return adminService.putUserDetail(req);
     }
 
+    // 챌린지
+    @GetMapping("/challenge")
+    public List<ChallengeDefinition> getChallenges() {
+        return adminService.getChallenges();
+    }
+
     @PutMapping("/challenge/modify")
     public ResultResponse<?> putChallenge(@RequestBody AdminChallengePutReq req){
         return adminService.putChallengeDetail(req);
@@ -61,7 +53,13 @@ public class AdminController {
         return adminService.removeChallenge(cdId);
     }
 
-    // 대시보드쪽
+    // 포인트
+    @GetMapping("/point")
+    public List<ChallengePointHistory> getPointHistory() {
+        return adminService.getPointHistory();
+    }
+
+    // 통계
     @GetMapping("/gender")
     public List<GenderCountRes> getGenderCount() {
         return adminService.getGenderCount();
@@ -70,5 +68,21 @@ public class AdminController {
     @GetMapping("/agegroup")
     public List<AgeCountRes> getAgeGroup() {
         return adminService.getAgeCount();
+    }
+
+    @GetMapping("/tier")
+    public List<TierCountRes> getTierCount() {
+        return adminService.getTierCount();
+    }
+
+    @GetMapping("challengerate")
+    public List<ChallengeSuccessRateCountRes> getChallengeSuccessRateCount() {
+        return adminService.getChallengeSuccessRateCount();
+    }
+
+    // 문의
+    @GetMapping("/qna")
+    public List<Inquiry> getInquiry() {
+        return adminService.getInquiry();
     }
 }

@@ -2,16 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.otd.otd_admin.application.admin.AdminMapper">
     <select id="groupByAge">
-        SELECT
-        CASE
-        WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(birth_date, '%Y%m%d'), CURDATE()) BETWEEN 10 AND 19 THEN '10대'
-        WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(birth_date, '%Y%m%d'), CURDATE()) BETWEEN 20 AND 29 THEN '20대'
-        WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(birth_date, '%Y%m%d'), CURDATE()) BETWEEN 30 AND 39 THEN '30대'
-        WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(birth_date, '%Y%m%d'), CURDATE()) BETWEEN 40 AND 49 THEN '40대'
-        WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(birth_date, '%Y%m%d'), CURDATE()) BETWEEN 50 AND 59 THEN '50대'
-        ELSE '기타'
-        END AS ageGroup,
-        COUNT(*) AS count
+        SELECT CASE
+            WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(REPLACE(birth_date, '-', ''), '%Y%m%d'), CURDATE())
+            BETWEEN 10 AND 19 THEN '10대'
+            WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(REPLACE(birth_date, '-', ''), '%Y%m%d'), CURDATE())
+            BETWEEN 20 AND 29 THEN '20대'
+            WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(REPLACE(birth_date, '-', ''), '%Y%m%d'), CURDATE())
+            BETWEEN 30 AND 39 THEN '30대'
+            WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(REPLACE(birth_date, '-', ''), '%Y%m%d'), CURDATE())
+            BETWEEN 40 AND 49 THEN '40대'
+            WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(REPLACE(birth_date, '-', ''), '%Y%m%d'), CURDATE())
+            BETWEEN 50 AND 59 THEN '50대'
+            ELSE '기타'
+            END AS ageGroup,
+            COUNT(*) AS count
         FROM user
         GROUP BY ageGroup;
     </select>
@@ -33,5 +37,37 @@
         FROM user u
         JOIN user_role ur
         ON u.user_id = ur.user_id;
+    </select>
+
+    <select id="countByTier">
+        SELECT CASE ur.challenge_code
+            WHEN '01' THEN '브론즈'
+            WHEN '02' THEN '실버'
+            WHEN '03' THEN '골드'
+            WHEN '04' THEN '다이아'
+            ELSE '기타'
+            END AS tier,
+            COUNT(DISTINCT ur.user_id) AS count
+        FROM user_role ur
+        JOIN user u ON ur.user_id = u.user_id
+        GROUP BY tier
+        ORDER BY FIELD(tier, '브론즈', '실버', '골드', '다이아', '기타');
+    </select>
+
+    <select id="countByChallengeType">
+        SELECT CASE cd.cd_type
+            WHEN 'competition' THEN '월간 경쟁'
+            WHEN 'personal' THEN '월간 개인'
+            WHEN 'weekly' THEN '주간'
+            ELSE '기타'
+            END AS challengeType,
+            COUNT(cp.cp_id) AS totalCount,
+            SUM(CASE WHEN cp.is_success = 1 THEN 1 ELSE 0 END) AS successCount,
+            ROUND(SUM(CASE WHEN cp.is_success = 1 THEN 1 ELSE 0 END) / COUNT(cp.cp_id) * 100, 1) AS successRate
+        FROM challenge_progress cp
+        JOIN challenge_definition cd
+        ON cp.cd_id = cd.cd_id
+        GROUP BY cd.cd_type
+        ORDER BY cd.cd_type;
     </select>
 </mapper>
