@@ -30,10 +30,8 @@ public class AdminController {
         return adminService.getUserDetail(userId);
     }
 
-    @PutMapping("/{userId}")
-    public ResultResponse<?> putUser(@PathVariable Long userId,
-                                     @RequestBody AdminUserPutReq req){
-        req.setUserId(userId);
+    @PutMapping("/user/modify")
+    public ResultResponse<?> putUser(@RequestBody AdminUserPutReq req){
         return adminService.putUserDetail(req);
     }
 
@@ -48,6 +46,10 @@ public class AdminController {
         return adminService.putChallengeDetail(req);
     }
 
+    @DeleteMapping("/user/{userId}")
+    public ResultResponse<?> deleteUser(@PathVariable Long userId){
+        return adminService.removeUser(userId);
+    }
     @DeleteMapping("/challenge/{cdId}")
     public ResultResponse<?> deleteChallenge(@PathVariable Long cdId) {
         return adminService.removeChallenge(cdId);

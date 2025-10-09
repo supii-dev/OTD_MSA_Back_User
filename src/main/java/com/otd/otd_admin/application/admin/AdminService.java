@@ -2,18 +2,18 @@ package com.otd.otd_admin.application.admin;
 
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
+import com.otd.configuration.feignclient.LifeFeignClient;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_admin.application.admin.Repository.AdminInquiryRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminPointRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminUserRepository;
 import com.otd.otd_admin.application.admin.model.*;
 import com.otd.otd_challenge.application.challenge.ChallengeMapper;
-import com.otd.otd_challenge.application.challenge.Repository.ChallengeDefinitionRepository;
-import com.otd.otd_challenge.application.challenge.Repository.ChallengePointRepository;
-import com.otd.otd_challenge.application.challenge.Repository.ChallengeProgressRepository;
+import com.otd.otd_challenge.application.challenge.Repository.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeProgress;
+import com.otd.otd_user.application.email.InquiryRepository;
 import com.otd.otd_user.application.user.UserMapper;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.application.user.model.UserRoleRepository;
@@ -48,6 +48,10 @@ public class AdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AdminInquiryRepository adminInquiryRepository;
+    private final InquiryRepository inquiryRepository;
+    private final ChallengeMissionRepository challengeMissionRepository;
+    private final ChallengeSettlementRepository challengeSettlementRepository;
+    private final LifeFeignClient lifeFeignClient;
 
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -100,15 +104,32 @@ public class AdminService {
         user.setNickName(req.getNickName());
         user.setPoint(req.getPoint());
         user.setXp(req.getXp());
-        if (req.getPassword() != null && !req.getPassword().isBlank()) {
-            user.setUpw(passwordEncoder.encode(req.getPassword()));
+        user.setUid(req.getUid());
+        user.setPic(req.getPic());
+        if (req.getUpw() != null && !req.getUpw().isBlank()) {
+            user.setUpw(passwordEncoder.encode(req.getUpw()));
         }
-        UserRole userRole = userRoleRepository.findByUserId(user.getUserId())
+        // 기존 역할 조회
+        UserRole exist = userRoleRepository.findByUserId(user.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_role 정보가 없습니다."));
 
-        userRole.getUserRoleIds().setRoleCode(req.getUserRole());
-        userRole.getUserRoleIds().setChallengeCode(req.getChallengeRole());
-        userRoleRepository.save(userRole);
+        EnumUserRole newRole = req.getUserRoles();
+        EnumChallengeRole newChallenge = req.getChallengeRole();
+
+        EnumUserRole currentRole = exist.getUserRoleIds().getRoleCode();
+        EnumChallengeRole currentChallenge = exist.getUserRoleIds().getChallengeCode();
+
+        // 값이 다르면 삭제 후 새로 추가
+        if (!currentRole.equals(newRole) || !currentChallenge.equals(newChallenge)) {
+            user.getUserRoles().remove(exist);   // 관계 제거
+            userRoleRepository.delete(exist);
+
+            UserRoleIds ids = new UserRoleIds(user.getUserId(), newRole, newChallenge);
+            UserRole newUserRole = new UserRole(ids, user);
+            user.getUserRoles().add(newUserRole);
+            userRoleRepository.save(newUserRole);
+        }
+
         userRepository.save(user);
         return new ResultResponse<>("유저 정보가 수정되었습니다.", user.getUserId());
     }
@@ -129,6 +150,24 @@ public class AdminService {
         cd.setXp(req.getXp());
         cd.setTier(req.getTier());
         return new ResultResponse<>("챌린지 정보가 수정되었습니다.", req.getCdId());
+    }
+
+    @Transactional
+    public ResultResponse<?> removeUser(Long userId) {
+        User user = userRepository.findByUserId(userId);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "유저 없음");
+        }
+
+        // life 서버에 삭제 요청
+        ResultResponse<?> lifeResponse = lifeFeignClient.deleteUserData(userId);
+
+        // cascade로 묶여있는 관련 데이터까지 삭제
+        userRepository.delete(user);
+
+        return new ResultResponse<>(
+                "유저 삭제 완료 (Life 서버 응답: " + lifeResponse.getMessage() + ")", userId
+        );
     }
 
     @Transactional

@@ -22,4 +22,6 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
     // 특정 사용자의 특정 문의 존재 여부
     boolean existsByIdAndUserId(Long id, Long userId);
+
+    void deleteAllByUserId(Long userId);
 }
