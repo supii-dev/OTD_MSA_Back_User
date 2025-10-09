@@ -58,7 +58,7 @@
         SELECT CASE cd.cd_type
             WHEN 'competition' THEN '월간 경쟁'
             WHEN 'personal' THEN '월간 개인'
-            WHEN 'weekly' THEN '주간'
+            WHEN 'weekly' THEN '주간 경쟁'
             ELSE '기타'
             END AS challengeType,
             COUNT(cp.cp_id) AS totalCount,
