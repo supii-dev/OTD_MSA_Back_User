@@ -1,21 +1,25 @@
 package com.otd.otd_user.application.email;
 
+import com.otd.configuration.enumcode.model.EnumInquiryStatus;
 import com.otd.otd_user.entity.Inquiry;
-import com.otd.otd_user.entity.InquiryStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
-    // 특정 사용자의 문의 목록 조회
+    // 특정 사용자의 문의 내역 조회 (최신순)
     List<Inquiry> findByUserIdOrderByCreatedAtDesc(Long userId);
 
-    // 특정 사용자의 문의 개수
-    int countByUserId(Long userId);
+    // 특정 상태의 문의 조회
+    List<Inquiry> findByStatus(EnumInquiryStatus status);
 
-    // 상태별 문의 조회
-    List<Inquiry> findByUserIdAndStatusOrderByCreatedAtDesc(Long userId, InquiryStatus status);
+    // 특정 사용자의 특정 문의 조회
+    Optional<Inquiry> findByIdAndUserId(Long id, Long userId);
+
+    // 특정 사용자의 특정 문의 존재 여부
+    boolean existsByIdAndUserId(Long id, Long userId);
 }

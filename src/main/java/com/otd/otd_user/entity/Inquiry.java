@@ -1,5 +1,6 @@
 package com.otd.otd_user.entity;
 
+import com.otd.configuration.enumcode.model.EnumInquiryStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "munhe")
+@Table(name = "inquiry")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -37,5 +38,5 @@ public class Inquiry {
     private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
-    private InquiryStatus status = InquiryStatus.PENDING;
+    private EnumInquiryStatus status = EnumInquiryStatus.PENDING;
 }

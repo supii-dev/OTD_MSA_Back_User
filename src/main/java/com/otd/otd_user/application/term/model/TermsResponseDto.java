@@ -1,6 +1,6 @@
 package com.otd.otd_user.application.term.model;
 
-import com.otd.otd_user.entity.TermsType;
+import com.otd.configuration.enumcode.model.EnumTermsType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class TermsResponseDto {
     private Long termsId;
-    private TermsType type;
+    private EnumTermsType type;
     private String typeDescription;
     private String title;
     private String content;

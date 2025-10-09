@@ -1,7 +1,7 @@
 package com.otd.otd_user.application.term;
 
 import com.otd.otd_user.entity.Terms;
-import com.otd.otd_user.entity.TermsType;
+import com.otd.configuration.enumcode.model.EnumTermsType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -11,9 +11,9 @@ public interface TermsRepository extends JpaRepository<Terms, Long> {
 
     List<Terms> findByIsActiveTrueOrderByTypeAsc();
 
-    Optional<Terms> findByTypeAndIsActiveTrue(TermsType type);
+    Optional<Terms> findByTypeAndIsActiveTrue(EnumTermsType type);
 
-    List<Terms> findByTypeOrderByVersionDesc(TermsType type);
+    List<Terms> findByTypeOrderByVersionDesc(EnumTermsType type);
 
     List<Terms> findByIsActiveTrueAndIsRequiredTrue();
 }
