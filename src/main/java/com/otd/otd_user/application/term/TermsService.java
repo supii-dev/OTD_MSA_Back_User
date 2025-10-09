@@ -2,7 +2,7 @@ package com.otd.otd_user.application.term;
 
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.Terms;
-import com.otd.otd_user.entity.TermsType;
+import com.otd.configuration.enumcode.model.EnumTermsType;
 import com.otd.otd_user.entity.User;
 import com.otd.otd_user.entity.UserAgreement;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +25,13 @@ public class TermsService {
         return termsRepository.findByIsActiveTrueOrderByTypeAsc();
     }
 
-    public Terms getActiveTermsByType(TermsType type) {
+    public Terms getActiveTermsByType(EnumTermsType type) {
         return termsRepository.findByTypeAndIsActiveTrue(type)
                 .orElseThrow(() -> new RuntimeException("활성화된 약관을 찾을 수 없습니다."));
     }
 
     @Transactional
-    public Terms createNewTerms(TermsType type, String title, String content,
+    public Terms createNewTerms(EnumTermsType type, String title, String content,
                                 String version, Boolean isRequired) {
         termsRepository.findByTypeAndIsActiveTrue(type)
                 .ifPresent(existingTerm -> {

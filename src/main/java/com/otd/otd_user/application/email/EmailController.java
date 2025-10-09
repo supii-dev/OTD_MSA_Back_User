@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -121,6 +123,8 @@ import java.util.Map;
         }
     }
 
+
+
     @PatchMapping("/email-update")
     public ResponseEntity<?> updateEmail(
             @Valid @RequestBody EmailUpdateDto request,
@@ -198,6 +202,32 @@ import java.util.Map;
                 "userId", userId,
                 "message", "인증이 완료되었습니다."
         ));
+    }
+
+    /**
+     * 사용자 문의 내역 조회
+     */
+    @GetMapping("/inquiry/my-inquiries")
+    public ResultResponse<?> getMyInquiries(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Long userId = userPrincipal.getSignedUserId();
+        log.info("문의 내역 조회 요청: 사용자ID={}", userId);
+
+        List<InquiryListRes> inquiries = emailService.getMyInquiries(userId);
+        return new ResultResponse<>("문의 내역 조회 성공", inquiries);
+    }
+
+    /**
+     * 특정 문의 상세 조회
+     */
+    @GetMapping("/inquiry/{inquiryId}")
+    public ResultResponse<?> getInquiryDetail(
+            @PathVariable Long inquiryId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Long userId = userPrincipal.getSignedUserId();
+        log.info("문의 상세 조회 요청: ID={}, 사용자ID={}", inquiryId, userId);
+
+        InquiryDetailRes inquiry = emailService.getInquiryDetail(inquiryId, userId);
+        return new ResultResponse<>("문의 상세 조회 성공", inquiry);
     }
 }
 
