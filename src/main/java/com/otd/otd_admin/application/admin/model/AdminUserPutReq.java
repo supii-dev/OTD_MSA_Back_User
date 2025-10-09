@@ -9,12 +9,13 @@ import lombok.Setter;
 @Setter
 public class AdminUserPutReq {
     private Long userId;
+    private String uid;
+    private String upw;
     private String name;
     private String nickName;
     private int point;
-    private int xp;
-    private String password;
+    private String pic;
     private EnumChallengeRole challengeRole;
-    private EnumUserRole userRole;
-
+    private EnumUserRole userRoles;
+    private int xp;
 }

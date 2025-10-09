@@ -1,6 +1,7 @@
 package com.otd.otd_challenge.application.challenge.Repository;
 
 import com.otd.otd_challenge.entity.ChallengeProgress;
+import com.otd.otd_user.entity.User;
 import jakarta.transaction.Transactional;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -47,4 +48,6 @@ public interface ChallengeProgressRepository extends JpaRepository<ChallengeProg
             "AND cp.endDate >= :recordDate")
     List<String> findActiveChallengeNames(@Param("userId") Long userId
                                         , @Param("recordDate") LocalDate recordDate);
+
+    void deleteAllByUser(User user);
 }
