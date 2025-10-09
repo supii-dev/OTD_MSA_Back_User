@@ -14,23 +14,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/pointshop/purchase")
+@RequestMapping("/api/OTD/pointshop/purchase")
 @RequiredArgsConstructor
 public class PurchaseHistoryController {
 
     private final PurchaseHistoryService purchaseHistoryService;
     private final UserRepository userRepository;
 
-    @PostMapping
+    @PostMapping("/{pointId}")
     public ResponseEntity<?> purchase(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody PurchasePostReq req
+            @PathVariable Long pointId // ⚠ 수정 필요
     ) {
         if (userPrincipal == null) {
             return ResponseEntity.status(401).body(new PointApiResponse<>(false, "로그인이 필요합니다."));
         }
-        PurchasePostRes res = purchaseHistoryService.purchaseItem(userPrincipal.getSignedUserId(), req.getPointId());
-        return ResponseEntity.ok(new PointApiResponse<>(true, res));
+        PurchasePostRes res = purchaseHistoryService.purchaseItem(userPrincipal.getSignedUserId(), pointId); // ⚠ 수정됨
+        return ResponseEntity.ok(new PointApiResponse<>(true, "구매 성공", res));
     }
 
     @PostMapping("/charge")
@@ -45,7 +45,7 @@ public class PurchaseHistoryController {
         Long userId = userPrincipal.getSignedUserId();
         int amount = req.getAmount();
         if (amount <= 0) {
-            return ResponseEntity.badRequest().body("1이상의 금액을 충전해야 합니다.");
+            return ResponseEntity.badRequest().body("1 이상의 금액을 충전해야 합니다.");
         }
 
         userRepository.updatePointByUserId(amount, userId);
@@ -53,13 +53,13 @@ public class PurchaseHistoryController {
         return ResponseEntity.ok(new PointApiResponse<>(true, "포인트가 충전되었습니다."));
     }
 
-    @GetMapping
+    @GetMapping("/history")
     public ResponseEntity<?> getPurchases(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         if(userPrincipal == null) {
             return ResponseEntity.status(401).body(new PointApiResponse<>(false, "로그인이 필요합니다."));
         }
 
         List<PurchasePostRes> purchases = purchaseHistoryService.getUserPurchases(userPrincipal.getSignedUserId());
-        return ResponseEntity.ok(new PointApiResponse<>(true, purchases));
+        return ResponseEntity.ok(new PointApiResponse<>(true, "구매 이력 조회 성공", purchases));
     }
 }

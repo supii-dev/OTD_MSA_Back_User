@@ -9,10 +9,15 @@ import org.springframework.data.jpa.repository.Query;
 import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface PurchaseHistoryRepository extends JpaRepository<PurchaseHistory,Long> {
     List<PurchaseHistory> findByUser(User user);
     List<PurchaseHistory> findByUser_UserId(Long userId);
+
+    // 사용자별 사용 포인트 총합
+    @Query("SELECT COALESCE(SUM(p.point.pointScore), 0) FROM PurchaseHistory p WHERE p.user.userId = :userId")
+    Optional<Integer> findTotalSpentByUserId(Long userId);
 
     // 사용자별 총 사용 포인트 상위 10명
     @Query("SELECT p.user.userId, SUM(p.point.pointScore) " +
@@ -22,10 +27,13 @@ public interface PurchaseHistoryRepository extends JpaRepository<PurchaseHistory
     List<Object[]> findTopUsersByTotalSpentPoints();
 
     // 월별 포인트 사용량
-    @Query("SELECT FUNCTION('DATE_FORMAT', p.purchaseTime, '%Y-%m') AS month, SUM(p.point.pointScore) " +
-            "FROM PurchaseHistory p " +
-            "GROUP BY FUNCTION('DATE_FORMAT', p.purchaseTime, '%Y-%m') " +
-            "ORDER BY month ASC")
+    @Query(value = """
+    SELECT DATE_FORMAT(p.purchase_time, '%Y-%m') AS month,
+           SUM(p.point_score) AS total_spent
+    FROM purchase_history p
+    GROUP BY DATE_FORMAT(p.purchase_time, '%Y-%m')
+    ORDER BY month ASC
+    """, nativeQuery = true)
     List<Object[]> findMonthlySpentPoints();
 
     // 인기 상품 상위 10개

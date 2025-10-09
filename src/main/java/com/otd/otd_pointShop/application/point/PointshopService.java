@@ -1,11 +1,16 @@
 package com.otd.otd_pointShop.application.point;
 
 import com.otd.otd_pointShop.application.point.model.*;
+import com.otd.otd_pointShop.application.purchase.model.PurchaseHistoryRes;
 import com.otd.otd_pointShop.entity.Point;
 import com.otd.otd_pointShop.entity.PointImage;
+import com.otd.otd_pointShop.entity.PurchaseHistory;
 import com.otd.otd_pointShop.repository.PointRepository;
 import com.otd.otd_pointShop.repository.PointImageRepository;
+import com.otd.otd_pointShop.repository.PurchaseHistoryRepository;
+import com.otd.otd_pointShop.repository.RechargeHistoryRepository;
 import com.otd.otd_user.application.user.UserRepository;
+import com.otd.otd_user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +40,8 @@ public class PointshopService {
     private final UserRepository userRepository;
     private final PointRepository pointRepository;
     private final PointImageRepository pointImageRepository;
+    private final PurchaseHistoryRepository purchaseHistoryRepository;
+    private final RechargeHistoryRepository rechargeHistoryRepository;
 
     public List<PointListRes> getPointListByUser(Long userId, Pageable pageable) {
         Page<Point> page = pointRepository.findByUser_UserId(userId, pageable);
@@ -178,5 +185,26 @@ public class PointshopService {
                 .filter(word -> word.length() > 1)
                 .map(String::toLowerCase)
                 .collect(Collectors.toSet());
+    }
+
+    // 유저 포인트 잔액 조회
+    public int getUserPointBalance(Long userId) {
+        int totalRecharge = rechargeHistoryRepository.findTotalRechargeByUserId(userId).orElse(0);
+        int totalSpent = purchaseHistoryRepository.findTotalSpentByUserId(userId).orElse(0);
+        return totalRecharge - totalSpent;
+    }
+
+    // 유저 구매 이력 조회
+    public List<PurchaseHistoryRes> getUserPurchaseHistory(Long userId) {
+        List<PurchaseHistory> list = purchaseHistoryRepository.findByUser_UserId(userId);
+        return list.stream()
+                .map(p -> PurchaseHistoryRes.builder()
+                        .purchaseId(p.getPurchaseId())
+                        .pointId(p.getPoint().getPointId())
+                        .pointItemName(p.getPoint().getPointItemName())
+                        .pointScore(p.getPoint().getPointScore())
+                        .purchaseTime(p.getPurchaseTime())
+                        .build())
+                .toList();
     }
 }

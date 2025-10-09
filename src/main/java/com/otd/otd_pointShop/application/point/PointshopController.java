@@ -3,6 +3,7 @@ package com.otd.otd_pointShop.application.point;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.model.UserPrincipal;
 import com.otd.otd_pointShop.application.point.model.*;
+import com.otd.otd_pointShop.application.purchase.model.PurchaseHistoryRes;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ import java.util.Set;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/pointshop")
+@RequestMapping("/api/OTD/pointshop")
 public class PointshopController {
     private final PointshopService pointshopService;
 
@@ -115,6 +116,25 @@ public class PointshopController {
         }
     }
 
+    // 유저 포인트 조회
+    @GetMapping("/user/points")
+    public ResponseEntity<?> getUserPoints(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Long userId = getLoginUserId(userPrincipal);
+        int balance = pointshopService.getUserPointBalance(userId);
+        log.info("[포인트 조회] 사용자 ID: {}, 잔액: {}", userId, balance);
+        return ResponseEntity.ok(new PointApiResponse<>(true, "포인트 잔액 조회 성공", balance));
+    }
+
+    // 구매 이력 조회
+    @GetMapping("/purchase/history")
+    public ResponseEntity<?> getUserPurchaseHistory(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Long userId = getLoginUserId(userPrincipal);
+        List<PurchaseHistoryRes> history = pointshopService.getUserPurchaseHistory(userId);
+        log.info("[구매 이력 조회] 사용자 ID: {}, 내역 개수: {}", userId, history.size());
+        return ResponseEntity.ok(new PointApiResponse<>(true, "구매 이력 조회 성공", history));
+    }
+
+    // 로그인 유저 확인
     private Long getLoginUserId(UserPrincipal userPrincipal) {
         if (userPrincipal == null) {
             throw new IllegalArgumentException("로그인이 필요합니다.");
