@@ -2,6 +2,7 @@ package com.otd.otd_admin.application.admin;
 
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
+import com.otd.configuration.feignclient.LifeFeignClient;
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_admin.application.admin.Repository.AdminInquiryRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminPointRepository;
@@ -50,6 +51,7 @@ public class AdminService {
     private final InquiryRepository inquiryRepository;
     private final ChallengeMissionRepository challengeMissionRepository;
     private final ChallengeSettlementRepository challengeSettlementRepository;
+    private final LifeFeignClient lifeFeignClient;
 
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -145,11 +147,19 @@ public class AdminService {
     @Transactional
     public ResultResponse<?> removeUser(Long userId) {
         User user = userRepository.findByUserId(userId);
-        
-        inquiryRepository.deleteAllByUserId(userId);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "유저 없음");
+        }
+
+        // life 서버에 삭제 요청
+        ResultResponse<?> lifeResponse = lifeFeignClient.deleteUserData(userId);
+
+        // cascade로 묶여있는 관련 데이터까지 삭제
         userRepository.delete(user);
 
-        return new ResultResponse<>("sda", user);
+        return new ResultResponse<>(
+                "유저 삭제 완료 (Life 서버 응답: " + lifeResponse.getMessage() + ")", userId
+        );
     }
 
     @Transactional
