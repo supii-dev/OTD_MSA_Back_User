@@ -4,7 +4,7 @@ import com.otd.otd_user.application.term.model.AgreementRequestDto;
 import com.otd.otd_user.application.term.model.AgreementResponseDto;
 import com.otd.otd_user.application.term.model.ApiResponse;
 import com.otd.otd_user.application.term.model.TermsResponseDto;
-import com.otd.otd_user.entity.TermsType;
+import com.otd.configuration.enumcode.model.EnumTermsType;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +40,7 @@ public class TermsController {
     }
 
     @GetMapping("/{type}")
-    public ResponseEntity<ApiResponse<TermsResponseDto>> getTermsByType(@PathVariable TermsType type) {
+    public ResponseEntity<ApiResponse<TermsResponseDto>> getTermsByType(@PathVariable EnumTermsType type) {
         var term = termsService.getActiveTermsByType(type);
 
         TermsResponseDto dto = TermsResponseDto.builder()
@@ -80,7 +80,7 @@ public class TermsController {
                 .map(agreement -> AgreementResponseDto.builder()
                         .agreementId(agreement.getAgreementId())
                         .termsId(agreement.getTerms().getTermsId())
-                        .termsType(agreement.getTerms().getType())
+                        .enumTermsType(agreement.getTerms().getType())
                         .termsTitle(agreement.getTerms().getTitle())
                         .agreed(agreement.getAgreed())
                         .agreedAt(agreement.getAgreedAt())

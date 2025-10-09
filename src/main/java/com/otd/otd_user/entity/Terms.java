@@ -1,5 +1,6 @@
 package com.otd.otd_user.entity;
 
+import com.otd.configuration.enumcode.model.EnumTermsType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +24,7 @@ public class Terms extends UpdatedAt {
 
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
-    private TermsType type;
+    private EnumTermsType type;
 
     @Column(nullable = false, length = 20)
     private String version;

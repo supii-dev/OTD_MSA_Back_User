@@ -1,6 +1,6 @@
 package com.otd.otd_user.application.term;
 
-import com.otd.otd_user.entity.TermsType;
+import com.otd.configuration.enumcode.model.EnumTermsType;
 import com.otd.otd_user.entity.UserAgreement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,7 +16,7 @@ public interface UserAgreementRepository extends JpaRepository<UserAgreement, Lo
             "WHERE ua.user.userId = :userId AND t.type = :termsType AND t.isActive = true")
     Optional<UserAgreement> findActiveAgreementByUserAndType(
             @Param("userId") Long userId,
-            @Param("termsType") TermsType termsType
+            @Param("termsType") EnumTermsType enumTermsType
     );
 
     List<UserAgreement> findByUserUserIdOrderByAgreedAtDesc(Long userId);
