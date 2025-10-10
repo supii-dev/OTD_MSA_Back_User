@@ -64,8 +64,6 @@ constants:
         secret-key: DEV0A2C37B3D5C593158404BA2DEF241C594D526 #테스트용 secretKey
 
 spring:
-  main:
-    allow-bean-definition-overriding: true
   application:
     name: otd-user
   task:

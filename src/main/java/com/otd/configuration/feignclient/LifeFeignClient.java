@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-
+@FeignClient(name = "${constants.feign-client.life.name}", url = "${constants.feign-client.life.url}")
 public interface LifeFeignClient {
     @PostMapping("/exercise/challenge/names")
     void sendActiveChallengeNames(@RequestBody List<String> challengeNames);

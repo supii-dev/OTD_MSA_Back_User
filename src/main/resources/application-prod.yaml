@@ -6,8 +6,8 @@ constants:
 
   feign-client:
     life:
-      name: otd-life/api/OTD
-      url: ""
+      name: otd-life
+      url: "http://otd-life:8080"
 server:
   port: 8080
 
