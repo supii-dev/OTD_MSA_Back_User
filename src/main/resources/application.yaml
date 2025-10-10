@@ -1,17 +1,17 @@
 constants:
   file:
     upload-directory: /home/green/download
-    challenge: /files/
+    challenge: files
     #   upload-directory: D:/kjh/project_2/upload/challenge
-    profile-pic: /profile
-    pointshop-pic: /pointshop
+    profile-pic: profile
+    pointshop-pic: pointshop
   feign-client:
     weather-api:
       url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
       service-key: fte7et4WjQ2QQTSP51SJ6VZ%2FXA3aDUYv054aZFUsGdrVOKFJxQnmrKJGh%2Box%2FcnwsvpeJmLazXr4je1K01Uoow%3D%3D
       data-type: json
     life:
-      url: http://localhost:8082/api/OTD
+      url: http://localhost:8083/api/OTD
   comment:
     start-index: 0
     need-for-view-count: 3 #피드 리스트를 뿌릴 때 실제로 피드당 보여지는 댓글 수
@@ -73,6 +73,7 @@ spring:
     locations: classpath:db/migration
     encoding: UTF-8
     # 이메일 설정
+    out-of-order: true
   mail:
     host: smtp.gmail.com
     port: 587
