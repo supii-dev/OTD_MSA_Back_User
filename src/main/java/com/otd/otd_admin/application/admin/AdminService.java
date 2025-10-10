@@ -1,5 +1,6 @@
 package com.otd.otd_admin.application.admin;
 
+import com.otd.configuration.constants.ConstFile;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.feignclient.LifeFeignClient;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
 import java.util.List;
 
 @Slf4j
@@ -49,6 +51,7 @@ public class AdminService {
     private final AdminInquiryRepository adminInquiryRepository;
     private final MyFileManager myFileManager;
     private final LifeFeignClient lifeFeignClient;
+    private final ConstFile constFile;
 
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -157,10 +160,29 @@ public class AdminService {
     }
 
     @Transactional
-    public AdminChallengeDto modifyChallenge(AdminChallengeDto dto) {
+    public AdminChallengeDto modifyChallenge(AdminChallengeDto dto
+            , MultipartFile file) {
         ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(dto.getCdId());
         if (cd == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 챌린지입니다");
+        }
+        // 새 이미지가 있으면 교체
+        if (file != null && !file.isEmpty()) {
+            // 새 파일 저장
+            String newFileName = saveChallengeImage(file);
+
+            // 기존 파일 삭제
+            if (cd.getCdImage() != null) {
+                File oldFile = new File(constFile.uploadDirectory + "/challenge/" + cd.getCdImage());
+                if (oldFile.exists() && !oldFile.delete()) {
+                    log.warn("기존 이미지 삭제 실패: {}", oldFile.getAbsolutePath());
+                }
+            }
+
+            dto.setCdImage(newFileName);
+        } else {
+            // 파일 안 넣으면 기존 이미지 유지
+            dto.setCdImage(cd.getCdImage());
         }
         cd.update(dto);
         return dto;
@@ -186,11 +208,28 @@ public class AdminService {
 
     @Transactional
     public ResultResponse<?> removeChallenge(Long cdId) {
-        int result = challengeDefinitionRepository.deleteByCdId(cdId);
-        if (result == 1) {
-            return new ResultResponse<>("챌린지 삭제가 되었습니다.", result);
-        } else {
-            return new ResultResponse<>("챌린지 삭제에 실패하였습니다.", result);
+        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(cdId);
+        if (cd == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 챌린지입니다");
         }
+
+        if (cd.getCdImage() != null) {
+            String filePath = constFile.uploadDirectory + "/challenge/" + cd.getCdImage();
+            File file = new File(filePath);
+
+            if (file.exists()) {
+                boolean deleted = file.delete();
+                if (!deleted) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "챌린지 이미지 삭제에 실패했습니다");
+                }
+            }
+        }
+        int result = challengeDefinitionRepository.deleteByCdId(cdId);
+        if (result != 1) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "챌린지 삭제에 실패했습니다.");
+        } 
+        return new ResultResponse<>("챌린지 및 이미지가 삭제가 되었습니다.", result);
     }
 }

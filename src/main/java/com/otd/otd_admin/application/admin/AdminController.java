@@ -60,12 +60,7 @@ public class AdminController {
             @RequestPart("challenge") AdminChallengeDto challengeDto,
             @RequestPart(value = "file", required = false) MultipartFile file) {
 
-        if (file != null && !file.isEmpty()) {
-            String fileName = adminService.saveChallengeImage(file);
-            challengeDto.setCdImage(fileName);
-        }
-
-        AdminChallengeDto update = adminService.modifyChallenge(challengeDto);
+        AdminChallengeDto update = adminService.modifyChallenge(challengeDto, file);
         return new ResultResponse<>("챌린지 수정 성공", update);
     }
 
