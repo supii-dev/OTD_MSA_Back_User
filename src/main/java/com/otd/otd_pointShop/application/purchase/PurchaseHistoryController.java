@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/OTD/pointshop/purchase")
+@RequestMapping("/OTD/pointshop/purchase")
 @RequiredArgsConstructor
 public class PurchaseHistoryController {
 

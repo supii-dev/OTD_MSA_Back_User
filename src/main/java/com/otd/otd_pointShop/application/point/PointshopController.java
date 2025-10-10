@@ -4,6 +4,7 @@ import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.model.UserPrincipal;
 import com.otd.otd_pointShop.application.point.model.*;
 import com.otd.otd_pointShop.application.purchase.model.PurchaseHistoryRes;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ import java.util.Set;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/OTD/pointshop")
+@RequestMapping("/OTD/pointshop")
 public class PointshopController {
     private final PointshopService pointshopService;
 
@@ -126,7 +127,7 @@ public class PointshopController {
     }
 
     // 구매 이력 조회
-    @GetMapping("/purchase/history")
+    @GetMapping("/user/purchase/history/all")
     public ResponseEntity<?> getUserPurchaseHistory(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = getLoginUserId(userPrincipal);
         List<PurchaseHistoryRes> history = pointshopService.getUserPurchaseHistory(userId);
@@ -140,5 +141,10 @@ public class PointshopController {
             throw new IllegalArgumentException("로그인이 필요합니다.");
         }
         return userPrincipal.getSignedUserId();
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("[DEBUG] PointshopController initialized!");
     }
 }
