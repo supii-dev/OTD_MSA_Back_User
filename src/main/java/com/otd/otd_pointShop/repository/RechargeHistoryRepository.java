@@ -1,6 +1,7 @@
 package com.otd.otd_pointShop.repository;
 
 import com.otd.otd_pointShop.entity.RechargeHistory;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -11,6 +12,6 @@ public interface RechargeHistoryRepository extends JpaRepository<RechargeHistory
     List<RechargeHistory> findByUser_UserId(Long userId);
 
     // 사용자별 충전 포인트 총합
-    @Query("SELECT COALESCE(SUM(r.amount), 0) FROM RechargeHistory r WHERE r.user.userId = :userId")
-    Optional<Integer> findTotalRechargeByUserId(Long userId);
+    @Query("SELECT SUM(r.amount) FROM RechargeHistory r WHERE r.user.userId = :userId")
+    Optional<Integer> findTotalRechargeByUserId(@Param("userId") Long userId);
 }

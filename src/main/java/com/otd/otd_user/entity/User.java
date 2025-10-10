@@ -62,6 +62,22 @@ public class User extends UpdatedAt{
     @Column(columnDefinition = "int DEFAULT 0", nullable = false)
     private int point;
 
+    // 포인트 양방향 관계 추가
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PointBalance> pointBalances = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PurchaseHistory> purchaseHistories = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PointUser> pointUsers = new ArrayList<>();
+
     @Column(columnDefinition = "int DEFAULT 0")
     private int xp;
 

@@ -3,6 +3,7 @@ package com.otd.otd_pointShop.repository;
 import com.otd.otd_pointShop.entity.Point;
 import com.otd.otd_pointShop.entity.PurchaseHistory;
 import com.otd.otd_user.entity.User;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -16,8 +17,8 @@ public interface PurchaseHistoryRepository extends JpaRepository<PurchaseHistory
     List<PurchaseHistory> findByUser_UserId(Long userId);
 
     // 사용자별 사용 포인트 총합
-    @Query("SELECT COALESCE(SUM(p.point.pointScore), 0) FROM PurchaseHistory p WHERE p.user.userId = :userId")
-    Optional<Integer> findTotalSpentByUserId(Long userId);
+    @Query("SELECT SUM(p.point.pointScore) FROM PurchaseHistory p WHERE p.user.userId = :userId")
+    Optional<Integer> findTotalSpentByUserId(@Param("userId") Long userId);
 
     // 사용자별 총 사용 포인트 상위 10명
     @Query("SELECT p.user.userId, SUM(p.point.pointScore) " +
