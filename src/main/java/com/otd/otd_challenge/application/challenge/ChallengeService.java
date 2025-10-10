@@ -44,11 +44,11 @@ public class ChallengeService {
     private void addImgPath(List<?> list) {
         for (Object o : list) {
             if (o instanceof ChallengeDefinitionGetRes cd) {
-                cd.setImage(imgPath + cd.getImage());
+                cd.setImage(imgPath + "/" + cd.getImage());
             } else if (o instanceof ChallengeProgressGetRes cp) {
-                cp.setImage(imgPath + cp.getImage());
+                cp.setImage(imgPath + "/" + cp.getImage());
             } else if (o instanceof ChallengeDefinition ecd) {
-                ecd.setCdImage(imgPath + ecd.getCdImage());
+                ecd.setCdImage(imgPath + "/" + ecd.getCdImage());
             }
         }
     }
@@ -418,7 +418,6 @@ public class ChallengeService {
     }
 
     private final int goal = 15;
-    String doExercise = "운동하기";
     @Transactional
     public int updateProgressEx(ExerciseDataReq req) {
         // 월간 개인챌린지 조회
@@ -600,20 +599,20 @@ public class ChallengeService {
             // 챌린지 이름 매칭 (정확히 일치해야 함)
             if (cdName.equals(req.getName())) {
 
-                // 단백질량이 목표 이상인 경우 한 번 더 체크
-                if (cp.getChallengeDefinition().getCdGoal() <= req.getTotalProtein()) {
+                // 단백질 or 물 이 목표 이상인 경우 한 번 더 체크
+                if (cp.getChallengeDefinition().getCdGoal() <= req.getValue()) {
 
                     // 오늘 날짜가 챌린지 기간 안이고, 기록이 아직 없는 경우
                     boolean exist = challengeRecordRepository
-                            .existsByChallengeProgressAndRecDate(cp, req.getMealDay());
+                            .existsByChallengeProgressAndRecDate(cp, req.getRecDate());
 
-                    if (!exist && !cp.getStartDate().isAfter(req.getMealDay()) &&
-                            !cp.getEndDate().isBefore(req.getMealDay())) {
+                    if (!exist && !cp.getStartDate().isAfter(req.getRecDate()) &&
+                            !cp.getEndDate().isBefore(req.getRecDate())) {
 
                         ChallengeRecord cr = ChallengeRecord.builder()
                                 .challengeProgress(cp)
-                                .recValue(req.getTotalProtein())
-                                .recDate(req.getMealDay())
+                                .recValue(req.getValue())
+                                .recDate(req.getRecDate())
                                 .build();
 
                         challengeRecordRepository.save(cr);

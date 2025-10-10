@@ -20,7 +20,7 @@ public class ChallengeDefinitionGetRes {
     private int reward;
     private String unit;
     private int xp;
-
+    private String note;
     @JsonIgnore
     private String tierCode;
 

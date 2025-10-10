@@ -109,16 +109,18 @@ public class UserService {
         userRepository.updateRefreshToken(userId, refreshToken);
     }
 
+    @Transactional
     public UserLoginDto login(UserLoginReq req) {
         User user = userRepository.findByUidAndProviderType(req.getUid(), SignInProviderType.LOCAL);
         if(user == null || !passwordEncoder.matches(req.getUpw(), user.getUpw())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "아이디/비밀번호를 확인해 주세요.");
         }
+        userRepository.updateLastLoginByUserId(user.getUserId(), LocalDateTime.now());
+
         List<EnumUserRole> roles = user.getUserRoles().stream()
                 .map(item -> item.getUserRoleIds().getRoleCode()).toList();
         log.info("roles: {}", roles);
         JwtUser jwtUser = new JwtUser(user.getUserId(), roles);
-
         EnumUserRole userRole = user.getUserRoles().stream()
                 .map(item -> item.getUserRoleIds().getRoleCode()).findFirst().orElse(null);
         EnumChallengeRole challengeRoles = user.getUserRoles().stream()

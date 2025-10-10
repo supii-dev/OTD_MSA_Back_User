@@ -5,9 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.SignInProviderType;
+import com.otd.otd_challenge.entity.*;
+import com.otd.otd_pointShop.entity.PointBalance;
+import com.otd.otd_pointShop.entity.PointUser;
+import com.otd.otd_pointShop.entity.PurchaseHistory;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +71,9 @@ public class User extends UpdatedAt{
     @JsonIgnore
     private String refreshToken;
 
+    @Column
+    private LocalDateTime lastLogin;
+
     @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -75,6 +84,26 @@ public class User extends UpdatedAt{
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRole> userRoles = new ArrayList<>(1);
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeMission> challengeMissions = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengePointHistory> challengePointHistories = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeProgress> challengeProgresses = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeSettlementLog> challengeSettlementLogs = new ArrayList<>();
 
     public void addUserRoles(List<EnumUserRole> enumUserRole, EnumChallengeRole enumChallengeRole) {
         for(EnumUserRole e : enumUserRole) {
