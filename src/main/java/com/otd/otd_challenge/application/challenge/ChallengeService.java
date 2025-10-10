@@ -44,11 +44,11 @@ public class ChallengeService {
     private void addImgPath(List<?> list) {
         for (Object o : list) {
             if (o instanceof ChallengeDefinitionGetRes cd) {
-                cd.setImage(imgPath + cd.getImage());
+                cd.setImage(imgPath + "/" + cd.getImage());
             } else if (o instanceof ChallengeProgressGetRes cp) {
-                cp.setImage(imgPath + cp.getImage());
+                cp.setImage(imgPath + "/" + cp.getImage());
             } else if (o instanceof ChallengeDefinition ecd) {
-                ecd.setCdImage(imgPath + ecd.getCdImage());
+                ecd.setCdImage(imgPath + "/" + ecd.getCdImage());
             }
         }
     }
