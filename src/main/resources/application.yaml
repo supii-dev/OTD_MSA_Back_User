@@ -10,6 +10,8 @@ constants:
       url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
       service-key: fte7et4WjQ2QQTSP51SJ6VZ%2FXA3aDUYv054aZFUsGdrVOKFJxQnmrKJGh%2Box%2FcnwsvpeJmLazXr4je1K01Uoow%3D%3D
       data-type: json
+    life:
+      url: http://localhost:8082/api/OTD
   comment:
     start-index: 0
     need-for-view-count: 3 #피드 리스트를 뿌릴 때 실제로 피드당 보여지는 댓글 수
@@ -65,7 +67,11 @@ spring:
       enabled: true
       pool:
         size: 2
-
+  flyway:
+    enabled: true
+    baseline-on-migrate: true  # 기존 DB가 있을 때 필요
+    locations: classpath:db/migration
+    encoding: UTF-8
     # 이메일 설정
   mail:
     host: smtp.gmail.com
@@ -81,9 +87,9 @@ spring:
             enable: true
     default-encoding: UTF-8
   datasource:
-#    url: jdbc:log4jdbc:mariadb://localhost/otd
-#    username: root
-#    password: green502
+    #    url: jdbc:log4jdbc:mariadb://localhost/otd
+    #    username: root
+    #    password: green502
     url: jdbc:log4jdbc:mariadb://112.222.157.157:5012/hsb
     username: hsb
     password: green502
@@ -92,10 +98,13 @@ spring:
     default-property-inclusion: non_null # 응답 JSON에서 null인 속성은 제외
   jpa:
     database: mysql
-    defer-datasource-initialization: true #JPA 테이블 생성 이후 data.sql
+    defer-datasource-initialization: false
+    #defer-datasource-initialization: true #JPA 테이블 생성 이후 data.sql
     hibernate:
-      ddl-auto: none #entity 수정이 파악되면 테이블을 수정한다.
-#      ddl-auto: create #프로젝트 실행시마다 테이블을 모두 drop 후 create한다.
+      ddl-auto: none
+      #ddl-auto: validate #entity 엔티티에 새로운거 추가할때 sql ALTER TABLE로 추가한뒤 시작해야함
+    #     ddl-auto: update #entity 수정이 파악되면 테이블을 수정한다.
+    #      ddl-auto: create #프로젝트 실행시마다 테이블을 모두 drop 후 create한다.
     properties:
       hibernate:
         jdbc:
@@ -174,3 +183,7 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
   mapper-locations: mappers/**/*.xml
+
+logging:
+  level:
+    org.springframework.web: DEBUG

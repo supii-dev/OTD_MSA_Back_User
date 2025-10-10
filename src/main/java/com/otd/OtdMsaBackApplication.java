@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ConfigurationPropertiesScan
 @SpringBootApplication
 @EnableFeignClients(basePackages = "com.otd.configuration.feignclient")
-@ComponentScan(basePackages = {"com.otd","com.otd.configuration"})
+@ComponentScan(basePackages = {"com.otd","com.otd.configuration", "com.otd.otd_user"})
 public class OtdMsaBackApplication {
 
     public static void main(String[] args) {
