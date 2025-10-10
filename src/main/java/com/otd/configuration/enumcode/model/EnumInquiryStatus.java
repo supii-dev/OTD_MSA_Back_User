@@ -1,18 +1,13 @@
 package com.otd.configuration.enumcode.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-import com.otd.configuration.enumcode.AbstractEnumCodeConverter;
-import com.otd.configuration.enumcode.EnumMapperType;
-import jakarta.persistence.Converter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
 public enum EnumInquiryStatus implements EnumMapperType {
-    PENDING("00", "대기 중", "문의가 접수되었습니다"),
-    RESOLVED("01", "답변 완료", "문의 처리가 완료되었습니다");
+    PENDING("01", "대기중", "문의가 접수되었습니다"),
+    RESOLVED("02", "완료", "문의 처리가 완료되었습니다");
 
     private final String code;
     private final String title;
@@ -27,16 +22,17 @@ public enum EnumInquiryStatus implements EnumMapperType {
             // 1) enum 상수명 매칭 (PENDING, RESOLVED)
             if (status.name().equalsIgnoreCase(key)) return status;
 
-            // 2) code 매칭 ("00", "01")
+            // 2) code 매칭 ("01", "02")
             if (status.code.equalsIgnoreCase(key)) return status;
 
-            // 3) title 매칭 ("대기 중", "답변 완료")
+            // 3) title 매칭 ("대기중", "완료")
             if (status.title.equalsIgnoreCase(key)) return status;
         }
 
         throw new IllegalArgumentException("Unknown EnumInquiryStatus: " + raw);
     }
 
+    @JsonValue
     @Override
     public String getCode() {
         return code;
