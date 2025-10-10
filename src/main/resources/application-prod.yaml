@@ -4,6 +4,9 @@ constants:
   jwt:
     refresh-token-cookie-path: /otd-api/api/OTD/user/reissue
 
+  feign-client:
+    life:
+      url: otd-life/api/OTD
 server:
   port: 8080
 
