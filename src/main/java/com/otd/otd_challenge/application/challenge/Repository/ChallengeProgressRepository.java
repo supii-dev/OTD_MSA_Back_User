@@ -49,7 +49,7 @@ public interface ChallengeProgressRepository extends JpaRepository<ChallengeProg
             "AND cp.startDate <= :recordDate " +
             "AND cp.endDate >= :recordDate")
     List<String> findActiveChallengeNames(@Param("userId") Long userId
-                                        , @Param("recordDate")  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime recordDate);
+                                        , @Param("recordDate") LocalDate recordDate);
 
     void deleteAllByUser(User user);
 }
