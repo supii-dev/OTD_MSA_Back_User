@@ -335,7 +335,7 @@ public class EmailService {
 
             // 2. Inquiry 엔티티 생성 및 저장
             Inquiry inquiry = new Inquiry();
-            inquiry.setUserId(userId);
+            inquiry.setUser(user);
             inquiry.setSubject(req.getSubject());
             inquiry.setContent(req.getMessage());
             inquiry.setSenderName(req.getSenderName());
@@ -403,7 +403,7 @@ public class EmailService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId)
                 .orElseThrow(() -> new RuntimeException("문의를 찾을 수 없습니다."));
 
-        if (!inquiry.getUserId().equals(userId)) {
+        if (!inquiry.getUser().getUserId().equals(userId)) {
             throw new RuntimeException("권한이 없습니다.");
         }
 
