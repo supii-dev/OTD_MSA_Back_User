@@ -1,10 +1,12 @@
 package com.otd.configuration.jwt;
 
-
 import com.otd.configuration.constants.ConstJwt;
 import com.otd.configuration.model.JwtUser;
 import com.otd.configuration.model.UserPrincipal;
 import com.otd.configuration.util.CookieUtils;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 
 //JWT 총괄 책임자
 @Slf4j
@@ -84,7 +87,6 @@ public class JwtTokenManager {
         cookieUtils.deleteCookie(response, "JSESSIONID", null, constJwt.getDomain());
         cookieUtils.deleteCookie(response, "Authorization", null, constJwt.getDomain());
         cookieUtils.deleteCookie(response, "RefreshToken", null, constJwt.getDomain());
-
     }
 
     public void reissue(HttpServletRequest request, HttpServletResponse response) {
@@ -114,26 +116,69 @@ public class JwtTokenManager {
         log.info("refreshToken: {}", refreshToken);
         if(accessToken !=null){
             JwtUser jwtUser = getJwtUserFromToken(accessToken);
-            //if(jwtUser == null) { return null; } //토큰이 오염됐을 시 예외발생하기 때문에 null처리는 안 해도 된다.
             UserPrincipal userPrincipal = new UserPrincipal(jwtUser);
             return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
-
         }
         else if(refreshToken != null){
             JwtUser jwtUser = getJwtUserFromToken(refreshToken);
             log.info(jwtUser.toString());
-            //if(jwtUser == null) { return null; } //토큰이 오염됐을 시 예외발생하기 때문에 null처리는 안 해도 된다.
             UserPrincipal userPrincipal = new UserPrincipal(jwtUser);
             return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
-
         }
         else
             return null;
+    }
 
+    // ============================================
+    // 소셜 온보딩용 레지스터 토큰 메서드들
+    // ============================================
 
-//        JwtUser jwtUser = getJwtUserFromToken(accessToken);
-//        //if(jwtUser == null) { return null; } //토큰이 오염됐을 시 예외발생하기 때문에 null처리는 안 해도 된다.
-//        UserPrincipal userPrincipal = new UserPrincipal(jwtUser);
-//        return new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
+    /**
+     * 소셜 온보딩용 레지스터 토큰 생성
+     * JwtTokenProvider를 활용하여 토큰 생성
+     */
+    public String generateSocialRegisterToken(
+            String nickname,
+            String profileImageUrl,
+            String providerType,
+            String providerId,
+            long expirationMillis) {
+
+        // JwtTokenProvider에 레지스터 토큰 생성 메서드 추가 필요
+        return jwtTokenProvider.generateRegisterToken(
+                nickname,
+                profileImageUrl,
+                providerType,
+                providerId,
+                expirationMillis
+        );
+    }
+
+    /**
+     * 레지스터 토큰에서 닉네임 추출
+     */
+    public String getNicknameFromRegisterToken(String token) {
+        return jwtTokenProvider.getClaimFromToken(token, "nickname", String.class);
+    }
+
+    /**
+     * 레지스터 토큰에서 프로필 이미지 URL 추출
+     */
+    public String getProfileImageUrlFromRegisterToken(String token) {
+        return jwtTokenProvider.getClaimFromToken(token, "profileImageUrl", String.class);
+    }
+
+    /**
+     * 레지스터 토큰에서 제공자 타입 추출
+     */
+    public String getProviderTypeFromRegisterToken(String token) {
+        return jwtTokenProvider.getClaimFromToken(token, "providerType", String.class);
+    }
+
+    /**
+     * 레지스터 토큰에서 제공자 ID 추출
+     */
+    public String getProviderIdFromRegisterToken(String token) {
+        return jwtTokenProvider.getClaimFromToken(token, "providerId", String.class);
     }
 }

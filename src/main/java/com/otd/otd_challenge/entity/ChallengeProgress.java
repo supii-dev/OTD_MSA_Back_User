@@ -1,6 +1,7 @@
 package com.otd.otd_challenge.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.otd.otd_pointShop.entity.PurchaseHistory;
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,6 +9,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -43,4 +46,8 @@ public class ChallengeProgress {
 
     @Column(columnDefinition = "TINYINT(1) DEFAULT 0", nullable = false)
     private boolean isSuccess;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "challengeProgress", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeRecord> challengeRecords = new ArrayList<>();
 }
