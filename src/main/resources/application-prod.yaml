@@ -2,7 +2,7 @@ constants:
   file:
     upload-directory: /home/download
   jwt:
-    refresh-token-cookie-path: /otd-api/api/user/reissue
+    refresh-token-cookie-path: /otd-api/api/OTD/user/reissue
 
 server:
   port: 8080
