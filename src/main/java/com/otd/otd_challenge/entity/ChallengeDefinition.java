@@ -1,6 +1,7 @@
 package com.otd.otd_challenge.entity;
 
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.otd_admin.application.admin.model.AdminChallengeDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,6 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@Builder
 public class ChallengeDefinition {
 
     @Id
@@ -43,4 +45,17 @@ public class ChallengeDefinition {
 
     @Column(length = 30, columnDefinition = "VARCHAR(30) DEFAULT '-'")
     private String note;
+
+    public void update(AdminChallengeDto dto) {
+        this.cdName = dto.getCdName();
+        this.cdType = dto.getCdType();
+        this.cdGoal = dto.getCdGoal();
+        this.cdUnit = dto.getCdUnit();
+        this.cdReward = dto.getCdReward();
+        this.xp = dto.getXp();
+        this.tier = dto.getTier();
+        if (dto.getCdImage() != null) {
+            this.cdImage = dto.getCdImage();
+        }
+    }
 }

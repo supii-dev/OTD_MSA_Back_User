@@ -9,6 +9,7 @@ import com.otd.otd_user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class AdminController {
         return adminService.getUsers();
     }
 
-    @GetMapping("user/{userId}")
+    @GetMapping("/user/{userId}")
     public AdminUserDetailGetRes getUserDetail(@PathVariable Long userId) {
         return adminService.getUserDetail(userId);
     }
@@ -41,15 +42,38 @@ public class AdminController {
         return adminService.getChallenges();
     }
 
+    @PostMapping("/challenge/add")
+    public ResultResponse<?> addChallenge(
+            @RequestPart("challenge") AdminChallengeDto challengeDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        if (file != null && !file.isEmpty()){
+            String fileName = adminService.saveChallengeImage(file);
+            challengeDto.setCdImage(fileName);
+        }
+        AdminChallengeDto save = adminService.addChallenge(challengeDto);
+        return new ResultResponse<>("챌린지 등록 성공", save);
+    }
+
     @PutMapping("/challenge/modify")
-    public ResultResponse<?> putChallenge(@RequestBody AdminChallengePutReq req){
-        return adminService.putChallengeDetail(req);
+    public ResultResponse<?> putChallenge(
+            @RequestPart("challenge") AdminChallengeDto challengeDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        if (file != null && !file.isEmpty()) {
+            String fileName = adminService.saveChallengeImage(file);
+            challengeDto.setCdImage(fileName);
+        }
+
+        AdminChallengeDto update = adminService.modifyChallenge(challengeDto);
+        return new ResultResponse<>("챌린지 수정 성공", update);
     }
 
     @DeleteMapping("/user/{userId}")
     public ResultResponse<?> deleteUser(@PathVariable Long userId){
         return adminService.removeUser(userId);
     }
+
     @DeleteMapping("/challenge/{cdId}")
     public ResultResponse<?> deleteChallenge(@PathVariable Long cdId) {
         return adminService.removeChallenge(cdId);
@@ -77,7 +101,7 @@ public class AdminController {
         return adminService.getTierCount();
     }
 
-    @GetMapping("challengerate")
+    @GetMapping("/challengerate")
     public List<ChallengeSuccessRateCountRes> getChallengeSuccessRateCount() {
         return adminService.getChallengeSuccessRateCount();
     }

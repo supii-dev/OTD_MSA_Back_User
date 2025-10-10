@@ -4,6 +4,7 @@ import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.feignclient.LifeFeignClient;
 import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.util.MyFileManager;
 import com.otd.otd_admin.application.admin.Repository.AdminInquiryRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminPointRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminUserRepository;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -35,9 +37,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AdminService {
-    private final UserMapper userMapper;
-
-    private final ChallengeMapper challengeMapper;
     private final ChallengeProgressRepository challengeProgressRepository;
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
     private final ChallengePointRepository challengePointRepository;
@@ -48,9 +47,7 @@ public class AdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AdminInquiryRepository adminInquiryRepository;
-    private final InquiryRepository inquiryRepository;
-    private final ChallengeMissionRepository challengeMissionRepository;
-    private final ChallengeSettlementRepository challengeSettlementRepository;
+    private final MyFileManager myFileManager;
     private final LifeFeignClient lifeFeignClient;
 
     public List<User> getUsers() {
@@ -135,21 +132,38 @@ public class AdminService {
     }
 
     @Transactional
-    public ResultResponse<?> putChallengeDetail(AdminChallengePutReq req) {
-        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(req.getCdId());
-        if (cd == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 챌린지를 찾을 수 없습니다.");
+    public AdminChallengeDto addChallenge(AdminChallengeDto dto) {
+        ChallengeDefinition cd = ChallengeDefinition.builder()
+                .cdName(dto.getCdName())
+                .cdType(dto.getCdType())
+                .cdGoal(dto.getCdGoal())
+                .cdUnit(dto.getCdUnit())
+                .cdReward(dto.getCdReward())
+                .xp(dto.getXp())
+                .tier(dto.getTier())
+                .cdImage(dto.getCdImage())
+                .build();
+
+        challengeDefinitionRepository.save(cd);
+        dto.setCdId(cd.getCdId());
+        return dto;
+    }
+
+    public String saveChallengeImage(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "파일이 없습니다");
         }
-        cd.setNote(req.getNote());
-        cd.setCdGoal(req.getCdGoal());
-        cd.setCdName(req.getCdName());
-        cd.setCdImage(req.getCdImage());
-        cd.setCdReward(req.getCdReward());
-        cd.setCdType(req.getCdType());
-        cd.setCdUnit(req.getCdUnit());
-        cd.setXp(req.getXp());
-        cd.setTier(req.getTier());
-        return new ResultResponse<>("챌린지 정보가 수정되었습니다.", req.getCdId());
+        return myFileManager.saveChallengeImage(file);
+    }
+
+    @Transactional
+    public AdminChallengeDto modifyChallenge(AdminChallengeDto dto) {
+        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(dto.getCdId());
+        if (cd == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 챌린지입니다");
+        }
+        cd.update(dto);
+        return dto;
     }
 
     @Transactional
