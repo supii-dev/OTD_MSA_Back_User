@@ -24,12 +24,12 @@ public class PurchaseHistoryController {
     @PostMapping("/{pointId}")
     public ResponseEntity<?> purchase(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @PathVariable Long pointId // ⚠ 수정 필요
+            @PathVariable Long pointId
     ) {
         if (userPrincipal == null) {
             return ResponseEntity.status(401).body(new PointApiResponse<>(false, "로그인이 필요합니다."));
         }
-        PurchasePostRes res = purchaseHistoryService.purchaseItem(userPrincipal.getSignedUserId(), pointId); // ⚠ 수정됨
+        PurchasePostRes res = purchaseHistoryService.purchaseItem(userPrincipal.getSignedUserId(), pointId);
         return ResponseEntity.ok(new PointApiResponse<>(true, "구매 성공", res));
     }
 
