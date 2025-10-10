@@ -7,8 +7,10 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +49,7 @@ public interface ChallengeProgressRepository extends JpaRepository<ChallengeProg
             "AND cp.startDate <= :recordDate " +
             "AND cp.endDate >= :recordDate")
     List<String> findActiveChallengeNames(@Param("userId") Long userId
-                                        , @Param("recordDate") LocalDate recordDate);
+                                        , @Param("recordDate")  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime recordDate);
 
     void deleteAllByUser(User user);
 }

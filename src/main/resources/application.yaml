@@ -11,6 +11,7 @@ constants:
       service-key: fte7et4WjQ2QQTSP51SJ6VZ%2FXA3aDUYv054aZFUsGdrVOKFJxQnmrKJGh%2Box%2FcnwsvpeJmLazXr4je1K01Uoow%3D%3D
       data-type: json
     life:
+      name: otd-life
       url: http://localhost:8083/api/OTD
   comment:
     start-index: 0
@@ -76,6 +77,7 @@ spring:
     locations: classpath:db/migration
     encoding: UTF-8
     # 이메일 설정
+    out-of-order: true
   mail:
     host: smtp.gmail.com
     port: 587
