@@ -1,18 +1,21 @@
 package com.otd.otd_user.application.user;
 
-import com.otd.configuration.jwt.JwtTokenManager;
 import com.otd.configuration.util.MyFileManager;
-import com.otd.configuration.util.MyFileUtils;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.otd_user.application.email.EmailService;
 import com.otd.otd_user.application.email.model.PasswordChangeReq;
 import com.otd.otd_user.application.email.model.PasswordResetReq;
+import com.otd.otd_user.application.term.TermsRepository;
 import com.otd.otd_user.application.user.model.*;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.model.JwtUser;
 import com.otd.configuration.security.SignInProviderType;
 import com.otd.configuration.util.ImgUploadManager;
 import com.otd.otd_user.entity.User;
+import com.otd.otd_user.entity.Terms;
+import com.otd.otd_user.entity.UserAgreement;
+import com.otd.otd_user.application.term.TermsRepository;
+import com.otd.otd_user.application.term.UserAgreementRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -35,10 +38,13 @@ public class UserService {
     private final ImgUploadManager imgUploadManager;
     private final EmailService emailService;
     private final MyFileManager myFileManager;
+    private final TermsRepository termsRepository;
+    private final UserAgreementRepository userAgreementRepository;
 
     public boolean isUidAvailable(String uid) {
         return userMapper.countByUid(uid) == 0;
     }
+
     @Transactional
     public void join(UserJoinReq req, MultipartFile pic) {
         String hashedPassword = passwordEncoder.encode(req.getUpw());
@@ -56,19 +62,46 @@ public class UserService {
                 .build();
 
         EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(req.getSurveyAnswers());
-        // 기본 역할 설정
         if (req.getRoles() == null || req.getRoles().isEmpty()) {
             user.addUserRoles(List.of(EnumUserRole.USER_2), challengeRole);
         } else {
             user.addUserRoles(req.getRoles(), challengeRole);
         }
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         if(pic != null) {
-            String savedFileName = myFileManager.saveProfilePic(user.getUserId(), pic);
-            user.setPic(savedFileName);
+            String savedFileName = myFileManager.saveProfilePic(savedUser.getUserId(), pic);
+            savedUser.setPic(savedFileName);
         }
+
+        // 약관 동의 처리 추가
+        if (req.getAgreedTermsIds() != null && !req.getAgreedTermsIds().isEmpty()) {
+            saveUserAgreements(savedUser, req.getAgreedTermsIds(), req.getIpAddress(), req.getUserAgent());
+        }
+
+        log.info("회원가입 완료 - userId: {}, email: {}", savedUser.getUserId(), savedUser.getEmail());
+    }
+
+    // 약관 동의 저장 메서드
+    private void saveUserAgreements(User user, List<Long> termsIds, String ipAddress, String userAgent) {
+        for (Long termsId : termsIds) {
+            Terms terms = termsRepository.findById(termsId)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, "약관을 찾을 수 없습니다. ID: " + termsId));
+
+            UserAgreement agreement = UserAgreement.builder()
+                    .user(user)
+                    .terms(terms)
+                    .agreed(true)
+                    .agreedAt(LocalDateTime.now())
+                    .ipAddress(ipAddress)
+                    .userAgent(userAgent)
+                    .build();
+
+            userAgreementRepository.save(agreement);
+        }
+        log.info("약관 동의 저장 완료 - userId: {}, 동의 약관 수: {}", user.getUserId(), termsIds.size());
     }
 
     @Transactional
@@ -86,6 +119,8 @@ public class UserService {
         log.info("roles: {}", roles);
         JwtUser jwtUser = new JwtUser(user.getUserId(), roles);
 
+        EnumUserRole userRole = user.getUserRoles().stream()
+                .map(item -> item.getUserRoleIds().getRoleCode()).findFirst().orElse(null);
         EnumChallengeRole challengeRoles = user.getUserRoles().stream()
                 .map(item -> item.getUserRoleIds().getChallengeCode())
                 .findFirst().orElse(null);
@@ -98,6 +133,7 @@ public class UserService {
                 .xp(user.getXp())
                 .email(user.getEmail())
                 .challengeRole(challengeRoles)
+                .userRole(userRole)
                 .build();
 
         return UserLoginDto.builder()
@@ -163,9 +199,15 @@ public class UserService {
     public String patchProfilePic(long signedUserId, MultipartFile pic) {
         User user = userRepository.findById(signedUserId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."));
-        imgUploadManager.removeProfileDirectory(signedUserId);
-        String savedFileName = imgUploadManager.saveProfilePic(signedUserId, pic);
+
+        myFileManager.removeProfileDirectory(signedUserId);
+        String savedFileName = myFileManager.saveProfilePic(signedUserId, pic);
+
         user.setPic(savedFileName);
+        userRepository.save(user);
+
+        log.info("프로필 사진 업데이트 완료 - userId: {}, pic: {}", signedUserId, savedFileName);
+
         return savedFileName;
     }
 
@@ -175,6 +217,77 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."));
         imgUploadManager.removeProfileDirectory(signedUserId);
         user.setPic(null);
+    }
+
+    @Transactional
+    public void updateNickname(Long userId, String nickname) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."));
+
+        if (nickname == null || nickname.trim().isEmpty()) {
+            throw new IllegalArgumentException("닉네임을 입력해주세요.");
+        }
+        if (nickname.length() < 2 || nickname.length() > 10) {
+            throw new IllegalArgumentException("닉네임은 2~10자여야 합니다.");
+        }
+        if (user.getNickName().equals(nickname)) {
+            throw new IllegalArgumentException("현재 닉네임과 동일합니다.");
+        }
+
+
+        if (!isNicknameAvailable(nickname)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용중인 닉네임입니다.");
+        }
+
+        user.setNickName(nickname);
+        log.info("닉네임 변경 완료 - userId: {}, 새 닉네임: {}", userId, nickname);
+    }
+    @Transactional
+    public void updateEmail(Long userId, String email) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."));
+
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("이메일을 입력해주세요.");
+        }
+
+        // 이메일 형식 검증
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        if (!email.matches(emailRegex)) {
+            throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다.");
+        }
+
+        // 현재 이메일과 동일한지 확인
+        if (user.getEmail().equals(email)) {
+            throw new IllegalArgumentException("현재 이메일과 동일합니다.");
+        }
+
+        // 이메일 중복 확인
+        if (userRepository.existsByEmail(email)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용중인 이메일입니다.");
+        }
+
+        // 이메일 인증 확인
+        if (!emailService.canResetPassword(email)) {
+            throw new IllegalArgumentException("이메일 인증을 완료해주세요.");
+        }
+
+        user.setEmail(email);
+        userRepository.save(user);
+
+        emailService.removePasswordResetPermission(email);
+
+        log.info("이메일 변경 완료 - userId: {}, 새 이메일: {}", userId, email);
+    }
+    @Transactional
+    public int deleteById(long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."));
+
+        userRepository.delete(user);
+        log.info("회원 삭제 완료 - userId: {}", userId);
+        return 1;
     }
 
 }

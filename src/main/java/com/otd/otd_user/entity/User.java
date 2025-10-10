@@ -1,6 +1,7 @@
 
 package com.otd.otd_user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.SignInProviderType;
@@ -27,6 +28,7 @@ public class User extends UpdatedAt{
     private String uid;
 
     @Column(nullable = false, length = 100)
+    @JsonIgnore
     private String upw;
 
     @Column(length = 30, name = "nick_name")
@@ -39,16 +41,16 @@ public class User extends UpdatedAt{
     private String name;
 
     @Column(name = "birth_date")
-    private String birthDate; // 생년월일
+    private String birthDate;
 
     @Column(length = 1)
-    private String gender; // 성별 (M: 남성, F: 여성)
+    private String gender;
 
-    @Column(length = 100, unique = true)
-    private String email; // 이메일 (고유값으로 설정)
+    @Column(length = 100)
+    private String email;
 
     @Column(length = 30)
-    private String phone; // 휴대폰번호
+    private String phone;
 
     @Column(length = 2)
     private SignInProviderType providerType;
@@ -60,14 +62,13 @@ public class User extends UpdatedAt{
     private int xp;
 
     @Column(length = 300)
+    @JsonIgnore
     private String refreshToken;
 
-    // 본인인증 관련 필드 추가
-//    @Column(length = 88, name = "ci")
-//    private String ci; // 연계정보 (Connecting Information)
-//
-//    @Column(length = 64, name = "di")
-//    private String di; // 중복가입확인정보 (Duplication Information)
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAgreement> agreements = new ArrayList<>();
 
     //cascade는 자식과 나랑 모든 연결 (내가 영속성되면 자식도 영속성되고, 내가 삭제되면 자식도 삭제 된다. 등등)
     //ohphanRemoval은 userRoles에서 자식을 하나 제거함. 그러면 DB에도 뺀 자식은 삭제처리가 된다.

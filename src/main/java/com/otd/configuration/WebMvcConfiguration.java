@@ -26,6 +26,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .addResourceLocations("file:" + uploadDirectory + "/challenge/");
         registry.addResourceHandler("/profile/**")
                 .addResourceLocations("file:" + uploadDirectory + "/profile/");
+        registry.addResourceHandler("/pointshop/**")
+                .addResourceLocations("file:" + uploadDirectory + "/pointshop/");
     }
 
     @Override

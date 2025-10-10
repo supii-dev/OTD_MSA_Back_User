@@ -1,6 +1,7 @@
 package com.otd.otd_challenge.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otd.otd_user.entity.CreatedAt;
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
