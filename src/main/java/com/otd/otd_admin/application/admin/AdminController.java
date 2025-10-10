@@ -19,6 +19,22 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
 
+    // 대시보드
+    @GetMapping("/dash/user")
+    public int getUserCount(){
+        return adminService.getUserCount();
+    }
+
+    @GetMapping("/dash/point")
+    public int getPointCount(){
+        return adminService.getPointCount();
+    }
+
+    @GetMapping("/dash/join")
+    public List<User> getJoinUser(){
+        return adminService.getRecentJoinUser();
+    }
+
     // 유저
     @GetMapping("/user")
     public List<User> getUsers() {
@@ -80,6 +96,11 @@ public class AdminController {
     @GetMapping("challengerate")
     public List<ChallengeSuccessRateCountRes> getChallengeSuccessRateCount() {
         return adminService.getChallengeSuccessRateCount();
+    }
+
+    @GetMapping("/signin")
+    public List<SignInCountRes> getSignInCount() {
+        return adminService.getSignInCount();
     }
 
     // 문의

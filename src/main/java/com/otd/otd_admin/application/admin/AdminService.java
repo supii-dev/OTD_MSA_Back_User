@@ -85,6 +85,21 @@ public class AdminService {
         return adminMapper.countByChallengeType();
     }
 
+    public List<SignInCountRes> getSignInCount() {
+        return adminMapper.countBySignIn();
+    }
+
+    public int getUserCount() {
+        return adminUserRepository.countUser();
+    }
+
+    public int getPointCount() {
+        return adminUserRepository.sumPoint();
+    }
+
+    public List<User> getRecentJoinUser() {
+        return adminUserRepository.findTop5ByOrderByCreatedAtDesc();
+    }
     public AdminUserDetailGetRes getUserDetail(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         List<ChallengeProgress> cp = challengeProgressRepository.findByUserId(user.getUserId());

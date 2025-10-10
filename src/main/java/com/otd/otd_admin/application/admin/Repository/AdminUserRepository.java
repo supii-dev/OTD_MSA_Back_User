@@ -11,4 +11,12 @@ public interface AdminUserRepository extends JpaRepository<User, Integer> {
     @Query("SELECT new com.otd.otd_admin.application.admin.model.GenderCountRes(u.gender, COUNT(u)) " +
             "FROM User u GROUP BY u.gender")
     List<GenderCountRes> countUserByGender();
+
+    @Query("SELECT COUNT(*) FROM User")
+    int countUser();
+
+    @Query("SELECT SUM(point) FROM User")
+    int sumPoint();
+
+    List<User> findTop5ByOrderByCreatedAtDesc();
 }
