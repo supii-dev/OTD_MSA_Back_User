@@ -5,6 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.SignInProviderType;
+import com.otd.otd_challenge.entity.*;
+import com.otd.otd_pointShop.entity.PointBalance;
+import com.otd.otd_pointShop.entity.PointUser;
+import com.otd.otd_pointShop.entity.PurchaseHistory;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,23 +39,22 @@ public class User extends UpdatedAt{
     private String nickName;
 
     @Column(length = 100)
-    @JsonIgnore
     private String pic;
 
     @Column(length = 30)
     private String name;
 
     @Column(name = "birth_date")
-    private String birthDate; // 생년월일
+    private String birthDate;
 
     @Column(length = 1)
-    private String gender; // 성별 (M: 남성, F: 여성)
+    private String gender;
 
-    @Column(length = 100, unique = true)
-    private String email; // 이메일 (고유값으로 설정)
+    @Column(length = 100)
+    private String email;
 
     @Column(length = 30)
-    private String phone; // 휴대폰번호
+    private String phone;
 
     @Column(length = 2)
     private SignInProviderType providerType;
@@ -66,6 +69,7 @@ public class User extends UpdatedAt{
     @JsonIgnore
     private String refreshToken;
 
+    @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAgreement> agreements = new ArrayList<>();
@@ -75,6 +79,26 @@ public class User extends UpdatedAt{
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRole> userRoles = new ArrayList<>(1);
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeMission> challengeMissions = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengePointHistory> challengePointHistories = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeProgress> challengeProgresses = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeSettlementLog> challengeSettlementLogs = new ArrayList<>();
 
     public void addUserRoles(List<EnumUserRole> enumUserRole, EnumChallengeRole enumChallengeRole) {
         for(EnumUserRole e : enumUserRole) {

@@ -1,5 +1,6 @@
 package com.otd.otd_user.entity;
 
+import com.otd.configuration.enumcode.model.EnumInquiryStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,11 +10,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "munhe")
+@Table(name = "inquiry")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Munhe {
+public class Inquiry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,6 +37,7 @@ public class Munhe {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Enumerated(EnumType.STRING)
-    private MunheStatus status = MunheStatus.PENDING;
+    @Column(name = "status")
+    @Convert(converter = EnumInquiryStatus.CodeConverter.class)
+    private EnumInquiryStatus status = EnumInquiryStatus.PENDING;
 }

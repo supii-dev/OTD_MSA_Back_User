@@ -1,6 +1,6 @@
-package com.otd.otd_user.entity;
+package com.otd.configuration.enumcode.model;
 
-public enum TermsType {
+public enum EnumTermsType {
     SERVICE("서비스 이용약관"),
     PRIVACY("개인정보 처리방침"),
     MARKETING("마케팅 수신동의"),
@@ -8,7 +8,7 @@ public enum TermsType {
 
     private final String description;
 
-    TermsType(String description) {
+    EnumTermsType(String description) {
         this.description = description;
     }
 

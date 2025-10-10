@@ -4,6 +4,7 @@ import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_admin.application.admin.model.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
+import com.otd.otd_user.entity.Inquiry;
 import com.otd.otd_user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,19 +19,10 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
 
+    // 유저
     @GetMapping("/user")
     public List<User> getUsers() {
         return adminService.getUsers();
-    }
-
-    @GetMapping("/challenge")
-    public List<ChallengeDefinition> getChallenges() {
-        return adminService.getChallenges();
-    }
-
-    @GetMapping("/point")
-    public List<ChallengePointHistory> getPointHistory() {
-        return adminService.getPointHistory();
     }
 
     @GetMapping("user/{userId}")
@@ -38,24 +30,38 @@ public class AdminController {
         return adminService.getUserDetail(userId);
     }
 
-    @PutMapping("/{userId}")
-    public ResultResponse<?> putUser(@PathVariable Long userId,
-                                     @RequestBody AdminUserPutReq req){
-        req.setUserId(userId);
+    @PutMapping("/user/modify")
+    public ResultResponse<?> putUser(@RequestBody AdminUserPutReq req){
         return adminService.putUserDetail(req);
     }
 
-    @PutMapping("/{cdId}")
-    public ResultResponse<?> putChallenge(@PathVariable Long cdId,
-                                          @RequestBody AdminChallengePutReq req){
-        req.setCdId(cdId);
+    // 챌린지
+    @GetMapping("/challenge")
+    public List<ChallengeDefinition> getChallenges() {
+        return adminService.getChallenges();
+    }
+
+    @PutMapping("/challenge/modify")
+    public ResultResponse<?> putChallenge(@RequestBody AdminChallengePutReq req){
         return adminService.putChallengeDetail(req);
     }
 
+    @DeleteMapping("/user/{userId}")
+    public ResultResponse<?> deleteUser(@PathVariable Long userId){
+        return adminService.removeUser(userId);
+    }
+    @DeleteMapping("/challenge/{cdId}")
+    public ResultResponse<?> deleteChallenge(@PathVariable Long cdId) {
+        return adminService.removeChallenge(cdId);
+    }
 
+    // 포인트
+    @GetMapping("/point")
+    public List<ChallengePointHistory> getPointHistory() {
+        return adminService.getPointHistory();
+    }
 
-
-    // 대시보드쪽
+    // 통계
     @GetMapping("/gender")
     public List<GenderCountRes> getGenderCount() {
         return adminService.getGenderCount();
@@ -64,5 +70,21 @@ public class AdminController {
     @GetMapping("/agegroup")
     public List<AgeCountRes> getAgeGroup() {
         return adminService.getAgeCount();
+    }
+
+    @GetMapping("/tier")
+    public List<TierCountRes> getTierCount() {
+        return adminService.getTierCount();
+    }
+
+    @GetMapping("challengerate")
+    public List<ChallengeSuccessRateCountRes> getChallengeSuccessRateCount() {
+        return adminService.getChallengeSuccessRateCount();
+    }
+
+    // 문의
+    @GetMapping("/qna")
+    public List<Inquiry> getInquiry() {
+        return adminService.getInquiry();
     }
 }
