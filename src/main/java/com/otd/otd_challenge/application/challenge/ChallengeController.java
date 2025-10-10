@@ -144,7 +144,12 @@ public class ChallengeController {
     }
     @GetMapping("/progress/challenges/{userId}")
     public ResponseEntity<List<String>> getActiveChallengeNames(@PathVariable Long userId
-            , @RequestParam("recordDate")  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime recordDate) {
+            , @RequestParam("recordDate") String strRecordDate) {
+        log.info("userId: {}", userId);
+        log.info("recordDate: {}", strRecordDate);
+
+        LocalDate recordDate = LocalDate.parse(strRecordDate);
+
         List<String> challengeNames = challengeProgressRepository.findActiveChallengeNames(userId, recordDate);
         return ResponseEntity.ok(challengeNames);
     }
