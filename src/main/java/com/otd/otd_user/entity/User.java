@@ -12,6 +12,8 @@ import com.otd.otd_pointShop.entity.PurchaseHistory;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,6 +70,9 @@ public class User extends UpdatedAt{
     @Column(length = 300)
     @JsonIgnore
     private String refreshToken;
+
+    @Column
+    private LocalDateTime lastLogin;
 
     @JsonIgnore
     @Builder.Default
