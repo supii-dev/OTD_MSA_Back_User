@@ -8,19 +8,23 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserLoginLog {
 
-    @EmbeddedId
-    private UserLoginLogIds userLoginLogIds;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long logId;
 
-    @ManyToOne
-    @MapsId("userId")
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private LocalDateTime loginTime;
+    private LocalDateTime loginDate;
+
+    @Column(length = 45) // IPv6까지
+    private String ipAddress; // 접속한 IP
+
+    private String userAgent;
 }
