@@ -65,7 +65,7 @@ public class User extends UpdatedAt{
     @JsonIgnore
     private String refreshToken;
 
-    @Column(unique = true, length = 100)
+    @Column(unique = false, length = 100)
     private String providerId;
 
     @Builder.Default

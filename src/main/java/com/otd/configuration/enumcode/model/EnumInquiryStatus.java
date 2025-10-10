@@ -1,5 +1,10 @@
 package com.otd.configuration.enumcode.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.otd.configuration.enumcode.AbstractEnumCodeConverter;
+import com.otd.configuration.enumcode.EnumMapperType;
+import jakarta.persistence.Converter;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
