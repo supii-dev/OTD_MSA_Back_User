@@ -5,9 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.SignInProviderType;
+import com.otd.otd_challenge.entity.ChallengeMission;
+import com.otd.otd_challenge.entity.ChallengePointHistory;
+import com.otd.otd_challenge.entity.ChallengeProgress;
+import com.otd.otd_challenge.entity.ChallengeSettlementLog;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +60,9 @@ public class User extends UpdatedAt{
     @Column(length = 2)
     private SignInProviderType providerType;
 
+    @Column(name = "provider_id", length = 100)
+    private String providerId;
+
     @Column(columnDefinition = "int DEFAULT 0", nullable = false)
     private int point;
 
@@ -64,6 +72,9 @@ public class User extends UpdatedAt{
     @Column(length = 300)
     @JsonIgnore
     private String refreshToken;
+
+    @Column
+    private LocalDateTime lastLogin;
 
     @JsonIgnore
     @Builder.Default
@@ -75,6 +86,26 @@ public class User extends UpdatedAt{
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserRole> userRoles = new ArrayList<>(1);
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeMission> challengeMissions = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengePointHistory> challengePointHistories = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeProgress> challengeProgresses = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChallengeSettlementLog> challengeSettlementLogs = new ArrayList<>();
 
     public void addUserRoles(List<EnumUserRole> enumUserRole, EnumChallengeRole enumChallengeRole) {
         for(EnumUserRole e : enumUserRole) {
