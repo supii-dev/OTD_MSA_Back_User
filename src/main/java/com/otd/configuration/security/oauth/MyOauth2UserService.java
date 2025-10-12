@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -43,62 +44,46 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
     }
 
     private OAuth2User process(OAuth2UserRequest req) {
-        OAuth2User oAuth2User = super.loadUser(req);
+        OAuth2User oAuth2User = super.loadUser(req); //소셜 로그인 완료하고 사용자 정보 JSON형태의 데이터를 담고 있는 객체
+        /*
+        req.getClientRegistration().getRegistrationId(); 소셜로그인 신청한 플랫폼 문자열값이 넘어온다.
+        플랫폼 문자열값은 spring.security.oauth2.client.registration 아래에 있는 속성값들이다. (google, kakao, naver)
+         */
+        SignInProviderType signInProviderType = SignInProviderType.valueOf(req.getClientRegistration()
+                .getRegistrationId()
+                .toUpperCase());
 
-        SignInProviderType signInProviderType = SignInProviderType.valueOf(
-                req.getClientRegistration().getRegistrationId().toUpperCase()
-        );
+        //사용하기 편하도록 규격화된 객체로 변환
+        Oauth2UserInfo oauth2UserInfo = oauth2UserInfoFactory.getOauth2UserInfo(signInProviderType, oAuth2User.getAttributes());
 
-        Oauth2UserInfo oauth2UserInfo = oauth2UserInfoFactory.getOauth2UserInfo(
-                signInProviderType,
-                oAuth2User.getAttributes()
-        );
+        //기존에 회원가입이 되어있는지 체크
+        User user = userRepository.findByUidAndProviderType(oauth2UserInfo.getId(), signInProviderType);
+        if(user == null) { // 최초 로그인 상황 > 회원가입 처리
+            user = new User();
+            user.setUid(oauth2UserInfo.getId());
+            user.setProviderType(signInProviderType);
+            user.setUpw("");
+            user.setNickName(oauth2UserInfo.getName());
+            user.setPic(oauth2UserInfo.getProfileImageUrl());
 
-        // providerId 생성 (예: KAKAO_1234567890)
-        String providerId = signInProviderType.name() + "_" + oauth2UserInfo.getId();
+            //최초 소셜 로그인은 회원가입으로 권한은 USER_1 처리
+            List<UserRole> userRoles = new ArrayList<>(1);
+            UserRoleIds ids = new UserRoleIds(user.getUserId(), EnumUserRole.USER_2, EnumChallengeRole.TBD);
 
-        // providerId로 기존 유저 확인
-        User user = userRepository.findByProviderId(providerId);
+            UserRole userRole = new UserRole(ids, user);
+            userRoles.add(userRole);
 
-        if(user == null) {
-            // 신규 유저 - DB에 저장하지 않고 임시 정보만 전달
-            log.info("신규 소셜 유저 - 온보딩 필요: {}", providerId);
-
-            // 임시 JwtUser 생성 (온보딩용)
-            List<EnumUserRole> tempRoles = List.of(EnumUserRole.USER_2);
-            JwtUser jwtUser = new OAuth2JwtUser(
-                    null, // name - 신규 유저는 이름 없음
-                    oauth2UserInfo.getName(), // nickName
-                    oauth2UserInfo.getProfileImageUrl(), // pic
-                    0L, // userId는 0 (아직 생성 안됨)
-                    tempRoles,
-                    signInProviderType.name(), // providerType 추가
-                    providerId // providerId 추가
-            );
-
-            UserPrincipal myUserDetails = new UserPrincipal(jwtUser);
-            return myUserDetails;
+            user.setUserRoles(userRoles);
+            userRepository.save(user);
         }
 
-        // 기존 유저 - 정상 로그인 처리
-        log.info("기존 소셜 유저 로그인: {}", user.getUserId());
-
-        List<EnumUserRole> roles = user.getUserRoles().stream()
-                .map(item -> item.getUserRoleIds().getRoleCode())
-                .toList();
+        List<EnumUserRole> roles = user.getUserRoles().stream().map(item -> item.getUserRoleIds()
+                .getRoleCode()).toList();
 
         String nickName = user.getNickName() == null ? user.getUid() : user.getNickName();
-        JwtUser jwtUser = new OAuth2JwtUser(
-                user.getName(), // name - 기존 유저의 이름 (User 엔티티에 name 필드가 있어야 함)
-                nickName, // nickName
-                user.getPic(), // pic
-                user.getUserId(),
-                roles,
-                signInProviderType.name(),
-                providerId
-        );
+        JwtUser jwtUser = new OAuth2JwtUser(nickName, user.getPic(), user.getUserId(), roles);
 
         UserPrincipal myUserDetails = new UserPrincipal(jwtUser);
-        return myUserDetails;
+        return myUserDetails; //이 객체는 OAuth2AuthenticationSuccessHandler객체의 onAuthenticationSuccess메소드의 Authentication auth 매개변수로 전달된다.
     }
 }
