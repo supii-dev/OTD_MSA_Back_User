@@ -16,6 +16,7 @@ import com.otd.otd_user.entity.Terms;
 import com.otd.otd_user.entity.UserAgreement;
 import com.otd.otd_user.application.term.TermsRepository;
 import com.otd.otd_user.application.term.UserAgreementRepository;
+import com.otd.otd_user.entity.UserLoginLog;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ public class UserService {
     private final MyFileManager myFileManager;
     private final TermsRepository termsRepository;
     private final UserAgreementRepository userAgreementRepository;
+    private final UserLoginLogRepository userLoginLogRepository;
 
     public boolean isUidAvailable(String uid) {
         return userMapper.countByUid(uid) == 0;
@@ -109,16 +111,18 @@ public class UserService {
         userRepository.updateRefreshToken(userId, refreshToken);
     }
 
+    @Transactional
     public UserLoginDto login(UserLoginReq req) {
         User user = userRepository.findByUidAndProviderType(req.getUid(), SignInProviderType.LOCAL);
         if(user == null || !passwordEncoder.matches(req.getUpw(), user.getUpw())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "아이디/비밀번호를 확인해 주세요.");
         }
+        userRepository.updateLastLoginByUserId(user.getUserId(), LocalDateTime.now());
+
         List<EnumUserRole> roles = user.getUserRoles().stream()
                 .map(item -> item.getUserRoleIds().getRoleCode()).toList();
         log.info("roles: {}", roles);
         JwtUser jwtUser = new JwtUser(user.getUserId(), roles);
-
         EnumUserRole userRole = user.getUserRoles().stream()
                 .map(item -> item.getUserRoleIds().getRoleCode()).findFirst().orElse(null);
         EnumChallengeRole challengeRoles = user.getUserRoles().stream()
@@ -140,6 +144,19 @@ public class UserService {
                 .jwtUser(jwtUser)
                 .userLoginRes(userLoginRes)
                 .build();
+    }
+
+    //로그 저장
+    @Transactional
+    public void saveLoginLog(Long userId, String ip, String userAgent){
+        User user = userRepository.findByUserId(userId);
+        UserLoginLog log = UserLoginLog.builder()
+                .user(user)
+                .loginDate(LocalDateTime.now())
+                .ipAddress(ip)
+                .userAgent(userAgent)
+                .build();
+        userLoginLogRepository.save(log);
     }
 
     //비밀번호 재설정(비밀번호 찾기)

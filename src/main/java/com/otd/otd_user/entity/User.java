@@ -12,6 +12,8 @@ import com.otd.otd_pointShop.entity.PurchaseHistory;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,9 +71,10 @@ public class User extends UpdatedAt{
     @JsonIgnore
     private String refreshToken;
 
-    @Column(unique = false, length = 100)
-    private String providerId;
+    @Column
+    private LocalDateTime lastLogin;
 
+    @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserAgreement> agreements = new ArrayList<>();

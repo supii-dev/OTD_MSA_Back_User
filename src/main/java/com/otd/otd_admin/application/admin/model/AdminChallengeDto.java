@@ -6,15 +6,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AdminChallengePutReq {
+public class AdminChallengeDto {
     private Long cdId;
     private String cdName;
-    private int cdGoal;
-    private String cdImage;
-    private int cdReward;
     private String cdType;
+    private int cdGoal;
     private String cdUnit;
-    private String note;
+    private int cdReward;
+    private Integer xp;
     private EnumChallengeRole tier;
-    private int xp;
+    private String cdImage;
 }

@@ -11,8 +11,8 @@ import java.time.LocalDate;
 @Builder
 public class MealDataReq {
     private Long userId;
-    private LocalDate mealDay;
-    private Double totalProtein;
+    private LocalDate recDate;
+    private Double value;
     private String name;
     private LocalDate today;
 }

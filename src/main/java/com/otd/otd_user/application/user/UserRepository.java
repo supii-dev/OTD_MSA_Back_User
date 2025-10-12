@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -31,6 +32,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query("UPDATE User u SET u.point = u.point + :amount WHERE u.userId = :userId")
     void updatePointByUserId(int amount, Long userId);
+
+    @Modifying
+    @Query("UPDATE User u SET u.lastLogin = :lastLogin WHERE u.userId = :userId")
+    void updateLastLoginByUserId(Long userId, LocalDateTime lastLogin);
 
     User findByProviderId(String providerId);
 }
