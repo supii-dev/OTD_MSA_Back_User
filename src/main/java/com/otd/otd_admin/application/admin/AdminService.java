@@ -12,13 +12,15 @@ import com.otd.otd_admin.application.admin.Repository.AdminInquiryRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminPointRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminUserRepository;
 import com.otd.otd_admin.application.admin.model.*;
-import com.otd.otd_challenge.application.challenge.ChallengeMapper;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardChallengeDto;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardInquiryDto;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardPointDto;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardUserDto;
+import com.otd.otd_admin.application.admin.model.statistics.*;
 import com.otd.otd_challenge.application.challenge.Repository.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeProgress;
-import com.otd.otd_user.application.email.InquiryRepository;
-import com.otd.otd_user.application.user.UserMapper;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.application.user.model.UserRoleRepository;
 import com.otd.otd_user.entity.Inquiry;
@@ -71,34 +73,12 @@ public class AdminService {
         return adminInquiryRepository.findAll();
     }
 
-    public List<GenderCountRes> getGenderCount() {
-        return adminUserRepository.countUserByGender();
-    }
-
-    public List<AgeCountRes> getAgeCount() {
-        return adminMapper.groupByAge();
-    }
-
-    public List<TierCountRes> getTierCount() {
-        return adminMapper.countByTier();
-    }
-
-    public List<ChallengeSuccessRateCountRes> getChallengeSuccessRateCount() {
-        return adminMapper.countByChallengeType();
-    }
-
-    // 통계 6개월 회원가입 유저 수
-    public List<SignInCountRes> getSignInCount() {
-        return adminMapper.countBySignIn();
-    }
-
     // 대시보드 유저
     public AdminDashBoardUserDto getUserDashBoard(){
         AdminDashBoardUserDto dto = new AdminDashBoardUserDto();
 
         // 전체 사용자 수
         int userCount = adminUserRepository.countUser();
-
         // 최근 회원가입자 top5
         List<User> recentJoinTop5 = adminUserRepository.findTop5ByOrderByCreatedAtDesc();
 
@@ -113,13 +93,10 @@ public class AdminService {
 
         // 전체 챌린지 개수
         int totalCount = challengeDefinitionRepository.countAllChallenge();
-
         // 참여자 수 top5 챌린지
         List<ChallengeDefinition> top5 = adminMapper.findTop5ByParticipationRate();
-
         // 실패율 top3 챌린지
         List<ChallengeDefinition> failTop3 = adminMapper.findTop3ByFailRate();
-
         // 전체 평균 성공률
         Double avgSuccessRate = adminMapper.findAverageSuccessRate();
 
@@ -137,7 +114,6 @@ public class AdminService {
 
         // 전체 포인트
         int totalPoint = adminUserRepository.sumPoint();
-
         // 포인트 보유 top5 유저
         List<User> top5User = adminMapper.findTop5ByPoint();
 
@@ -153,24 +129,17 @@ public class AdminService {
 
         // 총 문의 건수
         int totalInquiry = adminInquiryRepository.countAllInquiry();
-
         // 미답변 건수
         int unansweredCount = adminInquiryRepository.countByStatus(EnumInquiryStatus.PENDING);
-
         // 최근 글 5개
         List<Inquiry> recent5Inquiry = adminMapper.findRecent5Inquiry();
-
         for (Inquiry inquiry : recent5Inquiry) {
-            String statusCode = inquiry.getStatusCode(); // DB의 code 값 (예: "01")
-            inquiry.setStatus(
-                    EnumConvertUtils.ofCode(EnumInquiryStatus.class, statusCode)
-            );
+            String statusCode = inquiry.getStatus().getCode();
+            inquiry.setStatusCode(statusCode);
         }
-
         // 평균 문의 처리 시간
         Double avgResponseTime = adminMapper.getAvgInquiryRepliedTime();
-
-        // 답변 처리율
+        // 문의 답변율
         Double responseRate = adminMapper.getInquiryRepliedRate();
 
         dto.setTotalInquiryCount(totalInquiry);
@@ -182,6 +151,7 @@ public class AdminService {
         return dto;
     }
 
+    // 유저 챌린지 진행 기록, 포인트 지급 내역
     public AdminUserDetailGetRes getUserDetail(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         List<ChallengeProgress> cp = challengeProgressRepository.findByUserId(user.getUserId());
@@ -189,6 +159,60 @@ public class AdminService {
 
         return AdminUserDetailGetRes.builder().
             challengeProgress(cp).challengePointHistory(ch).build();
+    }
+
+    // 통계 유저
+    public AdminStatisticsUserDto getUserStatistics(){
+        AdminStatisticsUserDto dto = new AdminStatisticsUserDto();
+
+        // 성별 분포
+        List<GenderCountRes> genderCount = adminUserRepository.countUserByGender();
+        // 연령대 비율
+        List<AgeCountRes> ageCount = adminMapper.groupByAge();
+        // 6개월간 회원가입수
+        List<SignInCountRes> signInCount = adminMapper.countBySignIn();
+
+        dto.setGenderCount(genderCount);
+        dto.setAgeCount(ageCount);
+        dto.setSignInCount(signInCount);
+
+        return dto;
+    }
+
+    // 통계 챌린지
+    public AdminStatisticsChallengeDto getChallengeStatistics(){
+        AdminStatisticsChallengeDto dto = new AdminStatisticsChallengeDto();
+
+        // 챌린지 티어 비율
+        List<TierCountRes> tierCount = adminMapper.countByTier();
+        // 챌린지 타입별 성공률 , 타입별 갯수
+        List<ChallengeSuccessRateCountRes> challengeSuccessRateCount = adminMapper.countByChallengeType();
+        // 6개월간 챌린지 참여자 수
+        List<ChallengeParticipationCountRes> challengeParticipationCount = adminMapper.countByChallengeParticipation();
+        // 챌린지 타입별 비율
+        //List<ChallengeTypeCountRes> challengeTypeCount = adminMapper.countByChallengeTypeRatio();
+
+        dto.setTierCount(tierCount);
+        dto.setChallengeSuccessRateCount(challengeSuccessRateCount);
+        dto.setChallengeParticipationCount(challengeParticipationCount);
+        //dto.setChallengeTypeCountRes(challengeTypeCount);
+
+        return dto;
+    }
+
+    // 통계 문의
+    public AdminStatisticsInquiryDto getInquiryStatistics() {
+        AdminStatisticsInquiryDto dto = new AdminStatisticsInquiryDto();
+
+        // 문의 답변율
+        Double responseRate = adminMapper.getInquiryRepliedRate();
+        // 6개월간 문의건수
+        List<InquiryCountRes> inquiryCount = adminMapper.countByInquiry();
+
+        dto.setResponseRate(responseRate);
+        dto.setInquiryCount(inquiryCount);
+
+        return dto;
     }
 
     @Transactional
