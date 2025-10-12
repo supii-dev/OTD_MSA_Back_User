@@ -1,5 +1,7 @@
 package com.otd.otd_user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.otd.configuration.enumcode.model.EnumInquiryStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,17 +11,18 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "munhe")
+@Table(name = "inquiry")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Inquiry {
+public class Inquiry extends CreatedAt{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(nullable = false)
     private String subject;
@@ -33,9 +36,17 @@ public class Inquiry {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Column(name = "status")
+    @Convert(converter = EnumInquiryStatus.CodeConverter.class)
+    private EnumInquiryStatus status = EnumInquiryStatus.PENDING;
 
-    @Enumerated(EnumType.STRING)
-    private InquiryStatus status = InquiryStatus.PENDING;
+    @Column
+    private String reply;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "admin_id", nullable = true)
+    private User adminId;
+
+    @Column
+    private LocalDateTime replyAt;
 }
