@@ -88,4 +88,60 @@
         GROUP BY m.month_start
         ORDER BY m.month_start;
     </select>
+
+    <select id="findTop5ByParticipationRate">
+        SELECT cd.cd_id, cd.cd_name, cd.cd_type, cd.cd_goal, cd.cd_unit, cd.cd_reward
+        FROM challenge_definition cd
+        JOIN challenge_progress cp ON cd.cd_id = cp.cd_id
+        GROUP BY cd.cd_id
+        ORDER BY COUNT(cp.user_id) DESC
+        LIMIT 5;
+    </select>
+
+    <select id="findTop3ByFailRate">
+        SELECT cd.cd_id, cd.cd_name, cd.cd_type, cd.cd_goal, cd.cd_unit, cd.cd_reward
+        FROM challenge_definition cd
+        JOIN challenge_progress cp ON cd.cd_id = cp.cd_id
+        GROUP BY cd.cd_id
+        ORDER BY SUM(CASE WHEN cp.is_success = 0 THEN 1 ELSE 0 END) / COUNT(cp.cp_id) DESC
+        LIMIT 3;
+    </select>
+
+    <select id="findAverageSuccessRate">
+        SELECT ROUND(SUM(CASE WHEN cp.is_success = 1 THEN 1 ELSE 0 END) / COUNT(cp.cp_id) * 100, 1)
+        FROM challenge_progress cp;
+    </select>
+
+    <select id="findTop5ByPoint">
+        SELECT user_id, uid, nick_name, email, point
+        FROM user
+        ORDER BY point DESC
+        LIMIT 5
+    </select>
+
+    <select id="findRecent5Inquiry" resultType="com.otd.otd_user.entity.Inquiry">
+        SELECT sender_name,
+            sender_email,
+            subject,
+            status AS statusCode,
+            created_at
+        FROM inquiry
+        ORDER BY created_at DESC
+        LIMIT 5
+    </select>
+
+    <select id="getAvgInquiryRepliedTime">
+        SELECT AVG(TIMESTAMPDIFF(HOUR, created_at, reply_at))
+        FROM inquiry
+        WHERE reply_at IS NOT NULL
+    </select>
+
+    <select id="getInquiryRepliedRate">
+        SELECT
+        ROUND(
+        (SUM(CASE WHEN reply_at IS NOT NULL THEN 1 ELSE 0 END) / COUNT(*)) * 100,
+        1
+        )
+        FROM inquiry
+    </select>
 </mapper>

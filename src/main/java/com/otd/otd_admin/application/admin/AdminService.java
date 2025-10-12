@@ -1,7 +1,9 @@
 package com.otd.otd_admin.application.admin;
 
 import com.otd.configuration.constants.ConstFile;
+import com.otd.configuration.enumcode.EnumConvertUtils;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.configuration.enumcode.model.EnumInquiryStatus;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.feignclient.LifeFeignClient;
 import com.otd.configuration.model.ResultResponse;
@@ -85,21 +87,101 @@ public class AdminService {
         return adminMapper.countByChallengeType();
     }
 
+    // 통계 6개월 회원가입 유저 수
     public List<SignInCountRes> getSignInCount() {
         return adminMapper.countBySignIn();
     }
 
-    public int getUserCount() {
-        return adminUserRepository.countUser();
+    // 대시보드 유저
+    public AdminDashBoardUserDto getUserDashBoard(){
+        AdminDashBoardUserDto dto = new AdminDashBoardUserDto();
+
+        // 전체 사용자 수
+        int userCount = adminUserRepository.countUser();
+
+        // 최근 회원가입자 top5
+        List<User> recentJoinTop5 = adminUserRepository.findTop5ByOrderByCreatedAtDesc();
+
+        dto.setTotalUserCount(userCount);
+        dto.setRecentJoinUser(recentJoinTop5);
+
+        return dto;
+    }
+    // 대시보드 챌린지
+    public AdminDashBoardChallengeDto getChallengeDashBoard(){
+        AdminDashBoardChallengeDto dto = new AdminDashBoardChallengeDto();
+
+        // 전체 챌린지 개수
+        int totalCount = challengeDefinitionRepository.countAllChallenge();
+
+        // 참여자 수 top5 챌린지
+        List<ChallengeDefinition> top5 = adminMapper.findTop5ByParticipationRate();
+
+        // 실패율 top3 챌린지
+        List<ChallengeDefinition> failTop3 = adminMapper.findTop3ByFailRate();
+
+        // 전체 평균 성공률
+        Double avgSuccessRate = adminMapper.findAverageSuccessRate();
+
+        dto.setTotalChallengeCount(totalCount);
+        dto.setParticipantTop5Challenge(top5);
+        dto.setFailTop3Challenge(failTop3);
+        dto.setSuccessRate(avgSuccessRate);
+
+        return dto;
     }
 
-    public int getPointCount() {
-        return adminUserRepository.sumPoint();
+    // 대시보드 포인트
+    public AdminDashBoardPointDto getPointDashBoard(){
+        AdminDashBoardPointDto dto = new AdminDashBoardPointDto();
+
+        // 전체 포인트
+        int totalPoint = adminUserRepository.sumPoint();
+
+        // 포인트 보유 top5 유저
+        List<User> top5User = adminMapper.findTop5ByPoint();
+
+        dto.setTotalPoint(totalPoint);
+        dto.setPointTop5User(top5User);
+
+        return dto;
     }
 
-    public List<User> getRecentJoinUser() {
-        return adminUserRepository.findTop5ByOrderByCreatedAtDesc();
+    // 대시보드 문의
+    public AdminDashBoardInquiryDto getInquiryDashBoard(){
+        AdminDashBoardInquiryDto dto = new AdminDashBoardInquiryDto();
+
+        // 총 문의 건수
+        int totalInquiry = adminInquiryRepository.countAllInquiry();
+
+        // 미답변 건수
+        int unansweredCount = adminInquiryRepository.countByStatus(EnumInquiryStatus.PENDING);
+
+        // 최근 글 5개
+        List<Inquiry> recent5Inquiry = adminMapper.findRecent5Inquiry();
+
+        for (Inquiry inquiry : recent5Inquiry) {
+            String statusCode = inquiry.getStatusCode(); // DB의 code 값 (예: "01")
+            inquiry.setStatus(
+                    EnumConvertUtils.ofCode(EnumInquiryStatus.class, statusCode)
+            );
+        }
+
+        // 평균 문의 처리 시간
+        Double avgResponseTime = adminMapper.getAvgInquiryRepliedTime();
+
+        // 답변 처리율
+        Double responseRate = adminMapper.getInquiryRepliedRate();
+
+        dto.setTotalInquiryCount(totalInquiry);
+        dto.setUnansweredInquiryCount(unansweredCount);
+        dto.setRecentInquiryList(recent5Inquiry);
+        dto.setAvgRepliedTime(avgResponseTime);
+        dto.setResponseRate(responseRate);
+
+        return dto;
     }
+
     public AdminUserDetailGetRes getUserDetail(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         List<ChallengeProgress> cp = challengeProgressRepository.findByUserId(user.getUserId());

@@ -21,19 +21,24 @@ public class AdminController {
     private final AdminService adminService;
 
     // 대시보드
-    @GetMapping("/dash/user")
-    public int getUserCount(){
-        return adminService.getUserCount();
+    @GetMapping("dash/user")
+    public AdminDashBoardUserDto getUserDashBoard(){
+        return adminService.getUserDashBoard();
+    }
+
+    @GetMapping("/dash/challenge")
+    public AdminDashBoardChallengeDto getChallengeDashBoard(){
+        return adminService.getChallengeDashBoard();
     }
 
     @GetMapping("/dash/point")
-    public int getPointCount(){
-        return adminService.getPointCount();
+    public AdminDashBoardPointDto getPointDashBoard(){
+        return adminService.getPointDashBoard();
     }
 
-    @GetMapping("/dash/join")
-    public List<User> getJoinUser(){
-        return adminService.getRecentJoinUser();
+    @GetMapping("/dash/inquiry")
+    public AdminDashBoardInquiryDto getInquiryDashBoard(){
+        return adminService.getInquiryDashBoard();
     }
 
     // 유저
