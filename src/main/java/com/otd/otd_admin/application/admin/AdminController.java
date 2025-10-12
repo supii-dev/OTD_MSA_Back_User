@@ -20,6 +20,27 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
 
+    // 대시보드
+    @GetMapping("dash/user")
+    public AdminDashBoardUserDto getUserDashBoard(){
+        return adminService.getUserDashBoard();
+    }
+
+    @GetMapping("/dash/challenge")
+    public AdminDashBoardChallengeDto getChallengeDashBoard(){
+        return adminService.getChallengeDashBoard();
+    }
+
+    @GetMapping("/dash/point")
+    public AdminDashBoardPointDto getPointDashBoard(){
+        return adminService.getPointDashBoard();
+    }
+
+    @GetMapping("/dash/inquiry")
+    public AdminDashBoardInquiryDto getInquiryDashBoard(){
+        return adminService.getInquiryDashBoard();
+    }
+
     // 유저
     @GetMapping("/user")
     public List<User> getUsers() {
@@ -99,6 +120,11 @@ public class AdminController {
     @GetMapping("/challengerate")
     public List<ChallengeSuccessRateCountRes> getChallengeSuccessRateCount() {
         return adminService.getChallengeSuccessRateCount();
+    }
+
+    @GetMapping("/signin")
+    public List<SignInCountRes> getSignInCount() {
+        return adminService.getSignInCount();
     }
 
     // 문의
