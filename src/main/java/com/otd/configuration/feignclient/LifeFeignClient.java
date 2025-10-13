@@ -1,6 +1,7 @@
 package com.otd.configuration.feignclient;
 
 import com.otd.configuration.model.ResultResponse;
+import com.otd.otd_user.application.user.model.NicknameUpdateDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,4 +14,5 @@ public interface LifeFeignClient {
 
     @DeleteMapping("/api/OTD/admin2/{userId}")
     ResultResponse<?> deleteUserData(@PathVariable("userId") Long userId);
+
 }
