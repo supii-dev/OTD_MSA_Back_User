@@ -13,5 +13,5 @@ public class AdminStatisticsChallengeDto {
     private List<TierCountRes> tierCount;
     private List<ChallengeSuccessRateCountRes> challengeSuccessRateCount;
     private List<ChallengeParticipationCountRes> challengeParticipationCount;
-//    private List<ChallengeTypeCountRes> challengeTypeCountRes;
+    private List<ChallengeTypeCountRes> challengeTypeCount;
 }
