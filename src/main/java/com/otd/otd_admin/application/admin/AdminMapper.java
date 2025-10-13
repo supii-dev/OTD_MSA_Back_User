@@ -1,6 +1,6 @@
 package com.otd.otd_admin.application.admin;
 
-import com.otd.otd_admin.application.admin.model.*;
+import com.otd.otd_admin.application.admin.model.statistics.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_user.entity.Inquiry;
 import com.otd.otd_user.entity.User;
@@ -11,9 +11,15 @@ import java.util.List;
 @Mapper
 public interface AdminMapper {
     List<AgeCountRes> groupByAge();
+    List<SignInCountRes> countBySignIn();
+
     List<TierCountRes> countByTier();
     List<ChallengeSuccessRateCountRes> countByChallengeType();
-    List<SignInCountRes> countBySignIn();
+    List<ChallengeTypeCountRes> countByChallengeTypeRatio();
+    List<ChallengeParticipationCountRes> countByChallengeParticipation();
+
+    List<InquiryCountRes> countByInquiry();
+
     List<ChallengeDefinition> findTop3ByFailRate();
     List<ChallengeDefinition> findTop5ByParticipationRate();
     Double findAverageSuccessRate();

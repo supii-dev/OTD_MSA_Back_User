@@ -1,4 +1,4 @@
-package com.otd.otd_admin.application.admin.model;
+package com.otd.otd_admin.application.admin.model.dashboard;
 
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import lombok.Getter;
