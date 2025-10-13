@@ -60,6 +60,7 @@ public class User extends UpdatedAt{
     @Column(length = 30)
     private String phone;
 
+    @Convert(converter = SignInProviderType.CodeConverter.class)
     @Column(length = 2)
     private SignInProviderType providerType;
 
