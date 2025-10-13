@@ -33,7 +33,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     // https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.3.0'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis' // REDIS
 
     // https://mvnrepository.com/artifact/org.mindrot/jbcrypt
     implementation 'org.mindrot:jbcrypt:0.4'
