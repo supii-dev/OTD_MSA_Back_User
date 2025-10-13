@@ -205,4 +205,10 @@ public class UserController {
         ChallengeHomeGetRes response = pointService.getSelectedListAll(userPrincipal.getSignedUserId(), req);
         return new ResultResponse<>("미션 완료 내역 조회 성공", response);
     }
+
+    // 포인트 조회
+    @GetMapping("/{userId}/points")
+    public void userPoints(@PathVariable Long userId) {
+        userService.printUserPointMapping(userId);
+    }
 }

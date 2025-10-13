@@ -19,8 +19,9 @@ public class RechargeHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long rechargeId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", referencedColumnName ="user_id", nullable = false
+                , foreignKey = @ForeignKey(name="fk_point_user")) // FK
     private User user;
 
     @Column(nullable = false)
@@ -28,4 +29,5 @@ public class RechargeHistory {
 
     @Column(nullable = false)
     private LocalDateTime rechargeTime;
+
 }
