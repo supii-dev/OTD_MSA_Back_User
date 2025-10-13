@@ -1,20 +1,27 @@
 package com.otd.otd_admin.application.admin;
 
+import com.otd.configuration.constants.ConstFile;
+import com.otd.configuration.enumcode.EnumConvertUtils;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.configuration.enumcode.model.EnumInquiryStatus;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.feignclient.LifeFeignClient;
 import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.util.MyFileManager;
 import com.otd.otd_admin.application.admin.Repository.AdminInquiryRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminPointRepository;
+import com.otd.otd_admin.application.admin.Repository.AdminUserLoginLogRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminUserRepository;
 import com.otd.otd_admin.application.admin.model.*;
-import com.otd.otd_challenge.application.challenge.ChallengeMapper;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardChallengeDto;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardInquiryDto;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardPointDto;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardUserDto;
+import com.otd.otd_admin.application.admin.model.statistics.*;
 import com.otd.otd_challenge.application.challenge.Repository.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeProgress;
-import com.otd.otd_user.application.email.InquiryRepository;
-import com.otd.otd_user.application.user.UserMapper;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.application.user.model.UserRoleRepository;
 import com.otd.otd_user.entity.Inquiry;
@@ -27,17 +34,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
 import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminService {
-    private final UserMapper userMapper;
-
-    private final ChallengeMapper challengeMapper;
     private final ChallengeProgressRepository challengeProgressRepository;
     private final ChallengeDefinitionRepository challengeDefinitionRepository;
     private final ChallengePointRepository challengePointRepository;
@@ -48,10 +54,10 @@ public class AdminService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AdminInquiryRepository adminInquiryRepository;
-    private final InquiryRepository inquiryRepository;
-    private final ChallengeMissionRepository challengeMissionRepository;
-    private final ChallengeSettlementRepository challengeSettlementRepository;
+    private final MyFileManager myFileManager;
     private final LifeFeignClient lifeFeignClient;
+    private final ConstFile constFile;
+    private final AdminUserLoginLogRepository adminUserLoginLogRepository;
 
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -69,22 +75,85 @@ public class AdminService {
         return adminInquiryRepository.findAll();
     }
 
-    public List<GenderCountRes> getGenderCount() {
-        return adminUserRepository.countUserByGender();
+    // 대시보드 유저
+    public AdminDashBoardUserDto getUserDashBoard(){
+        AdminDashBoardUserDto dto = new AdminDashBoardUserDto();
+
+        // 전체 사용자 수
+        int userCount = adminUserRepository.countUser();
+        // 최근 회원가입자 top5
+        List<User> recentJoinTop5 = adminUserRepository.findTop5ByOrderByCreatedAtDesc();
+
+        dto.setTotalUserCount(userCount);
+        dto.setRecentJoinUser(recentJoinTop5);
+
+        return dto;
+    }
+    // 대시보드 챌린지
+    public AdminDashBoardChallengeDto getChallengeDashBoard(){
+        AdminDashBoardChallengeDto dto = new AdminDashBoardChallengeDto();
+
+        // 전체 챌린지 개수
+        int totalCount = challengeDefinitionRepository.countAllChallenge();
+        // 참여자 수 top5 챌린지
+        List<ChallengeDefinition> top5 = adminMapper.findTop5ByParticipationRate();
+        // 실패율 top3 챌린지
+        List<ChallengeDefinition> failTop3 = adminMapper.findTop3ByFailRate();
+        // 전체 평균 성공률
+        Double avgSuccessRate = adminMapper.findAverageSuccessRate();
+
+        dto.setTotalChallengeCount(totalCount);
+        dto.setParticipantTop5Challenge(top5);
+        dto.setFailTop3Challenge(failTop3);
+        dto.setSuccessRate(avgSuccessRate);
+
+        return dto;
     }
 
-    public List<AgeCountRes> getAgeCount() {
-        return adminMapper.groupByAge();
+    // 대시보드 포인트
+    public AdminDashBoardPointDto getPointDashBoard(){
+        AdminDashBoardPointDto dto = new AdminDashBoardPointDto();
+
+        // 전체 포인트
+        int totalPoint = adminUserRepository.sumPoint();
+        // 포인트 보유 top5 유저
+        List<User> top5User = adminMapper.findTop5ByPoint();
+
+        dto.setTotalPoint(totalPoint);
+        dto.setPointTop5User(top5User);
+
+        return dto;
     }
 
-    public List<TierCountRes> getTierCount() {
-        return adminMapper.countByTier();
+    // 대시보드 문의
+    public AdminDashBoardInquiryDto getInquiryDashBoard(){
+        AdminDashBoardInquiryDto dto = new AdminDashBoardInquiryDto();
+
+        // 총 문의 건수
+        int totalInquiry = adminInquiryRepository.countAllInquiry();
+        // 미답변 건수
+        int unansweredCount = adminInquiryRepository.countByStatus(EnumInquiryStatus.PENDING);
+        // 최근 글 5개
+        List<Inquiry> recent5Inquiry = adminMapper.findRecent5Inquiry();
+        for (Inquiry inquiry : recent5Inquiry) {
+            String statusCode = inquiry.getStatus().getCode();
+            inquiry.setStatusCode(statusCode);
+        }
+        // 평균 문의 처리 시간
+        Double avgResponseTime = adminMapper.getAvgInquiryRepliedTime();
+        // 문의 답변율
+        Double responseRate = adminMapper.getInquiryRepliedRate();
+
+        dto.setTotalInquiryCount(totalInquiry);
+        dto.setUnansweredInquiryCount(unansweredCount);
+        dto.setRecentInquiryList(recent5Inquiry);
+        dto.setAvgRepliedTime(avgResponseTime);
+        dto.setResponseRate(responseRate);
+
+        return dto;
     }
 
-    public List<ChallengeSuccessRateCountRes> getChallengeSuccessRateCount() {
-        return adminMapper.countByChallengeType();
-    }
-
+    // 유저 챌린지 진행 기록, 포인트 지급 내역
     public AdminUserDetailGetRes getUserDetail(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         List<ChallengeProgress> cp = challengeProgressRepository.findByUserId(user.getUserId());
@@ -92,6 +161,60 @@ public class AdminService {
 
         return AdminUserDetailGetRes.builder().
             challengeProgress(cp).challengePointHistory(ch).build();
+    }
+
+    // 통계 유저
+    public AdminStatisticsUserDto getUserStatistics(){
+        AdminStatisticsUserDto dto = new AdminStatisticsUserDto();
+
+        // 성별 분포
+        List<GenderCountRes> genderCount = adminUserRepository.countUserByGender();
+        // 연령대 비율
+        List<AgeCountRes> ageCount = adminMapper.groupByAge();
+        // 6개월간 회원가입수
+        List<SignInCountRes> signInCount = adminMapper.countBySignIn();
+
+        dto.setGenderCount(genderCount);
+        dto.setAgeCount(ageCount);
+        dto.setSignInCount(signInCount);
+
+        return dto;
+    }
+
+    // 통계 챌린지
+    public AdminStatisticsChallengeDto getChallengeStatistics(){
+        AdminStatisticsChallengeDto dto = new AdminStatisticsChallengeDto();
+
+        // 챌린지 티어 비율
+        List<TierCountRes> tierCount = adminMapper.countByTier();
+        // 챌린지 타입별 성공률 , 타입별 갯수
+        List<ChallengeSuccessRateCountRes> challengeSuccessRateCount = adminMapper.countByChallengeType();
+        // 6개월간 챌린지 참여자 수
+        List<ChallengeParticipationCountRes> challengeParticipationCount = adminMapper.countByChallengeParticipation();
+        // 챌린지 타입별 비율
+        //List<ChallengeTypeCountRes> challengeTypeCount = adminMapper.countByChallengeTypeRatio();
+
+        dto.setTierCount(tierCount);
+        dto.setChallengeSuccessRateCount(challengeSuccessRateCount);
+        dto.setChallengeParticipationCount(challengeParticipationCount);
+        //dto.setChallengeTypeCountRes(challengeTypeCount);
+
+        return dto;
+    }
+
+    // 통계 문의
+    public AdminStatisticsInquiryDto getInquiryStatistics() {
+        AdminStatisticsInquiryDto dto = new AdminStatisticsInquiryDto();
+
+        // 문의 답변율
+        Double responseRate = adminMapper.getInquiryRepliedRate();
+        // 6개월간 문의건수
+        List<InquiryCountRes> inquiryCount = adminMapper.countByInquiry();
+
+        dto.setResponseRate(responseRate);
+        dto.setInquiryCount(inquiryCount);
+
+        return dto;
     }
 
     @Transactional
@@ -135,21 +258,57 @@ public class AdminService {
     }
 
     @Transactional
-    public ResultResponse<?> putChallengeDetail(AdminChallengePutReq req) {
-        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(req.getCdId());
-        if (cd == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 챌린지를 찾을 수 없습니다.");
+    public AdminChallengeDto addChallenge(AdminChallengeDto dto) {
+        ChallengeDefinition cd = ChallengeDefinition.builder()
+                .cdName(dto.getCdName())
+                .cdType(dto.getCdType())
+                .cdGoal(dto.getCdGoal())
+                .cdUnit(dto.getCdUnit())
+                .cdReward(dto.getCdReward())
+                .xp(dto.getXp())
+                .tier(dto.getTier())
+                .cdImage(dto.getCdImage())
+                .build();
+
+        challengeDefinitionRepository.save(cd);
+        dto.setCdId(cd.getCdId());
+        return dto;
+    }
+
+    public String saveChallengeImage(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "파일이 없습니다");
         }
-        cd.setNote(req.getNote());
-        cd.setCdGoal(req.getCdGoal());
-        cd.setCdName(req.getCdName());
-        cd.setCdImage(req.getCdImage());
-        cd.setCdReward(req.getCdReward());
-        cd.setCdType(req.getCdType());
-        cd.setCdUnit(req.getCdUnit());
-        cd.setXp(req.getXp());
-        cd.setTier(req.getTier());
-        return new ResultResponse<>("챌린지 정보가 수정되었습니다.", req.getCdId());
+        return myFileManager.saveChallengeImage(file);
+    }
+
+    @Transactional
+    public AdminChallengeDto modifyChallenge(AdminChallengeDto dto
+            , MultipartFile file) {
+        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(dto.getCdId());
+        if (cd == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 챌린지입니다");
+        }
+        // 새 이미지가 있으면 교체
+        if (file != null && !file.isEmpty()) {
+            // 새 파일 저장
+            String newFileName = saveChallengeImage(file);
+
+            // 기존 파일 삭제
+            if (cd.getCdImage() != null) {
+                File oldFile = new File(constFile.uploadDirectory + "/challenge/" + cd.getCdImage());
+                if (oldFile.exists() && !oldFile.delete()) {
+                    log.warn("기존 이미지 삭제 실패: {}", oldFile.getAbsolutePath());
+                }
+            }
+
+            dto.setCdImage(newFileName);
+        } else {
+            // 파일 안 넣으면 기존 이미지 유지
+            dto.setCdImage(cd.getCdImage());
+        }
+        cd.update(dto);
+        return dto;
     }
 
     @Transactional
@@ -172,11 +331,32 @@ public class AdminService {
 
     @Transactional
     public ResultResponse<?> removeChallenge(Long cdId) {
-        int result = challengeDefinitionRepository.deleteByCdId(cdId);
-        if (result == 1) {
-            return new ResultResponse<>("챌린지 삭제가 되었습니다.", result);
-        } else {
-            return new ResultResponse<>("챌린지 삭제에 실패하였습니다.", result);
+        ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(cdId);
+        if (cd == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 챌린지입니다");
         }
+
+        if (cd.getCdImage() != null) {
+            String filePath = constFile.uploadDirectory + "/challenge/" + cd.getCdImage();
+            File file = new File(filePath);
+
+            if (file.exists()) {
+                boolean deleted = file.delete();
+                if (!deleted) {
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "챌린지 이미지 삭제에 실패했습니다");
+                }
+            }
+        }
+        int result = challengeDefinitionRepository.deleteByCdId(cdId);
+        if (result != 1) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "챌린지 삭제에 실패했습니다.");
+        } 
+        return new ResultResponse<>("챌린지 및 이미지가 삭제가 되었습니다.", result);
+    }
+
+    public int getTodayLogin() {
+        return adminUserLoginLogRepository.countTodayLogin();
     }
 }

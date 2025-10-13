@@ -78,12 +78,21 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResultResponse<?> login(@Valid @RequestBody UserLoginReq req, HttpServletResponse response) {
+    public ResultResponse<?> login(@Valid @RequestBody UserLoginReq req
+            , HttpServletRequest request
+            , HttpServletResponse response) {
         log.info("로그인 요청: {}", req.getUid());
         UserLoginDto userloginDto = userService.login(req);
         String refreshToken = jwtTokenManager.issue(response, userloginDto.getJwtUser());
-
         userService.updateRefreshToken(userloginDto.getUserLoginRes().getUserId(), refreshToken);
+        // ip & userAgent 추출
+        String ipAddress = getClientIp(request);
+        String userAgent = request.getHeader("User-Agent");
+        log.info("로그인 성공 : userId {}, ip {}, userAgent {}",
+                userloginDto.getUserLoginRes().getUserId(), ipAddress, userAgent);
+        // 로그인 로그 저장
+        userService.saveLoginLog(userloginDto.getUserLoginRes().getUserId(), ipAddress, userAgent);
+
         return new ResultResponse<>("로그인 성공", userloginDto.getUserLoginRes());
     }
 

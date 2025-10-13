@@ -49,4 +49,9 @@ public class Inquiry extends CreatedAt{
 
     @Column
     private LocalDateTime replyAt;
+
+    // xml용 status값 필드
+    @Transient
+    @JsonIgnore
+    private String statusCode;
 }

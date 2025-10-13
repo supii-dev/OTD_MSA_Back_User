@@ -1,4 +1,4 @@
-package com.otd.otd_admin.application.admin.model;
+package com.otd.otd_admin.application.admin.model.statistics;
 
 import lombok.Getter;
 import lombok.Setter;

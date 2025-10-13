@@ -2,6 +2,11 @@ package com.otd.otd_admin.application.admin;
 
 import com.otd.configuration.model.ResultResponse;
 import com.otd.otd_admin.application.admin.model.*;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardChallengeDto;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardInquiryDto;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardPointDto;
+import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardUserDto;
+import com.otd.otd_admin.application.admin.model.statistics.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_user.entity.Inquiry;
@@ -9,6 +14,7 @@ import com.otd.otd_user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,13 +25,34 @@ import java.util.List;
 public class AdminController {
     private final AdminService adminService;
 
+    // 대시보드
+    @GetMapping("dash/user")
+    public AdminDashBoardUserDto getUserDashBoard(){
+        return adminService.getUserDashBoard();
+    }
+
+    @GetMapping("/dash/challenge")
+    public AdminDashBoardChallengeDto getChallengeDashBoard(){
+        return adminService.getChallengeDashBoard();
+    }
+
+    @GetMapping("/dash/point")
+    public AdminDashBoardPointDto getPointDashBoard(){
+        return adminService.getPointDashBoard();
+    }
+
+    @GetMapping("/dash/inquiry")
+    public AdminDashBoardInquiryDto getInquiryDashBoard(){
+        return adminService.getInquiryDashBoard();
+    }
+
     // 유저
     @GetMapping("/user")
     public List<User> getUsers() {
         return adminService.getUsers();
     }
 
-    @GetMapping("user/{userId}")
+    @GetMapping("/user/{userId}")
     public AdminUserDetailGetRes getUserDetail(@PathVariable Long userId) {
         return adminService.getUserDetail(userId);
     }
@@ -41,15 +68,33 @@ public class AdminController {
         return adminService.getChallenges();
     }
 
+    @PostMapping("/challenge/add")
+    public ResultResponse<?> addChallenge(
+            @RequestPart("challenge") AdminChallengeDto challengeDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        if (file != null && !file.isEmpty()){
+            String fileName = adminService.saveChallengeImage(file);
+            challengeDto.setCdImage(fileName);
+        }
+        AdminChallengeDto save = adminService.addChallenge(challengeDto);
+        return new ResultResponse<>("챌린지 등록 성공", save);
+    }
+
     @PutMapping("/challenge/modify")
-    public ResultResponse<?> putChallenge(@RequestBody AdminChallengePutReq req){
-        return adminService.putChallengeDetail(req);
+    public ResultResponse<?> putChallenge(
+            @RequestPart("challenge") AdminChallengeDto challengeDto,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        AdminChallengeDto update = adminService.modifyChallenge(challengeDto, file);
+        return new ResultResponse<>("챌린지 수정 성공", update);
     }
 
     @DeleteMapping("/user/{userId}")
     public ResultResponse<?> deleteUser(@PathVariable Long userId){
         return adminService.removeUser(userId);
     }
+
     @DeleteMapping("/challenge/{cdId}")
     public ResultResponse<?> deleteChallenge(@PathVariable Long cdId) {
         return adminService.removeChallenge(cdId);
@@ -62,29 +107,29 @@ public class AdminController {
     }
 
     // 통계
-    @GetMapping("/gender")
-    public List<GenderCountRes> getGenderCount() {
-        return adminService.getGenderCount();
+    @GetMapping("/statistics/user")
+    public AdminStatisticsUserDto getUserStatistics() {
+        return adminService.getUserStatistics();
     }
 
-    @GetMapping("/agegroup")
-    public List<AgeCountRes> getAgeGroup() {
-        return adminService.getAgeCount();
+    @GetMapping("/statistics/challenge")
+    public AdminStatisticsChallengeDto getChallengeStatistics() {
+        return adminService.getChallengeStatistics();
     }
 
-    @GetMapping("/tier")
-    public List<TierCountRes> getTierCount() {
-        return adminService.getTierCount();
-    }
-
-    @GetMapping("challengerate")
-    public List<ChallengeSuccessRateCountRes> getChallengeSuccessRateCount() {
-        return adminService.getChallengeSuccessRateCount();
+    @GetMapping("/statistics/inquiry")
+    public AdminStatisticsInquiryDto getInquiryStatistics() {
+        return adminService.getInquiryStatistics();
     }
 
     // 문의
     @GetMapping("/qna")
     public List<Inquiry> getInquiry() {
         return adminService.getInquiry();
+    }
+
+    @GetMapping("/dashboard/login")
+    public int getTodayLogin() {
+        return adminService.getTodayLogin();
     }
 }
