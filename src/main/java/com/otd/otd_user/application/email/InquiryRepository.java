@@ -17,6 +17,7 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
     @Query("SELECT i FROM Inquiry i WHERE i.user.userId = :userId ORDER BY i.createdAt DESC")
     List<Inquiry> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
 
+    Inquiry findById(long id);
 
 //    // 특정 상태의 문의 조회
 //    List<Inquiry> findByStatus(EnumInquiryStatus status);

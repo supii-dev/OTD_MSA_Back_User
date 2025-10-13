@@ -1,6 +1,7 @@
 package com.otd.otd_admin.application.admin;
 
 import com.otd.configuration.model.ResultResponse;
+import com.otd.configuration.model.UserPrincipal;
 import com.otd.otd_admin.application.admin.model.*;
 import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardChallengeDto;
 import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardInquiryDto;
@@ -13,6 +14,7 @@ import com.otd.otd_user.entity.Inquiry;
 import com.otd.otd_user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -128,8 +130,11 @@ public class AdminController {
         return adminService.getInquiry();
     }
 
-    @GetMapping("/dashboard/login")
-    public int getTodayLogin() {
-        return adminService.getTodayLogin();
+    @PutMapping("/qna/modify")
+    public ResultResponse<?> modifyInquiry(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                           @RequestBody AdminInquiryReq req){
+        req.setAdminId(userPrincipal.getSignedUserId());
+        return adminService.putInquiry(req);
     }
+
 }
