@@ -8,6 +8,21 @@ constants:
     life:
       name: otd-life
       url: "http://otd-life:8080"
+  oauth2:
+    base-uri: /oauth2/authorization #FE 소셜로그인 요청할 때 사용할 주소값
+    # 플랫폼과 통신을 3번 정도 하는데 각 통신들이 하나의 작업을 위한 트랜잭션이라는 것을
+    # 연결시키기 위해 쿠키를 사용한다.
+    authorization-request-cookie-name: oauth2_auth_request
+    redirect-uri-param-cookie-name: redirect_uri
+    redirection-baseUri: /*/oauth2/code/*
+    cookie-expiry-seconds: 180
+    authorized-redirect-uris:
+      - https://greenart.n-e.kr/fe/redirect
+      - http://localhost:5173/fe/redirect
+      - http://localhost:5175/fe/redirect
+      - http://112.222.157.157:5174/fe/redirect
+
+
 server:
   port: 8080
 
