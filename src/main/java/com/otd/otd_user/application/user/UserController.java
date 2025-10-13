@@ -1,5 +1,6 @@
 package com.otd.otd_user.application.user;
 
+import com.otd.configuration.feignclient.LifeFeignClient;
 import com.otd.otd_challenge.application.challenge.ChallengeService;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgressGetReq;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,10 @@ public class UserController {
     private final PointService pointService;
     private final ChallengeService challengeService;
     private final UserRepository userRepository;
+    private final LifeFeignClient lifeFeignClient;
+
+    @Value("${constants.profile.base-url}")
+    private String profileBaseUrl;
 
     @PostMapping(
             value = "/join",
@@ -133,7 +139,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("message", "이미 사용중인 닉네임입니다."));
         }
-
+        lifeFeignClient.updateNickName(userPrincipal.getSignedUserId(), request);
         userService.updateNickname(userPrincipal.getSignedUserId(), request.getNickname());
 
         return ResponseEntity.ok(Map.of(
