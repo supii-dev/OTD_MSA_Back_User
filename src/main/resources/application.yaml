@@ -12,6 +12,8 @@ constants:
     life:
       name: otd-life
       url: http://localhost:8083
+  profile:
+    base-url: "http://localhost:8080/porfile"
   comment:
     start-index: 0
     need-for-view-count: 3 #피드 리스트를 뿌릴 때 실제로 피드당 보여지는 댓글 수
