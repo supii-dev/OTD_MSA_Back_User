@@ -10,6 +10,7 @@ import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.util.MyFileManager;
 import com.otd.otd_admin.application.admin.Repository.AdminInquiryRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminPointRepository;
+import com.otd.otd_admin.application.admin.Repository.AdminUserLoginLogRepository;
 import com.otd.otd_admin.application.admin.Repository.AdminUserRepository;
 import com.otd.otd_admin.application.admin.model.*;
 import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardChallengeDto;
@@ -56,6 +57,7 @@ public class AdminService {
     private final MyFileManager myFileManager;
     private final LifeFeignClient lifeFeignClient;
     private final ConstFile constFile;
+    private final AdminUserLoginLogRepository adminUserLoginLogRepository;
 
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -352,5 +354,9 @@ public class AdminService {
                     "챌린지 삭제에 실패했습니다.");
         } 
         return new ResultResponse<>("챌린지 및 이미지가 삭제가 되었습니다.", result);
+    }
+
+    public int getTodayLogin() {
+        return adminUserLoginLogRepository.countTodayLogin();
     }
 }

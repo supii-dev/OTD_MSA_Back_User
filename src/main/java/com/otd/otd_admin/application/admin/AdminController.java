@@ -127,4 +127,9 @@ public class AdminController {
     public List<Inquiry> getInquiry() {
         return adminService.getInquiry();
     }
+
+    @GetMapping("/dashboard/login")
+    public int getTodayLogin() {
+        return adminService.getTodayLogin();
+    }
 }
