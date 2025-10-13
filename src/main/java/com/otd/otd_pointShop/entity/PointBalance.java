@@ -2,7 +2,15 @@ package com.otd.otd_pointShop.entity;
 
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "point_balance")
 public class PointBalance {
@@ -11,6 +19,7 @@ public class PointBalance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // UserRepository x, FK 참조만
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

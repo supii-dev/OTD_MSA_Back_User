@@ -6,6 +6,7 @@ import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.SignInProviderType;
 import com.otd.otd_challenge.entity.*;
+import com.otd.otd_pointShop.entity.Point;
 import com.otd.otd_pointShop.entity.PointBalance;
 import com.otd.otd_pointShop.entity.PointUser;
 import com.otd.otd_pointShop.entity.PurchaseHistory;
@@ -79,6 +80,11 @@ public class User extends UpdatedAt{
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PointUser> pointUsers = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Point> points = new ArrayList<>();
 
     @Column(columnDefinition = "int DEFAULT 0")
     private int xp;
