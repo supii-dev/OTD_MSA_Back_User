@@ -49,9 +49,9 @@ constants:
     redirection-baseUri: /*/oauth2/code/*
     cookie-expiry-seconds: 180
     authorized-redirect-uris:
-      - http://localhost:5173/fe/redirect
-      - http://localhost:5175/fe/redirect
-      - http://112.222.157.157:5174/fe/redirect
+      - http://localhost:5173/otd/fe/redirect
+      - http://localhost:5175/otd/fe/redirect
+      - http://112.222.157.157:5174/otd/fe/redirect
   pay:
     kakao:
       base-url: https://open-api.kakaopay.com/online/v1/payment
