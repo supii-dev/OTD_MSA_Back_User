@@ -11,6 +11,7 @@ import com.otd.configuration.security.oauth.userinfo.Oauth2UserInfoFactory;
 import com.otd.otd_user.entity.User;
 import com.otd.otd_user.entity.UserRole;
 import com.otd.otd_user.entity.UserRoleIds;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -42,6 +43,7 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
             throw new InternalAuthenticationServiceException(ex.getMessage(), ex.getCause());
         }
     }
+
 
     private OAuth2User process(OAuth2UserRequest req) {
         OAuth2User oAuth2User = super.loadUser(req); //소셜 로그인 완료하고 사용자 정보 JSON형태의 데이터를 담고 있는 객체
