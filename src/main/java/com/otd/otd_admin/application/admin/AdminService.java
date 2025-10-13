@@ -102,6 +102,7 @@ public class AdminService {
         int userCount = adminUserRepository.countUser();
         // 최근 회원가입자 top5
         List<User> recentJoinTop5 = adminUserRepository.findTop5ByOrderByCreatedAtDesc();
+        // 오늘 로그인한 회원 수
         int todayLogin = adminUserLoginLogRepository.countTodayLogin();
         dto.setTotalUserCount(userCount);
         dto.setRecentJoinUser(recentJoinTop5);
@@ -211,12 +212,12 @@ public class AdminService {
         // 6개월간 챌린지 참여자 수
         List<ChallengeParticipationCountRes> challengeParticipationCount = adminMapper.countByChallengeParticipation();
         // 챌린지 타입별 비율
-        //List<ChallengeTypeCountRes> challengeTypeCount = adminMapper.countByChallengeTypeRatio();
+        List<ChallengeTypeCountRes> challengeTypeCount = adminMapper.countByChallengeTypeRatio();
 
         dto.setTierCount(tierCount);
         dto.setChallengeSuccessRateCount(challengeSuccessRateCount);
         dto.setChallengeParticipationCount(challengeParticipationCount);
-        //dto.setChallengeTypeCountRes(challengeTypeCount);
+        dto.setChallengeTypeCount(challengeTypeCount);
 
         return dto;
     }

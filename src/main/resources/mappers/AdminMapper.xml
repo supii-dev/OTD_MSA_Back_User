@@ -88,14 +88,18 @@
         ORDER BY cd.cd_type
     </select>
 
-<!--    <select id="countByChallengeTypeRatio">-->
-<!--        SELECT-->
-<!--        cd.cd_type AS challengeType,-->
-<!--        COUNT(cd.cd_id) AS count-->
-<!--        FROM challenge_definition cd-->
-<!--        GROUP BY cd.cd_type-->
-<!--        ORDER BY cd.cd_type-->
-<!--    </select>-->
+    <select id="countByChallengeTypeRatio">
+        SELECT CASE cd_type
+            WHEN 'competition' THEN '월간 경쟁'
+            WHEN 'personal' THEN '월간 개인'
+            WHEN 'weekly' THEN '주간 경쟁'
+            ELSE '기타'
+            END AS type,
+            COUNT(cd_type) AS count
+        FROM challenge_definition
+        WHERE cd_type != 'daily'
+        GROUP BY cd_type;
+    </select>
     
     <select id="countByChallengeParticipation">
         WITH RECURSIVE month_seq AS (
@@ -165,7 +169,7 @@
         LIMIT 5
     </select>
 
-    <select id="findRecent5Inquiry" resultType="com.otd.otd_user.entity.Inquiry">
+    <select id="findRecent5Inquiry">
         SELECT sender_name,
             sender_email,
             subject,
