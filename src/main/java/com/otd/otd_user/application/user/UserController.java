@@ -1,5 +1,6 @@
 package com.otd.otd_user.application.user;
 
+import com.otd.configuration.feignclient.LifeFeignClient;
 import com.otd.otd_challenge.application.challenge.ChallengeService;
 import com.otd.otd_challenge.application.challenge.model.detail.ChallengeProgressGetReq;
 import com.otd.otd_challenge.application.challenge.model.home.ChallengeHomeGetRes;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,10 @@ public class UserController {
     private final PointService pointService;
     private final ChallengeService challengeService;
     private final UserRepository userRepository;
+    private final LifeFeignClient lifeFeignClient;
+
+    @Value("${constants.profile.base-url}")
+    private String profileBaseUrl;
 
     @PostMapping(
             value = "/join",
@@ -133,7 +139,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("message", "이미 사용중인 닉네임입니다."));
         }
-
         userService.updateNickname(userPrincipal.getSignedUserId(), request.getNickname());
 
         return ResponseEntity.ok(Map.of(
@@ -199,5 +204,11 @@ public class UserController {
         // 필요한 경우 날짜 설정
         ChallengeHomeGetRes response = pointService.getSelectedListAll(userPrincipal.getSignedUserId(), req);
         return new ResultResponse<>("미션 완료 내역 조회 성공", response);
+    }
+
+    // 포인트 조회
+    @GetMapping("/{userId}/points")
+    public void userPoints(@PathVariable Long userId) {
+        userService.printUserPointMapping(userId);
     }
 }

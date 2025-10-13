@@ -2,6 +2,7 @@ package com.otd.otd_user.application.user;
 
 import com.otd.configuration.util.MyFileManager;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
+import com.otd.otd_pointShop.entity.Point;
 import com.otd.otd_user.application.email.EmailService;
 import com.otd.otd_user.application.email.model.PasswordChangeReq;
 import com.otd.otd_user.application.email.model.PasswordResetReq;
@@ -251,12 +252,12 @@ public class UserService {
             throw new IllegalArgumentException("현재 닉네임과 동일합니다.");
         }
 
-
         if (!isNicknameAvailable(nickname)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용중인 닉네임입니다.");
         }
 
         user.setNickName(nickname);
+
         log.info("닉네임 변경 완료 - userId: {}, 새 닉네임: {}", userId, nickname);
     }
     @Transactional
@@ -307,4 +308,14 @@ public class UserService {
         return 1;
     }
 
+    // 포인트 조회
+    @Transactional
+    public void printUserPointMapping(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."));
+        for (Point p : user.getPoints()) {
+            System.out.println("user_id = " + user.getUserId() + ", point_id = " + p.getPointId());
+        }
+    }
 }

@@ -12,6 +12,8 @@ constants:
     life:
       name: otd-life
       url: http://localhost:8083
+  profile:
+    base-url: "http://localhost:8080/porfile"
   comment:
     start-index: 0
     need-for-view-count: 3 #피드 리스트를 뿌릴 때 실제로 피드당 보여지는 댓글 수
@@ -106,18 +108,19 @@ spring:
     defer-datasource-initialization: false
     #defer-datasource-initialization: true #JPA 테이블 생성 이후 data.sql
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
 #      ddl-auto: update
       #ddl-auto: validate #entity 엔티티에 새로운거 추가할때 sql ALTER TABLE로 추가한뒤 시작해야함
     #     ddl-auto: update #entity 수정이 파악되면 테이블을 수정한다.
     #      ddl-auto: create #프로젝트 실행시마다 테이블을 모두 drop 후 create한다.
     properties:
       hibernate:
-        jdbc:
-          batch_size: 20
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true #쿼리문 로그를 찍어줄 때 보기편하게 포맷팅
         order_updates: true
         show_sql: true
+        jdbc:
+          batch_size: 20
   security:
     oauth2:
       client:
@@ -193,3 +196,6 @@ mybatis:
 logging:
   level:
     org.springframework.web: DEBUG
+
+    org.springframework.web.reactive.handler=DEBUG:
+    org.springframework.web.reactive.result.method.annotation=DEBUG:

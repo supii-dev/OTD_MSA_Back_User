@@ -6,6 +6,7 @@ import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.SignInProviderType;
 import com.otd.otd_challenge.entity.*;
+import com.otd.otd_pointShop.entity.Point;
 import com.otd.otd_pointShop.entity.PointBalance;
 import com.otd.otd_pointShop.entity.PointUser;
 import com.otd.otd_pointShop.entity.PurchaseHistory;
@@ -28,6 +29,7 @@ import java.util.List;
 public class User extends UpdatedAt{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
     @Column(nullable = false, length = 50)
@@ -63,6 +65,22 @@ public class User extends UpdatedAt{
 
     @Column(columnDefinition = "int DEFAULT 0", nullable = false)
     private int point;
+
+    // 포인트 양방향 관계 추가
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Point> points = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PointBalance> pointBalances = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PurchaseHistory> purchaseHistories = new ArrayList<>();
 
     @Column(columnDefinition = "int DEFAULT 0")
     private int xp;

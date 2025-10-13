@@ -15,13 +15,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.lettuce.core.ZAggregateArgs.Builder.sum;
-
 @Service
 @RequiredArgsConstructor
 public class RechargeService {
 
-    private final PointBalanceService pointBalanceService;
     private final RechargeHistoryRepository rechargeHistoryRepository;
     private final UserRepository userRepository;
 
@@ -36,8 +33,6 @@ public class RechargeService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다"));
 
-        // redis 포인트 충전
-        pointBalanceService.pointIncrement(userId, amount);
 
         // 충전 이력 저장
         RechargeHistory rechargeHistory = RechargeHistory.builder()
@@ -88,6 +83,9 @@ public class RechargeService {
 
     // 포인트 잔액 조회
     public Integer getBalance(Long userId) {
-        return pointBalanceService.getPointBalance(userId);
+        return rechargeHistoryRepository.findByUser_UserId(userId).stream()
+                .mapToInt(RechargeHistory::getAmount)
+                .sum();
     }
+
 }

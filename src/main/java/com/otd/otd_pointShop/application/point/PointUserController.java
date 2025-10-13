@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/OTD/pointshop/user")
+@RequestMapping("/OTD/pointshop/user")
 @RequiredArgsConstructor
 public class PointUserController {
 
