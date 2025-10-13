@@ -200,4 +200,5 @@ public class UserController {
         ChallengeHomeGetRes response = pointService.getSelectedListAll(userPrincipal.getSignedUserId(), req);
         return new ResultResponse<>("미션 완료 내역 조회 성공", response);
     }
+
 }
