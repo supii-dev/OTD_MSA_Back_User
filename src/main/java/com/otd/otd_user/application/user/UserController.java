@@ -32,6 +32,7 @@ public class UserController {
     private final JwtTokenManager jwtTokenManager;
     private final PointService pointService;
     private final ChallengeService challengeService;
+    private final UserRepository userRepository;
 
     @PostMapping(
             value = "/join",
