@@ -30,13 +30,12 @@ public enum EnumInquiryStatus implements EnumMapperType {
             // 2) code 매칭 ("00", "01")
             if (status.code.equalsIgnoreCase(key)) return status;
 
-            // 3) title 매칭 ("대기중", "완료")
+            // 3) title 매칭 ("대기 중", "답변 완료")
             if (status.title.equalsIgnoreCase(key)) return status;
         }
 
         throw new IllegalArgumentException("Unknown EnumInquiryStatus: " + raw);
     }
-
 
     @Override
     public String getCode() {

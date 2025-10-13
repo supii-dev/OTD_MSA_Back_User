@@ -11,8 +11,9 @@ public class PointUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", referencedColumnName ="user_id", nullable = false
+                , foreignKey = @ForeignKey(name="fk_point_user")) // FK
     private User user;
 
     @Column(nullable = false)

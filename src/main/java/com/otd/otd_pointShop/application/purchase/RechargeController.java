@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/pointshop/recharge")
+@RequestMapping("/OTD/pointshop/recharge")
 @RequiredArgsConstructor
 public class RechargeController {
 
     private final RechargeService rechargeService;
 
     // (관리자) 특정 유저 포인트 충전
-    @PostMapping("/recharge/admin")
+    @PostMapping("/admin")
     public ResponseEntity<?> rechargePoint(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody RechargePostReq req
@@ -34,7 +34,7 @@ public class RechargeController {
     }
 
     // (관리자) 전체 유저 충전 내역 조회
-    @GetMapping("/recharge/admin/history")
+    @GetMapping("/admin/history")
     public ResponseEntity<?> getAllRechargeHistories(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
@@ -47,7 +47,7 @@ public class RechargeController {
     }
 
     // (관리자) 총 포인트 통계
-    @GetMapping("/recharge/admin/stars/total")
+    @GetMapping("/admin/stats/total")
     public ResponseEntity<?> getTotalPointStats(
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
@@ -59,7 +59,7 @@ public class RechargeController {
     }
 
     // (관리자) 특정 유저 충전 이력 조회
-    @GetMapping("/recharge/admin/history/user/{userId}")
+    @GetMapping("/admin/history/user/{userId}")
     public ResponseEntity<?> getRechargeHistoryByUser(@PathVariable Long userId) {
         List<RechargePostRes> history = rechargeService.getRechargeHistoryByUserId(userId);
         return ResponseEntity.ok(new PointApiResponse<>(true, history));
