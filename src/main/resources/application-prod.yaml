@@ -2,14 +2,14 @@ constants:
   file:
     upload-directory: /home/download
   jwt:
-    refresh-token-cookie-path: /otd-api/api/user/reissue
+    refresh-token-cookie-path: /otd-api/api/OTD/user/reissue
 
-eureka:
-  client:
-    enabled: false
-
+  feign-client:
+    life:
+      name: otd-life
+      url: "http://otd-life:8080"
 server:
-  port: 8082
+  port: 8080
 
 management:
   endpoint:
@@ -18,11 +18,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: "*"
+
 
 spring:
   cloud:
     kubernetes:
+      loadbalancer:
+        enabled: true
       discovery:
         enabled: true
       reload:

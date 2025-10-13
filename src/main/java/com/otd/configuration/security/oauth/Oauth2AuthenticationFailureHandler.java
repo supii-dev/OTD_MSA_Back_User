@@ -24,7 +24,7 @@ public class Oauth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest req, HttpServletResponse res, AuthenticationException exception)
-    throws IOException{
+            throws IOException{
         exception.printStackTrace();
 
         //FE - Redirect-Url 획득 from Cookie
@@ -34,9 +34,9 @@ public class Oauth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         //URL에 에러 쿼리스트링 추가
         String targetUrl = redirectUrl == null ? "/" : UriComponentsBuilder.fromUriString(redirectUrl)
-                                                                           .queryParam("error", exception.getLocalizedMessage())
-                                                                           .build()
-                                                                           .toUriString();
+                .queryParam("error", exception.getLocalizedMessage())
+                .build()
+                .toUriString();
         //targetUrl = "http://프론트 호스트 주소값/fe/redirect?error=에러메세지";
         getRedirectStrategy().sendRedirect(req, res, targetUrl);
 
