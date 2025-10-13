@@ -15,7 +15,4 @@ public interface LifeFeignClient {
     @DeleteMapping("/api/OTD/admin2/{userId}")
     ResultResponse<?> deleteUserData(@PathVariable("userId") Long userId);
 
-    @PatchMapping("/api/OTD/community/nickname/{userId}")
-    void updateNickName(@PathVariable("userId") Long userId
-            , @RequestBody NicknameUpdateDto nickName);
 }

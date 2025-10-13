@@ -139,7 +139,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("message", "이미 사용중인 닉네임입니다."));
         }
-        lifeFeignClient.updateNickName(userPrincipal.getSignedUserId(), request);
         userService.updateNickname(userPrincipal.getSignedUserId(), request.getNickname());
 
         return ResponseEntity.ok(Map.of(
