@@ -22,6 +22,7 @@ import com.otd.otd_challenge.application.challenge.Repository.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeProgress;
+import com.otd.otd_user.application.email.InquiryRepository;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.application.user.model.UserRoleRepository;
 import com.otd.otd_user.entity.Inquiry;
@@ -38,6 +39,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -58,6 +61,7 @@ public class AdminService {
     private final LifeFeignClient lifeFeignClient;
     private final ConstFile constFile;
     private final AdminUserLoginLogRepository adminUserLoginLogRepository;
+    private final InquiryRepository inquiryRepository;
 
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -75,6 +79,21 @@ public class AdminService {
         return adminInquiryRepository.findAll();
     }
 
+    public ResultResponse<?> putInquiry(AdminInquiryReq req) {
+        Inquiry inquiry = inquiryRepository.findById(req.getId());
+        User user = userRepository.findByUserId(req.getAdminId());
+        if (req.getStatus() == EnumInquiryStatus.PENDING) {
+            inquiry.setReply(req.getReply());
+            inquiry.setReplyAt(LocalDateTime.now());
+            inquiry.setAdminId(user);
+            inquiry.setStatus(EnumInquiryStatus.RESOLVED);
+            inquiryRepository.save(inquiry);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 처리된 문의 입니다.");
+        }
+        return new ResultResponse<>("문의 답변이 완료되었습니다", inquiry);
+    }
+
     // 대시보드 유저
     public AdminDashBoardUserDto getUserDashBoard(){
         AdminDashBoardUserDto dto = new AdminDashBoardUserDto();
@@ -83,10 +102,10 @@ public class AdminService {
         int userCount = adminUserRepository.countUser();
         // 최근 회원가입자 top5
         List<User> recentJoinTop5 = adminUserRepository.findTop5ByOrderByCreatedAtDesc();
-
+        int todayLogin = adminUserLoginLogRepository.countTodayLogin();
         dto.setTotalUserCount(userCount);
         dto.setRecentJoinUser(recentJoinTop5);
-
+        dto.setTodayLoginUserCount(todayLogin);
         return dto;
     }
     // 대시보드 챌린지
@@ -354,9 +373,5 @@ public class AdminService {
                     "챌린지 삭제에 실패했습니다.");
         } 
         return new ResultResponse<>("챌린지 및 이미지가 삭제가 되었습니다.", result);
-    }
-
-    public int getTodayLogin() {
-        return adminUserLoginLogRepository.countTodayLogin();
     }
 }

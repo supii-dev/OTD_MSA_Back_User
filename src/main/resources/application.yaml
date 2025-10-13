@@ -10,7 +10,8 @@ constants:
       service-key: fte7et4WjQ2QQTSP51SJ6VZ%2FXA3aDUYv054aZFUsGdrVOKFJxQnmrKJGh%2Box%2FcnwsvpeJmLazXr4je1K01Uoow%3D%3D
       data-type: json
     life:
-      url: http://localhost:8083/api/OTD
+      name: otd-life
+      url: http://localhost:8083
   comment:
     start-index: 0
     need-for-view-count: 3 #피드 리스트를 뿌릴 때 실제로 피드당 보여지는 댓글 수
@@ -34,6 +35,9 @@ constants:
     # refresh-token-cookie-path: / #해당 path때만 refresh-token값이 넘어온다.
     refresh-token-cookie-validity-seconds: 1_296_000 # 15일 (s) 60 * 60 * 24 * 15
     refresh-token-validity-milliseconds: 1_296_000_000 # 15일 (ms) 60 * 60 * 24 * 15 * 1000
+
+    register-token:
+      expiration-time: 1800000  # 30분 (밀리초)
   oauth2:
     base-uri: /oauth2/authorization #FE 소셜로그인 요청할 때 사용할 주소값
     # 플랫폼과 통신을 3번 정도 하는데 각 통신들이 하나의 작업을 위한 트랜잭션이라는 것을

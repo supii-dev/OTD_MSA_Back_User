@@ -32,6 +32,7 @@ public class UserController {
     private final JwtTokenManager jwtTokenManager;
     private final PointService pointService;
     private final ChallengeService challengeService;
+    private final UserRepository userRepository;
 
     @PostMapping(
             value = "/join",
@@ -151,6 +152,7 @@ public class UserController {
 
     @PostMapping("/reissue")
     public ResultResponse<?> reissue(HttpServletResponse response, HttpServletRequest request) {
+        log.info("reissue request: {}  respone: {}", request,  response);
         jwtTokenManager.reissue(request, response);
         return new ResultResponse<>("AccessToken 재발행 성공", null);
     }

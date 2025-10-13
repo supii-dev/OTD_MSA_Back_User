@@ -3,7 +3,6 @@ package com.otd.configuration.jwt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otd.configuration.constants.ConstJwt;
-import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.model.JwtUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -31,10 +30,8 @@ public class JwtTokenProvider {
     }
 
     // JWT 토큰 생성
-    // Date to LocalDateTime
-    // https://medium.com/@201924576/spring-boot-jwts-%EB%A5%BC-localdatetime-%EC%9C%BC%EB%A1%9C-%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0-61fa0a902ccb
     public String generateToken(JwtUser jwtUser, long tokenValidityMilliSeconds) {
-        Date now = new Date(); //Data객체를 기본생성자로 만들면 현재일시 정보로 객체화
+        Date now = new Date();
         return Jwts.builder()
                 //header
                 .header().type(constJwt.bearerFormat)
@@ -70,11 +67,61 @@ public class JwtTokenProvider {
     }
 
     private Claims getClaims(String token) {
-
         return Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    /**
+     * 소셜 온보딩용 레지스터 토큰 생성 (0.12.x 버전)
+     *
+     * @param nickname 소셜에서 받은 닉네임
+     * @param profileImageUrl 소셜에서 받은 프로필 이미지 URL
+     * @param providerType 소셜 제공자 타입 (KAKAO, GOOGLE 등)
+     * @param providerId 고유 식별자 (KAKAO_1234567890 형태)
+     * @param expirationMillis 만료 시간 (밀리초)
+     * @return 생성된 레지스터 토큰
+     */
+    public String generateRegisterToken(
+            String nickname,
+            String profileImageUrl,
+            String providerType,
+            String providerId,
+            long expirationMillis) {
+
+        Date now = new Date();
+        return Jwts.builder()
+                .claim("nickname", nickname)
+                .claim("profileImageUrl", profileImageUrl)
+                .claim("providerType", providerType)
+                .claim("providerId", providerId)
+                .claim("tokenType", "social_register")
+                .issuedAt(now)
+                .expiration(new Date(now.getTime() + expirationMillis))  // ✅ 0.12.x: setExpiration → expiration
+                .signWith(secretKey)
+                .compact();
+    }
+
+    /**
+     *
+     * @param token JWT 토큰
+     * @param claimName 추출할 클레임 이름
+     * @param type 클레임의 타입
+     * @return 추출된 클레임 값
+     */
+    public <T> T getClaimFromToken(String token, String claimName, Class<T> type) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claims.get(claimName, type);
+        } catch (Exception e) {
+            log.error("토큰 파싱 실패: {}", e.getMessage());
+            throw new RuntimeException("토큰 파싱 실패", e);
+        }
     }
 }

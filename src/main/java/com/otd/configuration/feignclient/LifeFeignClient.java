@@ -2,18 +2,15 @@ package com.otd.configuration.feignclient;
 
 import com.otd.configuration.model.ResultResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "life", url = "${constants.feign-client.life.url}")
+@FeignClient(name = "${constants.feign-client.life.name}", url = "${constants.feign-client.life.url}")
 public interface LifeFeignClient {
-    @PostMapping("/exercise/challenge/names")
+    @PostMapping("/api/OTD/exercise/challenge/names")
     void sendActiveChallengeNames(@RequestBody List<String> challengeNames);
 
-    @DeleteMapping("/admin2/{userId}")
+    @DeleteMapping("/api/OTD/admin2/{userId}")
     ResultResponse<?> deleteUserData(@PathVariable("userId") Long userId);
 }

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -86,9 +87,3 @@ public class MyOauth2UserService extends DefaultOAuth2UserService {
         return myUserDetails; //이 객체는 OAuth2AuthenticationSuccessHandler객체의 onAuthenticationSuccess메소드의 Authentication auth 매개변수로 전달된다.
     }
 }
-
-
-
-
-
-
