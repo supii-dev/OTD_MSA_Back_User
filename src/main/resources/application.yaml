@@ -2,7 +2,6 @@ constants:
   file:
     upload-directory: /home/green/download
     challenge: files
-    #   upload-directory: D:/kjh/project_2/upload/challenge
     profile-pic: profile
     pointshop-pic: pointshop
   feign-client:
