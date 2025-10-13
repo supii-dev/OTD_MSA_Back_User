@@ -18,4 +18,5 @@ public class AdminUserPutReq {
     private EnumChallengeRole challengeRole;
     private EnumUserRole userRoles;
     private int xp;
+
 }
