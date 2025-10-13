@@ -14,6 +14,7 @@ import com.otd.otd_user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -30,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class PointshopService {
@@ -97,15 +99,19 @@ public class PointshopService {
 
     @Transactional
     public void createPointItem(PointPostReq dto, MultipartFile[] images, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자 정보가 존재하지 않습니다."));
+
         Point point = new Point();
-        point.setUser(userRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자 없음")));
+        point.setUser(user);
         point.setPointScore(dto.getPointScore());
         point.setPointItemName(dto.getPointItemName());
         point.setPointItemContent(dto.getPointItemContent());
 
-        List<PointImage> imagesList = storeImages(images, point);
-        point.setPointItemImage(imagesList);
-
+        if (images != null && images.length > 0) {
+            List<PointImage> imagesList = storeImages(images, point);
+            point.setPointItemImage(imagesList);
+        }
         pointRepository.save(point);
     }
 
@@ -151,24 +157,44 @@ public class PointshopService {
         List<PointImage> imagesList = new ArrayList<>();
         if (images == null || images.length == 0) return imagesList;
 
+        Path directoryPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(directoryPath);
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 저장 경로 생성 실패", e);
+        }
+
         for (MultipartFile file : images) {
             validateImageExtension(file);
-            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path savePath = Paths.get(uploadDir, filename);
 
+            String originalName = FilenameUtils.getBaseName(file.getOriginalFilename());
+            String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+            String fileName = UUID.randomUUID().toString() + "." + extension;
+
+            Path savePath = directoryPath.resolve(fileName);
             try {
-                Files.createDirectories(savePath.getParent());
                 file.transferTo(savePath.toFile());
             } catch (IOException e) {
-                throw new RuntimeException("이미지 저장에 실패하였습니다", e);
+                log.error("이미지 저장 실패: {}", originalName, e);
+                throw new RuntimeException("이미지 저장에 실패하였습니다: " + originalName, e);
             }
 
             PointImage pointImage = new PointImage();
-            pointImage.setImageUrl(filename);
+            pointImage.setImageUrl(fileName);
+            pointImage.setImageType(file.getContentType());
+            pointImage.setAltText(originalName);
             pointImage.setPoint(point);
+
             imagesList.add(pointImage);
         }
         return imagesList;
+    }
+
+    private String getFileExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return "";
+        }
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
     private void validateImageExtension(MultipartFile file) {
@@ -189,9 +215,11 @@ public class PointshopService {
 
     // 유저 포인트 잔액 조회
     public int getUserPointBalance(Long userId) {
-        int totalRecharge = rechargeHistoryRepository.findTotalRechargeByUserId(userId).orElse(0);
-        int totalSpent = purchaseHistoryRepository.findTotalSpentByUserId(userId).orElse(0);
-        return totalRecharge - totalSpent;
+        int balance = userRepository.findPointByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("유저 포인트 정보를 찾을 수 없습니다."));
+
+        log.info("[현재 포인트 조회] userId={}, balance={}", userId, balance);
+        return balance;
     }
 
     // 유저 구매 이력 조회
@@ -207,4 +235,5 @@ public class PointshopService {
                         .build())
                 .toList();
     }
+
 }

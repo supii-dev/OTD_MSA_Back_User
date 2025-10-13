@@ -2,11 +2,13 @@ package com.otd.otd_user.application.user;
 
 import com.otd.configuration.security.SignInProviderType;
 import com.otd.otd_user.entity.User;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -18,6 +20,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query("UPDATE User u Set u.refreshToken = :refreshToken WHERE u.userId = :userId")
     void updateRefreshToken(Long userId, String refreshToken);
+
+    // 유저 조회
+    @Query("SELECT u.userId, p.pointId FROM User u JOIN u.points p WHERE u.userId = :userId")
+    List<Object[]> findUserAndPointIds(@Param("userId") Long userId);
 
     // 포인트 조회
     @Query("SELECT u.point FROM User u WHERE u.userId = :userId")

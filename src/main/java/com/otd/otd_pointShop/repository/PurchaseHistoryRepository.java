@@ -17,7 +17,7 @@ public interface PurchaseHistoryRepository extends JpaRepository<PurchaseHistory
     List<PurchaseHistory> findByUser_UserId(Long userId);
 
     // 사용자별 사용 포인트 총합
-    @Query("SELECT SUM(p.point.pointScore) FROM PurchaseHistory p WHERE p.user.userId = :userId")
+    @Query("SELECT COALESCE(SUM(p.point.pointScore), 0) FROM PurchaseHistory p WHERE p.user.userId = :userId")
     Optional<Integer> findTotalSpentByUserId(@Param("userId") Long userId);
 
     // 사용자별 총 사용 포인트 상위 10명

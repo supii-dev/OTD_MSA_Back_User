@@ -45,8 +45,9 @@ public class Point {
         this.updatedAt = LocalDateTime.now();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false) // FK
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false,
+            foreignKey = @ForeignKey(name="fk_point_user")) // FK
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)

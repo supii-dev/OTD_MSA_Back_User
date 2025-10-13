@@ -12,6 +12,7 @@ public interface RechargeHistoryRepository extends JpaRepository<RechargeHistory
     List<RechargeHistory> findByUser_UserId(Long userId);
 
     // 사용자별 충전 포인트 총합
-    @Query("SELECT SUM(r.amount) FROM RechargeHistory r WHERE r.user.userId = :userId")
+    @Query("SELECT COALESCE(SUM(r.amount), 0) FROM RechargeHistory r WHERE r.user.userId = :userId")
     Optional<Integer> findTotalRechargeByUserId(@Param("userId") Long userId);
+
 }

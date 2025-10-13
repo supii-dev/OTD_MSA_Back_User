@@ -29,6 +29,7 @@ import java.util.List;
 public class User extends UpdatedAt{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
     @Column(nullable = false, length = 50)
@@ -69,22 +70,17 @@ public class User extends UpdatedAt{
     @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Point> points = new ArrayList<>();
+
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PointBalance> pointBalances = new ArrayList<>();
 
     @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PurchaseHistory> purchaseHistories = new ArrayList<>();
-
-    @JsonIgnore
-    @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PointUser> pointUsers = new ArrayList<>();
-
-    @JsonIgnore
-    @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Point> points = new ArrayList<>();
 
     @Column(columnDefinition = "int DEFAULT 0")
     private int xp;

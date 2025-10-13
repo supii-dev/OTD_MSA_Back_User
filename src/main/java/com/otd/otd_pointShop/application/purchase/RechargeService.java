@@ -87,4 +87,5 @@ public class RechargeService {
                 .mapToInt(RechargeHistory::getAmount)
                 .sum();
     }
+
 }

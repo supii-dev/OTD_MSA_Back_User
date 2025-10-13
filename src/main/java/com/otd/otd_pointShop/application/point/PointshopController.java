@@ -4,6 +4,7 @@ import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.model.UserPrincipal;
 import com.otd.otd_pointShop.application.point.model.*;
 import com.otd.otd_pointShop.application.purchase.model.PurchaseHistoryRes;
+import com.otd.otd_pointShop.repository.PointRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import java.util.Set;
 @RequestMapping("/OTD/pointshop")
 public class PointshopController {
     private final PointshopService pointshopService;
+    private final PointRepository pointRepository;
 
     // 포인트 등록
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -59,13 +61,13 @@ public class PointshopController {
 
     // 포인트 요약 리스트 조회
     @GetMapping("/list")
-    public ResponseEntity<?> getPointList (
+    public ResponseEntity<PointApiResponse<List<PointListRes>>> getPointList(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
         Long userId = getLoginUserId(userPrincipal);
         List<PointListRes> list = pointshopService.getPointListByUser(userId, pageable);
-        return ResponseEntity.ok(list);
+        return ResponseEntity.ok(new PointApiResponse<>(true, "포인트 리스트 조회 성공", list));
     }
 
     // 키워드 기반 조회
@@ -119,11 +121,13 @@ public class PointshopController {
 
     // 유저 포인트 조회
     @GetMapping("/user/points")
-    public ResponseEntity<?> getUserPoints(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<PointApiResponse<Integer>> getUserPoints(@AuthenticationPrincipal UserPrincipal userPrincipal) {
         Long userId = getLoginUserId(userPrincipal);
         int balance = pointshopService.getUserPointBalance(userId);
         log.info("[포인트 조회] 사용자 ID: {}, 잔액: {}", userId, balance);
-        return ResponseEntity.ok(new PointApiResponse<>(true, "포인트 잔액 조회 성공", balance));
+
+        PointApiResponse<Integer> response = new PointApiResponse<>(true, "포인트 잔액 조회 성공", balance);
+        return ResponseEntity.ok(response);
     }
 
     // 구매 이력 조회
