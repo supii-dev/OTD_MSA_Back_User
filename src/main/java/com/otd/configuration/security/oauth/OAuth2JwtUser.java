@@ -6,6 +6,7 @@ import lombok.Getter;
 
 import java.util.List;
 
+
 @Getter
 public class OAuth2JwtUser extends JwtUser {
     private final String nickName;

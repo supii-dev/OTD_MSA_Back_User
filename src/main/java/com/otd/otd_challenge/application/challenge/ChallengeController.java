@@ -27,6 +27,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -143,8 +144,13 @@ public class ChallengeController {
     }
     @GetMapping("/progress/challenges/{userId}")
     public ResponseEntity<List<String>> getActiveChallengeNames(@PathVariable Long userId
-            , @RequestParam("recordDate") LocalDate recordDate) {
-        List<String> challengeNames = challengeProgressRepository.findActiveChallengeNames(userId, recordDate);
+            , @RequestParam("recordDate") LocalDate strRecordDate) {
+        log.info("userId: {}", userId);
+        log.info("recordDate: {}", strRecordDate);
+
+//        LocalDate recordDate = LocalDate.parse(strRecordDate);
+
+        List<String> challengeNames = challengeProgressRepository.findActiveChallengeNames(userId, strRecordDate);
         return ResponseEntity.ok(challengeNames);
     }
 }

@@ -42,7 +42,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
         final String uri = request.getRequestURI();
         log.info("요청 URI: {}", uri);
-
         // 인증 불필요 엔드포인트는 바로 통과
         if ("/api/OTD/user/join".equals(uri)
                 || "/api/OTD/user/login".equals(uri)) {
