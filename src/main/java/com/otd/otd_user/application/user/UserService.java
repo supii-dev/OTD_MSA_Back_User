@@ -136,6 +136,7 @@ public class UserService {
                 .pic(user.getPic())
                 .point(user.getPoint())
                 .xp(user.getXp())
+                .gender(user.getGender())
                 .email(user.getEmail())
                 .challengeRole(challengeRoles)
                 .userRole(userRole)
