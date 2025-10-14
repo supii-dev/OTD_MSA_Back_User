@@ -32,7 +32,7 @@ public class OnboardingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        if (Boolean.TRUE.equals(user.getOnboardingCompleted())) {
+        if (user.getOnboardingCompleted() != null && user.getOnboardingCompleted() == 1) {
             log.warn("이미 온보딩이 완료된 사용자입니다 - UserId: {}", userId);
             throw new RuntimeException("이미 온보딩이 완료되었습니다.");
         }
@@ -67,7 +67,7 @@ public class OnboardingService {
         updateUserChallengeRole(user, challengeRole);
 
 
-        user.setOnboardingCompleted(true);
+        user.setOnboardingCompleted(1);
 
         userRepository.save(user);
 
@@ -82,7 +82,8 @@ public class OnboardingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        return user.getOnboardingCompleted();
+
+        return user.getOnboardingCompleted() != null && user.getOnboardingCompleted() == 1;
     }
 
 
