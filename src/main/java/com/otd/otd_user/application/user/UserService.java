@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -137,6 +138,7 @@ public class UserService {
                 .point(user.getPoint())
                 .xp(user.getXp())
                 .gender(user.getGender())
+                .age(user.getAge())
                 .email(user.getEmail())
                 .challengeRole(challengeRoles)
                 .userRole(userRole)

@@ -17,6 +17,7 @@ public class UserLoginRes {
     private String pic;
     private String email;
     private String gender;
+    private Integer age;
     private int point;
     private int xp;
     private List<String> roles;
