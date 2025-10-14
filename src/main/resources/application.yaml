@@ -196,3 +196,6 @@ mybatis:
 logging:
   level:
     org.springframework.web: DEBUG
+
+    org.springframework.web.reactive.handler=DEBUG:
+    org.springframework.web.reactive.result.method.annotation=DEBUG:
