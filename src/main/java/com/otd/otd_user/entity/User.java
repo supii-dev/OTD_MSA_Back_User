@@ -148,5 +148,7 @@ public class User extends UpdatedAt{
         LocalDate birthDate = LocalDate.parse(this.birthDate, DateTimeFormatter.ISO_LOCAL_DATE);
         return Period.between(birthDate, LocalDate.now()).getYears();
     }
+    @Column(name = "onboarding_completed")
+    private Boolean onboardingCompleted = false;
 
 }
