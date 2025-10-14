@@ -19,6 +19,8 @@ public class InquiryDetailRes {
     private String senderName;
     private String senderEmail;
     private EnumInquiryStatus status;
+    private String reply;
+    private LocalDateTime replyAt;
     private String statusTitle;
     private LocalDateTime createdAt;
 }
