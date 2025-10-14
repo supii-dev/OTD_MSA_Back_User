@@ -20,6 +20,18 @@
         ON u.user_id = ur.user_id
     </select>
 
+    <select id="findByCdId">
+        SELECT cp.is_success, cp.total_record, u.nick_name, u.`name`,
+               cd.cd_name, cd.cd_type, cd.cd_goal ,cd.cd_unit
+        FROM challenge_progress cp
+        INNER JOIN `user` u ON u.user_id = cp.user_id
+        INNER JOIN challenge_definition cd ON cd.cd_id = cp.cd_id
+        WHERE cp.cd_id = #{id}
+        AND cp.start_date &lt;= #{date}
+        AND cp.end_date &gt;= #{date}
+        ORDER BY cp.total_record DESC
+    </select>
+
     <select id="groupByAge">
         SELECT CASE
             WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(REPLACE(birth_date, '-', ''), '%Y%m%d'), CURDATE())
