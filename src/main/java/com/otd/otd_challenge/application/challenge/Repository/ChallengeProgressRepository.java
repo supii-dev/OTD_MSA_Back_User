@@ -51,5 +51,4 @@ public interface ChallengeProgressRepository extends JpaRepository<ChallengeProg
     List<String> findActiveChallengeNames(@Param("userId") Long userId
                                         , @Param("recordDate") LocalDate recordDate);
 
-    void deleteAllByUser(User user);
 }
