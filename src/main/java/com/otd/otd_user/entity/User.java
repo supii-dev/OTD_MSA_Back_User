@@ -15,6 +15,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -137,6 +139,14 @@ public class User extends UpdatedAt{
                 .map(userRole -> userRole.getUserRoleIds().getChallengeCode())
                 .findFirst() // 유저가 가진 챌린지 Role 하나만 꺼냄
                 .orElse(EnumChallengeRole.TBD);
+    }
+
+    public Integer getAge() {
+        if (this.birthDate == null || this.birthDate.length() < 8) {
+            return null;
+        }
+        LocalDate birthDate = LocalDate.parse(this.birthDate, DateTimeFormatter.BASIC_ISO_DATE);
+        return Period.between(birthDate, LocalDate.now()).getYears();
     }
 
 }
