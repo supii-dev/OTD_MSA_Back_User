@@ -92,18 +92,19 @@ public class AdminService {
         return adminInquiryRepository.findAll();
     }
 
+    public Inquiry getInquiryDetail(Long inquiryId) {
+        return adminInquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의글이 존재하지 않습니다. id=" + inquiryId));
+    }
+
     public ResultResponse<?> putInquiry(AdminInquiryReq req) {
         Inquiry inquiry = inquiryRepository.findById(req.getId());
         User user = userRepository.findByUserId(req.getAdminId());
-        if (req.getStatus() == EnumInquiryStatus.PENDING) {
+
             inquiry.setReply(req.getReply());
             inquiry.setReplyAt(LocalDateTime.now());
             inquiry.setAdminId(user);
             inquiry.setStatus(EnumInquiryStatus.RESOLVED);
             inquiryRepository.save(inquiry);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 처리된 문의 입니다.");
-        }
         return new ResultResponse<>("문의 답변이 완료되었습니다", inquiry);
     }
 

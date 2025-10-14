@@ -11,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum EnumInquiryStatus implements EnumMapperType {
-    PENDING("00", "대기중", "문의가 접수되었습니다"),
-    RESOLVED("01", "완료", "문의 처리가 완료되었습니다");
+    PENDING("00", "대기 중", "문의가 접수되었습니다"),
+    RESOLVED("01", "답변 완료", "문의 처리가 완료되었습니다");
 
     private final String code;
     private final String title;

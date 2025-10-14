@@ -141,5 +141,8 @@ public class AdminController {
         req.setAdminId(userPrincipal.getSignedUserId());
         return adminService.putInquiry(req);
     }
-
+    @GetMapping("/qna/{inquiryId}")
+    public Inquiry getInquiryDetail(@PathVariable Long inquiryId) {
+        return adminService.getInquiryDetail(inquiryId);
+    }
 }
