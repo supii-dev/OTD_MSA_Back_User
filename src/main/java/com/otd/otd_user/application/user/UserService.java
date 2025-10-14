@@ -63,6 +63,7 @@ public class UserService {
                 .phone(req.getPhone())
                 .birthDate(req.getBirthDate())
                 .gender(req.getGender())
+                .onboardingCompleted(1)
                 .build();
 
         EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(req.getSurveyAnswers());

@@ -95,6 +95,9 @@ public class User extends UpdatedAt{
     @Column
     private LocalDateTime lastLogin;
 
+    @Column(name = "onboarding_completed", columnDefinition = "INT DEFAULT 0")
+    private Integer onboardingCompleted = 0;
+
     @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -148,5 +151,6 @@ public class User extends UpdatedAt{
         LocalDate birthDate = LocalDate.parse(this.birthDate, DateTimeFormatter.ISO_LOCAL_DATE);
         return Period.between(birthDate, LocalDate.now()).getYears();
     }
+
 
 }
