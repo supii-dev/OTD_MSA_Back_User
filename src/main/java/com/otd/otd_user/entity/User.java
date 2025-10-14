@@ -142,10 +142,10 @@ public class User extends UpdatedAt{
     }
 
     public Integer getAge() {
-        if (this.birthDate == null || this.birthDate.length() < 8) {
+        if (this.birthDate == null || this.birthDate.length() < 10) {
             return null;
         }
-        LocalDate birthDate = LocalDate.parse(this.birthDate, DateTimeFormatter.BASIC_ISO_DATE);
+        LocalDate birthDate = LocalDate.parse(this.birthDate, DateTimeFormatter.ISO_LOCAL_DATE);
         return Period.between(birthDate, LocalDate.now()).getYears();
     }
 
