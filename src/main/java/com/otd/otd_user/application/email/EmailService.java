@@ -415,6 +415,8 @@ public class EmailService {
                 .senderEmail(inquiry.getSenderEmail())
                 .status(inquiry.getStatus())
                 .statusTitle(inquiry.getStatus().getTitle())
+                .reply(inquiry.getReply())
+                .replyAt(inquiry.getReplyAt())
                 .createdAt(inquiry.getCreatedAt())
                 .build();
     }

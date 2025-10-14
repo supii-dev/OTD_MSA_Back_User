@@ -70,6 +70,11 @@ public class AdminController {
         return adminService.getChallenges();
     }
 
+    @GetMapping("/challenge/progress/{id}")
+    public List<AdminChallengeProgress> getChallengeProgress(@PathVariable Long id){
+        return adminService.getChallengeProgress(id);
+    }
+
     @PostMapping("/challenge/add")
     public ResultResponse<?> addChallenge(
             @RequestPart("challenge") AdminChallengeDto challengeDto,
@@ -132,7 +137,7 @@ public class AdminController {
 
     @PutMapping("/qna/modify")
     public ResultResponse<?> modifyInquiry(@AuthenticationPrincipal UserPrincipal userPrincipal,
-                                           @RequestBody AdminInquiryReq req){
+                                           @RequestBody AdminInquiryReq req) {
         req.setAdminId(userPrincipal.getSignedUserId());
         return adminService.putInquiry(req);
     }

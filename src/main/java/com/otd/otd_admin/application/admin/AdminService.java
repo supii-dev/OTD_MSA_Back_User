@@ -75,6 +75,19 @@ public class AdminService {
         return adminPointRepository.findAll();
     }
 
+    public List<AdminChallengeProgress> getChallengeProgress(Long id) {
+        LocalDate date = LocalDate.now();
+        List<AdminChallengeProgress> result = adminMapper.findByCdId(id, date);
+        for (AdminChallengeProgress acp : result) {
+            String format =  acp.getCdGoal() + acp.getCdUnit();
+            acp.setGoal(format);
+
+            String format2 = acp.getTotalRecord().intValue() + acp.getCdUnit();
+            acp.setRecord(format2);
+        }
+        return result;
+    }
+
     public List<Inquiry> getInquiry() {
         return adminInquiryRepository.findAll();
     }
