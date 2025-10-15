@@ -17,10 +17,10 @@ constants:
     redirection-baseUri: /*/oauth2/code/*
     cookie-expiry-seconds: 180
     authorized-redirect-uris:
-      - https://greenart.n-e.kr/fe/redirect
-      - http://localhost:5173/fe/redirect
-      - http://localhost:5175/fe/redirect
-      - http://112.222.157.157:5174/fe/redirect
+      - https://greenart.n-e.kr/otd/fe/redirect
+      - http://localhost:5173/otd/fe/redirect
+      - http://localhost:5175/otd/redirect
+      - http://112.222.157.157:5174/otd/fe/redirect
 
 
 server:

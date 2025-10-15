@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -65,6 +66,7 @@ public class UserService {
                 .phone(req.getPhone())
                 .birthDate(req.getBirthDate())
                 .gender(req.getGender())
+                .onboardingCompleted(1)
                 .build();
 
         EnumChallengeRole challengeRole = EnumChallengeRole.fromCode(req.getSurveyAnswers());
@@ -139,9 +141,12 @@ public class UserService {
                 .pic(user.getPic())
                 .point(user.getPoint())
                 .xp(user.getXp())
+                .gender(user.getGender())
+                .age(user.getAge())
                 .email(user.getEmail())
                 .challengeRole(challengeRoles)
                 .userRole(userRole)
+                .onboardingCompleted(user.getOnboardingCompleted())
                 .build();
 
         return UserLoginDto.builder()
@@ -255,12 +260,12 @@ public class UserService {
             throw new IllegalArgumentException("현재 닉네임과 동일합니다.");
         }
 
-
         if (!isNicknameAvailable(nickname)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용중인 닉네임입니다.");
         }
 
         user.setNickName(nickname);
+
         log.info("닉네임 변경 완료 - userId: {}, 새 닉네임: {}", userId, nickname);
     }
     @Transactional

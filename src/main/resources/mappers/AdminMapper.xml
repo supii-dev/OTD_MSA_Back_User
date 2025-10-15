@@ -20,6 +20,18 @@
         ON u.user_id = ur.user_id
     </select>
 
+    <select id="findByCdId">
+        SELECT cp.is_success, cp.total_record, u.nick_name, u.`name`,
+               cd.cd_name, cd.cd_type, cd.cd_goal ,cd.cd_unit
+        FROM challenge_progress cp
+        INNER JOIN `user` u ON u.user_id = cp.user_id
+        INNER JOIN challenge_definition cd ON cd.cd_id = cp.cd_id
+        WHERE cp.cd_id = #{id}
+        AND cp.start_date &lt;= #{date}
+        AND cp.end_date &gt;= #{date}
+        ORDER BY cp.total_record DESC
+    </select>
+
     <select id="groupByAge">
         SELECT CASE
             WHEN TIMESTAMPDIFF(YEAR, STR_TO_DATE(REPLACE(birth_date, '-', ''), '%Y%m%d'), CURDATE())
@@ -88,14 +100,18 @@
         ORDER BY cd.cd_type
     </select>
 
-<!--    <select id="countByChallengeTypeRatio">-->
-<!--        SELECT-->
-<!--        cd.cd_type AS challengeType,-->
-<!--        COUNT(cd.cd_id) AS count-->
-<!--        FROM challenge_definition cd-->
-<!--        GROUP BY cd.cd_type-->
-<!--        ORDER BY cd.cd_type-->
-<!--    </select>-->
+    <select id="countByChallengeTypeRatio">
+        SELECT CASE cd_type
+            WHEN 'competition' THEN '월간 경쟁'
+            WHEN 'personal' THEN '월간 개인'
+            WHEN 'weekly' THEN '주간 경쟁'
+            ELSE '기타'
+            END AS type,
+            COUNT(cd_type) AS count
+        FROM challenge_definition
+        WHERE cd_type != 'daily'
+        GROUP BY cd_type;
+    </select>
     
     <select id="countByChallengeParticipation">
         WITH RECURSIVE month_seq AS (
@@ -165,7 +181,7 @@
         LIMIT 5
     </select>
 
-    <select id="findRecent5Inquiry" resultType="com.otd.otd_user.entity.Inquiry">
+    <select id="findRecent5Inquiry">
         SELECT sender_name,
             sender_email,
             subject,

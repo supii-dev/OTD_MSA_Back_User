@@ -15,6 +15,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +62,7 @@ public class User extends UpdatedAt{
     @Column(length = 30)
     private String phone;
 
+    @Convert(converter = SignInProviderType.CodeConverter.class)
     @Column(length = 2)
     private SignInProviderType providerType;
 
@@ -121,6 +124,9 @@ public class User extends UpdatedAt{
     @Column
     private LocalDateTime lastLogin;
 
+    @Column(name = "onboarding_completed", columnDefinition = "INT DEFAULT 0")
+    private Integer onboardingCompleted = 0;
+
     @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -129,7 +135,7 @@ public class User extends UpdatedAt{
     //cascade는 자식과 나랑 모든 연결 (내가 영속성되면 자식도 영속성되고, 내가 삭제되면 자식도 삭제 된다. 등등)
     //ohphanRemoval은 userRoles에서 자식을 하나 제거함. 그러면 DB에도 뺀 자식은 삭제처리가 된다.
     @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch =  FetchType.EAGER)
     private List<UserRole> userRoles = new ArrayList<>(1);
 
     @JsonIgnore
@@ -166,4 +172,14 @@ public class User extends UpdatedAt{
                 .findFirst() // 유저가 가진 챌린지 Role 하나만 꺼냄
                 .orElse(EnumChallengeRole.TBD);
     }
+
+    public Integer getAge() {
+        if (this.birthDate == null || this.birthDate.length() < 10) {
+            return null;
+        }
+        LocalDate birthDate = LocalDate.parse(this.birthDate, DateTimeFormatter.ISO_LOCAL_DATE);
+        return Period.between(birthDate, LocalDate.now()).getYears();
+    }
+
+
 }

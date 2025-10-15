@@ -75,22 +75,36 @@ public class AdminService {
         return adminPointRepository.findAll();
     }
 
+    public List<AdminChallengeProgress> getChallengeProgress(Long id) {
+        LocalDate date = LocalDate.now();
+        List<AdminChallengeProgress> result = adminMapper.findByCdId(id, date);
+        for (AdminChallengeProgress acp : result) {
+            String format =  acp.getCdGoal() + acp.getCdUnit();
+            acp.setGoal(format);
+
+            String format2 = acp.getTotalRecord().intValue() + acp.getCdUnit();
+            acp.setRecord(format2);
+        }
+        return result;
+    }
+
     public List<Inquiry> getInquiry() {
         return adminInquiryRepository.findAll();
+    }
+
+    public Inquiry getInquiryDetail(Long inquiryId) {
+        return adminInquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의글이 존재하지 않습니다. id=" + inquiryId));
     }
 
     public ResultResponse<?> putInquiry(AdminInquiryReq req) {
         Inquiry inquiry = inquiryRepository.findById(req.getId());
         User user = userRepository.findByUserId(req.getAdminId());
-        if (req.getStatus() == EnumInquiryStatus.PENDING) {
+
             inquiry.setReply(req.getReply());
             inquiry.setReplyAt(LocalDateTime.now());
             inquiry.setAdminId(user);
             inquiry.setStatus(EnumInquiryStatus.RESOLVED);
             inquiryRepository.save(inquiry);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 처리된 문의 입니다.");
-        }
         return new ResultResponse<>("문의 답변이 완료되었습니다", inquiry);
     }
 
@@ -102,6 +116,7 @@ public class AdminService {
         int userCount = adminUserRepository.countUser();
         // 최근 회원가입자 top5
         List<User> recentJoinTop5 = adminUserRepository.findTop5ByOrderByCreatedAtDesc();
+        // 오늘 로그인한 회원 수
         int todayLogin = adminUserLoginLogRepository.countTodayLogin();
         dto.setTotalUserCount(userCount);
         dto.setRecentJoinUser(recentJoinTop5);
@@ -211,12 +226,12 @@ public class AdminService {
         // 6개월간 챌린지 참여자 수
         List<ChallengeParticipationCountRes> challengeParticipationCount = adminMapper.countByChallengeParticipation();
         // 챌린지 타입별 비율
-        //List<ChallengeTypeCountRes> challengeTypeCount = adminMapper.countByChallengeTypeRatio();
+        List<ChallengeTypeCountRes> challengeTypeCount = adminMapper.countByChallengeTypeRatio();
 
         dto.setTierCount(tierCount);
         dto.setChallengeSuccessRateCount(challengeSuccessRateCount);
         dto.setChallengeParticipationCount(challengeParticipationCount);
-        //dto.setChallengeTypeCountRes(challengeTypeCount);
+        dto.setChallengeTypeCount(challengeTypeCount);
 
         return dto;
     }

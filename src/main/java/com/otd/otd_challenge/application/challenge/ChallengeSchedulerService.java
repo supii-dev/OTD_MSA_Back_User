@@ -151,7 +151,7 @@ public class ChallengeSchedulerService {
   private void addImgPath(List<?> list) {
     for (Object o : list) {
      if(o instanceof ChallengeSettlementGetRes cs){
-       cs.setImage(imgPath + cs.getImage());
+       cs.setImage(imgPath + "/" + cs.getImage());
      }
     }
   }
