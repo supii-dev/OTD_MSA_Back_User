@@ -427,7 +427,6 @@ public class ChallengeService {
     }
 
     private static final int DEFAULT_PERSONAL_GOAL = 15;
-    @Transactional
     public int updateProgressEx(ExerciseDataReq req) {
         // 월간 개인챌린지 조회
         List<ChallengeProgress> personalProgresses =
@@ -530,7 +529,6 @@ public class ChallengeService {
         }
         return 1;
     }
-    @Transactional
     public int deleteRecord(ChallengeRecordDeleteReq req) {
 
         // 운동 이름과 같은 챌린지 조회
@@ -600,7 +598,6 @@ public class ChallengeService {
         return 1;
     }
 
-    @Transactional
     public int updateProgressMeal(MealDataReq req) {
         List<ChallengeProgress> personalProgresses =
                 challengeProgressRepository.findActiveProgressByType(
