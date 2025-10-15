@@ -13,5 +13,5 @@ public class PurchasePostRes {
     private String pointItemName;
     private Integer pointScore;
     private String pointItemImage;
-    private LocalDateTime purchaseTime;
+    private LocalDateTime purchaseAt;
 }
