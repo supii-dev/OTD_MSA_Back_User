@@ -230,7 +230,7 @@ public class ChallengeService {
         return map;
     }
 
-    @Transactional
+   // @Transactional
     public ResultResponse<?> saveMissionRecord(Long userId, ChallengeRecordMissionPostReq req){
         int result = challengeMapper.saveMissionRecordByUserIdAndCpId(userId, req.getCdId());
         ChallengeDefinition point = challengeDefinitionRepository.findByCdId(req.getCdId());
