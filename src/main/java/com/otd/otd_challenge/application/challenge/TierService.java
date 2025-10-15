@@ -10,18 +10,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TierService {
     public EnumChallengeRole checkTierUp(EnumChallengeRole myRole, int xp) {
+        int level = xp / 100; // 100xp = 1레벨
+
         switch (myRole) {
             case BRONZE:
-                if (xp >= 500) return EnumChallengeRole.SILVER;
+                if (level >= 5) return EnumChallengeRole.SILVER;
                 break;
             case SILVER:
-                if (xp >= 1000) return EnumChallengeRole.DIAMOND;
-                if (xp >= 500) return EnumChallengeRole.GOLD;
+                if (level >= 10) return EnumChallengeRole.GOLD;
                 break;
             case GOLD:
-                if (xp >= 1500) return EnumChallengeRole.DIAMOND;
-                if (xp >= 1000) return EnumChallengeRole.DIAMOND;
-                if (xp >= 500) return EnumChallengeRole.DIAMOND;
+                if (level >= 15) return EnumChallengeRole.DIAMOND;
                 break;
             case DIAMOND:
                 return EnumChallengeRole.DIAMOND;
