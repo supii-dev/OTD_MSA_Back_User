@@ -1,16 +1,15 @@
 package com.otd.otd_user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@Setter
 public class UserRole {
     @EmbeddedId
     private UserRoleIds userRoleIds;
@@ -19,5 +18,6 @@ public class UserRole {
     @ManyToOne
     @MapsId("userId")
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 }

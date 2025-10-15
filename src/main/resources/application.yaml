@@ -1,7 +1,19 @@
 constants:
   file:
-    upload-directory: C:/Users/숩인/Desktop/hsb/backand/upload
-    profile-pic: /profile
+    upload-directory: /home/green/download
+    challenge: files
+    profile-pic: profile
+    pointshop-pic: pointshop
+  feign-client:
+    weather-api:
+      url: https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0
+      service-key: fte7et4WjQ2QQTSP51SJ6VZ%2FXA3aDUYv054aZFUsGdrVOKFJxQnmrKJGh%2Box%2FcnwsvpeJmLazXr4je1K01Uoow%3D%3D
+      data-type: json
+    life:
+      name: otd-life
+      url: http://localhost:8083
+  profile:
+    base-url: "http://localhost:8080/porfile"
   comment:
     start-index: 0
     need-for-view-count: 3 #피드 리스트를 뿌릴 때 실제로 피드당 보여지는 댓글 수
@@ -10,7 +22,10 @@ constants:
     bearer-format: JWT
 
     claim-key: signedUser
-    secret-key: DaeguGreenArtAcademyClass502MsaClassFightingkkkkkk
+    header-key : Authorization
+    secret-key: DaeguGreenArtAcademyClass502RoomForProjectOneTwoDayFighting
+
+    domain: greenart.n-e.kr
 
     access-token-cookie-name: access-token
     access-token-cookie-path: / #모든 경로에서 access-token값이 넘어온다.
@@ -18,9 +33,13 @@ constants:
     access-token-validity-milliseconds: 900_000 # 15분 (ms) 60 * 15 * 1000
 
     refresh-token-cookie-name: refresh-token
-    refresh-token-cookie-path: /api/user/reissue #해당 path때만 refresh-token값이 넘어온다.
+    refresh-token-cookie-path: /api/OTD/user/reissue #해당 path때만 refresh-token값이 넘어온다.
+    # refresh-token-cookie-path: / #해당 path때만 refresh-token값이 넘어온다.
     refresh-token-cookie-validity-seconds: 1_296_000 # 15일 (s) 60 * 60 * 24 * 15
     refresh-token-validity-milliseconds: 1_296_000_000 # 15일 (ms) 60 * 60 * 24 * 15 * 1000
+
+    register-token:
+      expiration-time: 1800000  # 30분 (밀리초)
   oauth2:
     base-uri: /oauth2/authorization #FE 소셜로그인 요청할 때 사용할 주소값
     # 플랫폼과 통신을 3번 정도 하는데 각 통신들이 하나의 작업을 위한 트랜잭션이라는 것을
@@ -30,8 +49,9 @@ constants:
     redirection-baseUri: /*/oauth2/code/*
     cookie-expiry-seconds: 180
     authorized-redirect-uris:
-      - http://localhost:5173/fe/redirect
-      - http://112.222.157.157:5174/fe/redirect
+      - http://localhost:5173/otd/fe/redirect
+      - http://localhost:5175/otd/fe/redirect
+      - http://112.222.157.157:5174/otd/fe/redirect
   pay:
     kakao:
       base-url: https://open-api.kakaopay.com/online/v1/payment
@@ -45,47 +65,62 @@ constants:
         secret-key: DEV0A2C37B3D5C593158404BA2DEF241C594D526 #테스트용 secretKey
 
 spring:
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: # Redis 비밀번호 (있는 경우)
-
+  application:
+    name: otd-user
+  task:
+    scheduling:
+      enabled: true
+      pool:
+        size: 2
     # 이메일 설정
+    out-of-order: true
   mail:
     host: smtp.gmail.com
     port: 587
-    username: "hwangsubin93@gmail.com"
-    password:
+    username: hwangsubin93@gmail.com
+    password: dpdy fqcf kvgg fure
     properties:
       mail:
         smtp:
           auth: true
+          timeout: 5000
           starttls:
             enable: true
     default-encoding: UTF-8
-  application:
-    name: otd
   datasource:
-    url: jdbc:log4jdbc:mariadb://localhost/otd
-    username: root
+    #    url: jdbc:log4jdbc:mariadb://localhost/otd
+    #    username: root
+    #    password: green502
+    url: jdbc:log4jdbc:mariadb://112.222.157.157:5012/hsb
+    username: hsb
     password: green502
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000     # 5분
+      max-lifetime: 1800000    # 30분
+      connection-timeout: 30000
   jackson:
     default-property-inclusion: non_null # 응답 JSON에서 null인 속성은 제외
   jpa:
     database: mysql
-    defer-datasource-initialization: true #JPA 테이블 생성 이후 data.sql
+    defer-datasource-initialization: false
+    #defer-datasource-initialization: true #JPA 테이블 생성 이후 data.sql
     hibernate:
-      ddl-auto: update #entity 수정이 파악되면 테이블을 수정한다.
-      #ddl-auto: create #프로젝트 실행시마다 테이블을 모두 drop 후 create한다.
+      #ddl-auto: none
+      ddl-auto: update
+      #ddl-auto: validate #entity 엔티티에 새로운거 추가할때 sql ALTER TABLE로 추가한뒤 시작해야함
+    #     ddl-auto: update #entity 수정이 파악되면 테이블을 수정한다.
+    #      ddl-auto: create #프로젝트 실행시마다 테이블을 모두 drop 후 create한다.
     properties:
       hibernate:
-        jdbc:
-          batch_size: 20
+        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true #쿼리문 로그를 찍어줄 때 보기편하게 포맷팅
         order_updates: true
         show_sql: true
+        jdbc:
+          batch_size: 20
   security:
     oauth2:
       client:
@@ -109,8 +144,8 @@ spring:
               - profile
           kakao:
             client-name: Kakao
-            client-id: 23cc7564b5c5007c60f5088a24f32fbe
-            client-secret: UsaYUJvlEy5yNfOMKNrgXbbes6WCYfod
+            client-id: ea7335b63181c9ea13d1e2ca858e03f8
+            client-secret: ZXQ6kO4UeooM0Nauxmqb5shOafur5cf4
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
@@ -124,8 +159,8 @@ spring:
             #       http://localhost8080/login/oauth2/code/kakao
           naver:
             client-name: Naver
-            client-id: k7L3R4HdmuHmqYCldZDW
-            client-secret: TY8EYMdwKs
+            client-id: P72KoAqAMzH5sNgVCdYF
+            client-secret: 82rDV1lZi5
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/{action}/oauth2/code/{registrationId}"
@@ -139,13 +174,28 @@ spring:
   servlet:
     multipart:
       max-file-size: 15MB
+      enabled: true
+      max-request-size: 15MB
   sql:
     init:
-      mode: always
+    #  mode: always
 
-
+server:
+  port: 8082
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
   mapper-locations: mappers/**/*.xml
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+
+    org.springframework.web.reactive.handler=DEBUG:
+    org.springframework.web.reactive.result.method.annotation=DEBUG:
