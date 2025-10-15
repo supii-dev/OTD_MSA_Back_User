@@ -121,4 +121,12 @@ public class PurchaseHistoryService {
                 .map(PurchaseHistoryRes::fromEntity)
                 .toList();
     }
+
+    // 사용자별 구매 이력 조회
+    public List<PurchasePostRes> getUserPurchaseHistory(Long userId) {
+        return purchaseHistoryRepository.findByUser_UserId(userId)
+                .stream()
+                .map(PurchasePostRes::fromEntity)
+                .toList();
+    }
 }

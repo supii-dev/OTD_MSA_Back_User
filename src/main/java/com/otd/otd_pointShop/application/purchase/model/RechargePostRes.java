@@ -1,5 +1,6 @@
 package com.otd.otd_pointShop.application.purchase.model;
 
+import com.otd.otd_pointShop.entity.PurchaseHistory;
 import lombok.Builder;
 import lombok.Data;
 

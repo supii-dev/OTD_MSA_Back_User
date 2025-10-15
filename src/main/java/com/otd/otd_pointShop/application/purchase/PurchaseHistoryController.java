@@ -1,5 +1,6 @@
 package com.otd.otd_pointShop.application.purchase;
 
+import com.otd.configuration.model.ResultResponse;
 import com.otd.configuration.model.UserPrincipal;
 import com.otd.otd_pointShop.application.point.model.PointApiResponse;
 import com.otd.otd_pointShop.application.purchase.model.PurchasePointChargeReq;
@@ -73,14 +74,19 @@ public class PurchaseHistoryController {
 
     // (사용자) 본인 구매 이력 조회
     @GetMapping("/history/user")
-    public ResponseEntity<?> getUserPurchaseHistory(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("success", false, "message", "로그인 필요"));
+    public ResponseEntity<ResultResponse<?>> getUserPurchaseHistory(HttpSession session) {
+        Object loginUser = session.getAttribute("loginUser");
+
+        if (loginUser == null) {
+            return ResponseEntity.status(401)
+                    .body(new ResultResponse<>("로그인 필요", List.of()));
         }
+
+        Long userId = (Long) loginUser;
+        var history = purchaseHistoryService.getUserPurchaseHistory(userId);
+
         return ResponseEntity.ok(
-                purchaseHistoryService.getPurchaseHistoryByUser(userId)
+                new ResultResponse<>("구매 이력 조회 성공", history)
         );
     }
 

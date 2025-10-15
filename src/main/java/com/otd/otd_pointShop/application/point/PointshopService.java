@@ -289,7 +289,7 @@ public class PointshopService {
         Point point = pointRepository.findById(pointId)
                 .orElseThrow(() -> new RuntimeException("포인트를 찾을 수 없습니다."));
 
-        user.setPointRef(point);
+        user.addPoint(point);
         userRepository.save(user);
     }
 }
