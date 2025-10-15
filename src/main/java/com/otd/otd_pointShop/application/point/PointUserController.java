@@ -1,12 +1,19 @@
 package com.otd.otd_pointShop.application.point;
 
+import com.otd.configuration.model.ResultResponse;
+import com.otd.otd_pointShop.application.point.model.PointApiResponse;
 import com.otd.otd_pointShop.application.point.model.PointBalanceResponse;
 import com.otd.otd_pointShop.application.point.model.PointChargeRequest;
+import com.otd.otd_pointShop.entity.PointUser;
+import com.otd.otd_pointShop.repository.PointUserRepository;
+import com.otd.otd_user.application.user.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/OTD/pointshop/user")
@@ -14,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 public class PointUserController {
 
     private final PointUserService pointUserService;
+    private final UserRepository userRepository;
+    private final PointUserRepository pointUserRepository;
 
     // 포인트 충전
     @PostMapping("/charge")
@@ -49,5 +58,17 @@ public class PointUserController {
 
         int balance = pointUserService.getPointBalance(userId.longValue());
         return ResponseEntity.ok(new PointBalanceResponse(balance));
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<PointApiResponse> getUserPointHistory(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(401)
+                    .body(PointApiResponse.error("로그인이 필요합니다."));
+        }
+
+        List<PointUser> history = pointUserService.getUserPointHistory(userId);
+        return ResponseEntity.ok(PointApiResponse.success(history));
     }
 }

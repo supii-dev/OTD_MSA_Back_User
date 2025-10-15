@@ -1,5 +1,6 @@
 package com.otd.otd_pointShop.application.purchase;
 
+import com.otd.otd_pointShop.application.purchase.model.PurchaseHistoryRes;
 import com.otd.otd_pointShop.application.purchase.model.PurchasePostRes;
 import com.otd.otd_pointShop.entity.Point;
 import com.otd.otd_pointShop.entity.PurchaseHistory;
@@ -10,11 +11,14 @@ import com.otd.otd_user.application.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import com.otd.otd_pointShop.application.purchase.PurchaseHistoryService;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PurchaseHistoryService {
@@ -22,32 +26,30 @@ public class PurchaseHistoryService {
     private final PointRepository pointRepository;
     private final UserRepository userRepository;
 
-    // point 상품 구매
+    // 포인트 상품 구매
     @Transactional
     public PurchasePostRes purchaseItem(Long userId, Long pointId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         Point point = pointRepository.findById(pointId)
                 .orElseThrow(() -> new EntityNotFoundException("포인트 아이템을 찾을 수 없습니다."));
-        int pointBalance = user.getPoint();
-        int pointPrice = point.getPointScore();
 
-        if (pointBalance < pointPrice) {
-            throw new IllegalArgumentException("포인트가 부족합니다. 현재 잔액: " + pointBalance + " / 필요 포인트: " + pointPrice);
+        int balance = user.getPoint();
+        int price = point.getPointScore();
+
+        if (balance < price) {
+            throw new IllegalArgumentException("포인트가 부족합니다. (잔액: " + balance + ", 필요: " + price + ")");
         }
 
-        // 포인트 차감
-        user.setPoint(pointBalance - pointPrice);
+        user.setPoint(balance - price);
         userRepository.save(user);
 
-        // 구매 이력 저장
         PurchaseHistory history = new PurchaseHistory();
         history.setUser(user);
         history.setPoint(point);
         purchaseHistoryRepository.save(history);
 
-        // 대표 이미지 추출
-        String imageUrl = point.getPointItemImage() != null && !point.getPointItemImage().isEmpty()
+        String imageUrl = (point.getPointItemImage() != null && !point.getPointItemImage().isEmpty())
                 ? point.getPointItemImage().get(0).getImageUrl()
                 : null;
 
@@ -55,32 +57,59 @@ public class PurchaseHistoryService {
                 .purchaseId(history.getPurchaseId())
                 .pointId(point.getPointId())
                 .pointItemName(point.getPointItemName())
-                .pointScore(pointPrice)
+                .pointScore(price)
                 .pointItemImage(imageUrl)
-                .purchaseTime(history.getPurchaseTime())
+                .purchaseAt(history.getPurchaseAt())
                 .build();
     }
 
-    // 전체 구매 이력 조회
-    @Transactional
+    // (사용자) 구매 이력 조회
     public List<PurchasePostRes> getUserPurchases(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        return purchaseHistoryRepository.findByUser(user).stream().map(purchase -> {
+        return purchaseHistoryRepository.findByUser(user).stream()
+                .map(purchase -> {
+                    Point point = purchase.getPoint();
+                    String imageUrl = (point.getPointItemImage() != null && !point.getPointItemImage().isEmpty())
+                            ? point.getPointItemImage().get(0).getImageUrl()
+                            : null;
+
+                    return PurchasePostRes.builder()
+                            .purchaseId(purchase.getPurchaseId())
+                            .pointId(point.getPointId())
+                            .pointItemName(point.getPointItemName())
+                            .pointScore(point.getPointScore())
+                            .pointItemImage(imageUrl)
+                            .purchaseAt(purchase.getPurchaseAt())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    // (관리자) 전체 구매 이력 조회
+    public List<PurchaseHistoryRes> getAllHistories() {
+        return purchaseHistoryRepository.findAll().stream().map(purchase -> {
             Point point = purchase.getPoint();
-            String imageUrl = point.getPointItemImage() != null && !point.getPointItemImage().isEmpty()
+            String imageUrl = (point.getPointItemImage() != null && !point.getPointItemImage().isEmpty())
                     ? point.getPointItemImage().get(0).getImageUrl()
                     : null;
 
-            return PurchasePostRes.builder()
+            return PurchaseHistoryRes.builder()
                     .purchaseId(purchase.getPurchaseId())
                     .pointId(point.getPointId())
                     .pointItemName(point.getPointItemName())
                     .pointScore(point.getPointScore())
                     .pointItemImage(imageUrl)
-                    .purchaseTime(purchase.getPurchaseTime())
+                    .purchaseAt(purchase.getPurchaseAt())
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    public List<PurchaseHistoryRes> getHistory(Integer memberId) {
+        return purchaseHistoryRepository.findByUser_UserId(memberId.longValue())
+                .stream()
+                .map(PurchaseHistoryRes::fromEntity)
+                .toList();
     }
 }

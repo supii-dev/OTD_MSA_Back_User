@@ -25,10 +25,10 @@ public class PurchaseHistory {
     @JoinColumn(name = "point_id", nullable = false)
     private Point point;
 
-    private LocalDateTime purchaseTime;
+    private LocalDateTime purchaseAt;
 
     @PrePersist
     public void prePersist() {
-        this.purchaseTime = LocalDateTime.now();
+        this.purchaseAt = LocalDateTime.now();
     }
 }

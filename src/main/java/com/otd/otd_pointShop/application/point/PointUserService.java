@@ -1,15 +1,28 @@
 package com.otd.otd_pointShop.application.point;
 
+import com.otd.otd_pointShop.entity.PointUser;
+import com.otd.otd_pointShop.repository.PointUserRepository;
 import com.otd.otd_user.application.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PointUserService {
 
+    private final PointUserRepository pointUserRepository;
     private final UserRepository userRepository;
+
+    // 유저 포인트 내역 조회
+    @Transactional
+    public List<PointUser> getUserPointHistory(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        return pointUserRepository.findByUser_UserIdOrderByCreatedAtDesc(userId);
+    }
 
     public int getPointBalance(Long userId) {
         return userRepository.findPointByUserId(userId)

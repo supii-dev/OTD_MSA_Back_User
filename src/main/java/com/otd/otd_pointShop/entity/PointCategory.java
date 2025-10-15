@@ -12,6 +12,7 @@ import java.util.List;
 public class PointCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "point_category_id")
     private Long pointCategoryId;
 
     private String categoryName;
