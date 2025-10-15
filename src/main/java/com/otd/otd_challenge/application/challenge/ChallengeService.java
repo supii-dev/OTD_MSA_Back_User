@@ -236,7 +236,16 @@ public class ChallengeService {
         ChallengeDefinition point = challengeDefinitionRepository.findByCdId(req.getCdId());
         User user = userRepository.findByUserId(userId);
         int newPoint = user.getPoint() + point.getCdReward();
+        int newXp = user.getXp() + point.getXp();
+
+        userRepository.addXpByUserId(newXp, userId);
         userRepository.addPointByUserId(newPoint, userId);
+        EnumChallengeRole myRole = user.getChallengeRole();
+
+        EnumChallengeRole newRole = tierService.checkTierUp(myRole, newXp);
+        if (newRole != myRole) {
+            challengeRoleRepository.updateChallengeRole(user.getUserId(), newRole);
+        }
         return new ResultResponse<>("success", result);
     }
 
@@ -417,7 +426,8 @@ public class ChallengeService {
         return res;
     }
 
-    private final int goal = 15;
+    private static final int DEFAULT_PERSONAL_GOAL = 15;
+    @Transactional
     public int updateProgressEx(ExerciseDataReq req) {
         // 월간 개인챌린지 조회
         List<ChallengeProgress> personalProgresses =
@@ -458,7 +468,7 @@ public class ChallengeService {
                         challengeRecordRepository.save(cr);
 
                         cp.setTotalRecord(cp.getTotalRecord() + 1);
-                        if (cp.getTotalRecord() >= goal) {
+                        if (cp.getTotalRecord() >= DEFAULT_PERSONAL_GOAL) {
                             cp.setSuccess(true);
                         }
                         challengeProgressRepository.save(cp);
@@ -520,7 +530,7 @@ public class ChallengeService {
         }
         return 1;
     }
-
+    @Transactional
     public int deleteRecord(ChallengeRecordDeleteReq req) {
 
         // 운동 이름과 같은 챌린지 조회
@@ -568,7 +578,7 @@ public class ChallengeService {
                     cp.setTotalRecord(cp.getTotalRecord() - 1);
                     challengeRecordRepository.delete(cr);
 
-                    if (cp.getTotalRecord() < goal) {
+                    if (cp.getTotalRecord() < DEFAULT_PERSONAL_GOAL) {
                         cp.setSuccess(false);
                     }
                     challengeProgressRepository.save(cp);
@@ -580,7 +590,7 @@ public class ChallengeService {
                     cp.setTotalRecord(cp.getTotalRecord() - 1);
                     challengeRecordRepository.delete(cr);
 
-                    if (cp.getTotalRecord() < goal) {
+                    if (cp.getTotalRecord() < DEFAULT_PERSONAL_GOAL) {
                         cp.setSuccess(false);
                     }
                 }
@@ -590,7 +600,7 @@ public class ChallengeService {
         return 1;
     }
 
-
+    @Transactional
     public int updateProgressMeal(MealDataReq req) {
         List<ChallengeProgress> personalProgresses =
                 challengeProgressRepository.findActiveProgressByType(
@@ -623,7 +633,7 @@ public class ChallengeService {
                         challengeRecordRepository.save(cr);
                         cp.setTotalRecord(cp.getTotalRecord() + 1);
 
-                        if (cp.getTotalRecord() >= goal) {
+                        if (cp.getTotalRecord() >= DEFAULT_PERSONAL_GOAL) {
                             cp.setSuccess(true);
                         }
                         challengeProgressRepository.save(cp);
