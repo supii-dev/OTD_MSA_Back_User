@@ -16,8 +16,10 @@ import java.util.List;
 @Entity
 @Table(name = "point")
 public class Point {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "point_id")
     private Long pointId; // 고유 ID
 
     @Column(nullable = false)
@@ -45,13 +47,23 @@ public class Point {
         this.updatedAt = LocalDateTime.now();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id",
             foreignKey = @ForeignKey(name="fk_point_user")) // FK
     private User user;
 
+    // user entity point를 point entity와 매핑
+    @Transient
+    private int userCurrentPoint;
+
+    public void syncUserPoint() {
+        if (this.user != null) {
+            this.userCurrentPoint = this.user.getPoint();
+        }
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "point_category_id")
+    @JoinColumn(name = "point_category_id", referencedColumnName = "point_category_id")
     private PointCategory pointCategory;
 
     @OneToMany(mappedBy = "point", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
