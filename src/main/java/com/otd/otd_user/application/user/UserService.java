@@ -143,6 +143,7 @@ public class UserService {
                 .email(user.getEmail())
                 .challengeRole(challengeRoles)
                 .userRole(userRole)
+                .onboardingCompleted(user.getOnboardingCompleted())
                 .build();
 
         return UserLoginDto.builder()

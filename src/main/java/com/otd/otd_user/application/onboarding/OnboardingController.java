@@ -1,5 +1,6 @@
 package com.otd.otd_user.application.onboarding;
 
+import com.otd.configuration.model.UserPrincipal;
 import com.otd.otd_user.application.onboarding.model.OnboardingRequest;
 import com.otd.otd_user.application.term.model.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,20 +19,25 @@ public class OnboardingController {
 
     private final OnboardingService onboardingService;
 
-    /**
-     * 온보딩 완료 처리
-     */
     @PostMapping("/complete")
     public ResponseEntity<ApiResponse<String>> completeOnboarding(
             @Valid @RequestBody OnboardingRequest request,
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             HttpServletRequest httpRequest) {
 
+
+        log.info("Authenticated userId: {}", userPrincipal.getSignedUserId());
+
+        if (userPrincipal.getSignedUserId() == null) {
+            log.warn("userId is null! 인증이 안 되어 있습니다.");
+            return ResponseEntity.status(401).body(ApiResponse.error("인증 필요"));
+        }
+
         try {
-            onboardingService.completeOnboarding(userId, request, httpRequest);
+            onboardingService.completeOnboarding(userPrincipal.getSignedUserId(), request, httpRequest);
             return ResponseEntity.ok(ApiResponse.success("온보딩이 완료되었습니다."));
         } catch (Exception e) {
-            log.error("온보딩 완료 실패 - UserId: {}", userId, e);
+            log.error("온보딩 완료 실패 - UserId: {}", userPrincipal.getSignedUserId(), e);
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }

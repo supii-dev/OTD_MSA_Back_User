@@ -20,6 +20,7 @@ public class UserLoginRes {
     private Integer age;
     private int point;
     private int xp;
+    private int onboardingCompleted;
     private List<String> roles;
     private LocalDateTime lastLoginAt;
     private EnumChallengeRole challengeRole;
