@@ -26,4 +26,7 @@ public class PointGetRes {
     private List<PointImageRes> images;
     private LocalDateTime createdAt;
 
+    // 유저 현재 포인트
+    private int userCurrentPoint;
+
 }

@@ -15,4 +15,5 @@ public class PointListRes {
     private Integer pointScore;
     private LocalDateTime createdAt;
     private List<String> pointItemImage;
+    private int userCurrentPoint;
 }

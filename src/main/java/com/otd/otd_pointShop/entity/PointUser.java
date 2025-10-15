@@ -2,7 +2,15 @@ package com.otd.otd_pointShop.entity;
 
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
+import lombok.*;
 
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "point_user")
 public class PointUser {
@@ -11,11 +19,30 @@ public class PointUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 유저 PK
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", referencedColumnName ="user_id", nullable = false
                 , foreignKey = @ForeignKey(name="fk_point_user")) // FK
     private User user;
 
-    @Column(nullable = false)
+    // 현재 잔여 포인트
+    @Column(name = "point_balance", nullable = false)
     private Integer pointBalance = 0;
+
+    // 변동 포인트 (예: +1000, -500)
+    @Column(name = "point_delta")
+    private Integer pointDelta;
+
+    // 변동 사유 (ex: 구매, 충전, 관리자지급)
+    @Column(name = "reason", length = 255)
+    private String reason;
+
+    //  등록 시각
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

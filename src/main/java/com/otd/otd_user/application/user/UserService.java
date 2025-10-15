@@ -3,6 +3,8 @@ package com.otd.otd_user.application.user;
 import com.otd.configuration.util.MyFileManager;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.otd_pointShop.entity.Point;
+import com.otd.otd_pointShop.entity.PointUser;
+import com.otd.otd_pointShop.repository.PointRepository;
 import com.otd.otd_user.application.email.EmailService;
 import com.otd.otd_user.application.email.model.PasswordChangeReq;
 import com.otd.otd_user.application.email.model.PasswordResetReq;
@@ -43,6 +45,7 @@ public class UserService {
     private final TermsRepository termsRepository;
     private final UserAgreementRepository userAgreementRepository;
     private final UserLoginLogRepository userLoginLogRepository;
+    private final PointRepository pointRepository;
 
     public boolean isUidAvailable(String uid) {
         return userMapper.countByUid(uid) == 0;
@@ -308,14 +311,61 @@ public class UserService {
         return 1;
     }
 
+    @Transactional
+    public void updateUserPoint(Long userId, int delta, String reason) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."));
+
+        // 현재 잔액 업데이트
+        int newBalance = user.getPoint() + delta;
+        if (newBalance < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "포인트가 부족합니다.");
+        }
+        user.setPoint(newBalance);
+
+        // PointUser 로그 추가
+        PointUser pointUser = PointUser.builder()
+                .user(user)
+                .pointBalance(newBalance)
+                .pointDelta(delta)
+                .reason(reason)
+                .build();
+
+        user.addPointUser(pointUser);
+        userRepository.save(user);
+
+        log.info("userId={} / Δ{} / 잔액={} / reason={}", userId, delta, newBalance, reason);
+    }
+
+
     // 포인트 조회
     @Transactional
     public void printUserPointMapping(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."));
-        for (Point p : user.getPoints()) {
-            System.out.println("user_id = " + user.getUserId() + ", point_id = " + p.getPointId());
+        if (user.getPoints() == null) {
+            System.out.println("해당 유저는 보유한 포인트 상품이 없습니다.");
+            return;
         }
+        for (Point p : user.getPoints()) {
+            System.out.println("user_id = " + user.getUserId() +
+                    ", point_id = " + p.getPointId() +
+                    ", item_name = " + p.getPointItemName());
+        }
+    }
+
+    // 포인트 등록
+    @Transactional
+    public void addPointToUser(Long userId, Point point) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "존재하지 않는 사용자입니다."));
+
+        user.addPoint(point); // 양방향 연결
+        userRepository.save(user);
+
+        log.info("유저 {}에게 포인트 상품 '{}'이 추가되었습니다.", user.getUserId(), point.getPointItemName());
     }
 }

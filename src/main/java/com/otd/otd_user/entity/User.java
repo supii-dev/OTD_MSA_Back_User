@@ -63,14 +63,38 @@ public class User extends UpdatedAt{
     @Column(length = 2)
     private SignInProviderType providerType;
 
-    @Column(columnDefinition = "int DEFAULT 0", nullable = false)
+    @Column(name = "point", columnDefinition = "int DEFAULT 0", nullable = false)
     private int point;
 
-    // 포인트 양방향 관계 추가
+    // 유저가 가진 포인트 상품들
     @JsonIgnore
     @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Point> points = new ArrayList<>();
+
+    public List<Point> getPoints() {
+        return points;
+    }
+
+    public void addPoint(Point pointEntity) {
+        if (points == null) points = new ArrayList<>();
+        points.add(pointEntity);
+        pointEntity.setUser(this);
+    }
+
+    // 포인트 로그 (pointUser)
+    @JsonIgnore
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<PointUser> pointUsers = new ArrayList<>();
+
+    public void addPointUser(PointUser pointUser) {
+        if (this.pointUsers == null) {
+            this.pointUsers = new ArrayList<>();
+        }
+        this.pointUsers.add(pointUser);
+        pointUser.setUser(this);
+    }
 
     @JsonIgnore
     @Builder.Default
@@ -81,6 +105,11 @@ public class User extends UpdatedAt{
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PurchaseHistory> purchaseHistories = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "point_ref", referencedColumnName = "point_id",
+                foreignKey = @ForeignKey(name = "fk_user_point"))
+    private Point pointRef;
 
     @Column(columnDefinition = "int DEFAULT 0")
     private int xp;
