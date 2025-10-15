@@ -106,8 +106,17 @@ public class PurchaseHistoryService {
         }).collect(Collectors.toList());
     }
 
+    // memberId 기반
     public List<PurchaseHistoryRes> getHistory(Integer memberId) {
         return purchaseHistoryRepository.findByUser_UserId(memberId.longValue())
+                .stream()
+                .map(PurchaseHistoryRes::fromEntity)
+                .toList();
+    }
+
+    // controller method
+    public List<PurchaseHistoryRes> getPurchaseHistoryByUser(Long userId) {
+        return purchaseHistoryRepository.findByUser_UserId(userId)
                 .stream()
                 .map(PurchaseHistoryRes::fromEntity)
                 .toList();

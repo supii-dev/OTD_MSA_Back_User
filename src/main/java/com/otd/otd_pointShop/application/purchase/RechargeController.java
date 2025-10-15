@@ -6,13 +6,16 @@ import com.otd.otd_pointShop.application.stats.model.MonthlyRechargeStatsRes;
 import com.otd.otd_pointShop.application.purchase.model.RechargeGetRes;
 import com.otd.otd_pointShop.application.purchase.model.RechargePostReq;
 import com.otd.otd_pointShop.application.purchase.model.RechargePostRes;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -112,14 +115,20 @@ public class RechargeController {
 
     // (사용자) 내 포인트 잔액 조회
     @GetMapping("/balance")
-    public ResponseEntity<?> getMyBalance(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        if (userPrincipal == null) {
-            return ResponseEntity.status(401)
-                    .body(new PointApiResponse<>(false, "로그인이 필요합니다."));
+    public ResponseEntity<?> getMyBalance(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "message", "로그인 필요"));
         }
 
-        Long userId = userPrincipal.getSignedUserId();
-        Integer balance = rechargeService.getBalance(userId);
-        return ResponseEntity.ok(new PointApiResponse<>(true, "내 포인트 잔액 조회 성공", balance, balance));
+        try {
+            Integer balance = rechargeService.getBalanceByUserId(userId);
+            return ResponseEntity.ok(Map.of("success", true, "data", balance));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("success", false, "message", "잔액 조회 실패"));
+        }
     }
 }

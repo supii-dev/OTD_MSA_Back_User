@@ -107,6 +107,11 @@ public class RechargeService {
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 
+    // 사용자 전용
+    public Integer getBalanceByUserId(Long userId) {
+        return getBalance(userId);
+    }
+
     // 관리자 월별 충전 통계
     public List<MonthlyRechargeStatsRes> getMonthlyRechargeStatsByAdmin(Long adminId) {
         List<Object[]> rawData = rechargeHistoryRepository.findMonthlyRechargeStatsByAdmin(adminId);

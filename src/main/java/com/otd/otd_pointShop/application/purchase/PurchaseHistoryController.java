@@ -7,8 +7,10 @@ import com.otd.otd_pointShop.application.purchase.model.PurchasePostReq;
 import com.otd.otd_pointShop.application.purchase.model.PurchasePostRes;
 import com.otd.otd_pointShop.application.stats.StatsService;
 import com.otd.otd_user.application.user.UserRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -70,16 +72,16 @@ public class PurchaseHistoryController {
     }
 
     // (사용자) 본인 구매 이력 조회
-    @GetMapping("/history")
-    public ResponseEntity<?> getUserPurchases(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        if (userPrincipal == null) {
-            return ResponseEntity.status(401)
-                    .body(new PointApiResponse<>(false, "로그인이 필요합니다."));
+    @GetMapping("/history/user")
+    public ResponseEntity<?> getUserPurchaseHistory(HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "message", "로그인 필요"));
         }
-
-        List<PurchasePostRes> purchases = purchaseHistoryService.getUserPurchases(userPrincipal.getSignedUserId());
-        log.info("[구매 이력 조회] userId={}, count={}", userPrincipal.getSignedUserId(), purchases.size());
-        return ResponseEntity.ok(new PointApiResponse<>(true, "구매 이력 조회 성공", purchases));
+        return ResponseEntity.ok(
+                purchaseHistoryService.getPurchaseHistoryByUser(userId)
+        );
     }
 
     // (관리자) 모든 사용자 구매 + 충전 이력 조회
@@ -92,7 +94,7 @@ public class PurchaseHistoryController {
 
         Map<String, Object> data = new HashMap<>();
         data.put("purchases", purchaseHistoryService.getAllHistories());
-        data.put("recharges", statsService.getMonthlySummary()); // ✅ 수정
+        data.put("recharges", statsService.getMonthlySummary());
 
         return ResponseEntity.ok(new PointApiResponse<>(true, "전체 구매/충전 이력 조회 성공", data));
     }
