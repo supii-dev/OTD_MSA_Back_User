@@ -418,7 +418,6 @@ public class ChallengeService {
     }
 
     private final int goal = 15;
-    @Transactional
     public int updateProgressEx(ExerciseDataReq req) {
         // 월간 개인챌린지 조회
         List<ChallengeProgress> personalProgresses =
@@ -459,7 +458,10 @@ public class ChallengeService {
                         challengeRecordRepository.save(cr);
 
                         cp.setTotalRecord(cp.getTotalRecord() + 1);
-                        if (cp.getTotalRecord() >= goal) cp.setSuccess(true);
+                        if (cp.getTotalRecord() >= goal) {
+                            cp.setSuccess(true);
+                        }
+                        challengeProgressRepository.save(cp);
                     }
                 }
                 // 일반 개인 챌린지 (계단오르기, 요가 등)
@@ -477,6 +479,7 @@ public class ChallengeService {
                         if (cp.getTotalRecord() >= cp.getChallengeDefinition().getCdGoal()) {
                             cp.setSuccess(true);
                         }
+                        challengeProgressRepository.save(cp);
                     }
                 }
                 else if (cdName.equals("칼로리 소비")){
@@ -493,9 +496,17 @@ public class ChallengeService {
                         if (cp.getTotalRecord() >= cp.getChallengeDefinition().getCdGoal()) {
                             cp.setSuccess(true);
                         }
+                        challengeProgressRepository.save(cp);
                     }
                 }
             } else {
+                double newTotal = cp.getTotalRecord() + req.getRecord();
+                cp.setTotalRecord(newTotal);
+
+                double goal = cp.getChallengeDefinition().getCdGoal();
+                if (newTotal >= goal) {
+                    cp.setSuccess(true);
+                }
                 ChallengeRecord cr = ChallengeRecord.builder()
                         .challengeProgress(cp)
                         .recDate(req.getRecordDate())
@@ -504,18 +515,12 @@ public class ChallengeService {
                         .build();
 
                 challengeRecordRepository.save(cr);
-
-                double newTotal = cp.getTotalRecord() + req.getRecord();
-                cp.setTotalRecord(newTotal);
-
-                double goal = cp.getChallengeDefinition().getCdGoal();
-                if (newTotal >= goal) cp.setSuccess(true);
+                challengeProgressRepository.save(cp);
             }
         }
         return 1;
     }
 
-    @Transactional
     public int deleteRecord(ChallengeRecordDeleteReq req) {
 
         // 운동 이름과 같은 챌린지 조회
@@ -536,10 +541,10 @@ public class ChallengeService {
             if (cr != null) {
                 mapProgresses.setTotalRecord(mapProgresses.getTotalRecord() - cr.getRecValue());
                 challengeRecordRepository.delete(cr);
-
                 if (mapProgresses.getTotalRecord() < mapProgresses.getChallengeDefinition().getCdGoal()) {
                     mapProgresses.setSuccess(false);
                 }
+                challengeProgressRepository.save(mapProgresses);
             }
         }
 
@@ -566,6 +571,7 @@ public class ChallengeService {
                     if (cp.getTotalRecord() < goal) {
                         cp.setSuccess(false);
                     }
+                    challengeProgressRepository.save(cp);
                 }
             } else if ("칼로리 소비".equals(cdName)
                     && cp.getChallengeDefinition().getCdGoal() > req.getTotalKcal()) {
@@ -578,14 +584,13 @@ public class ChallengeService {
                         cp.setSuccess(false);
                     }
                 }
+                challengeProgressRepository.save(cp);
             }
         }
-
         return 1;
     }
 
 
-    @Transactional
     public int updateProgressMeal(MealDataReq req) {
         List<ChallengeProgress> personalProgresses =
                 challengeProgressRepository.findActiveProgressByType(
@@ -621,6 +626,7 @@ public class ChallengeService {
                         if (cp.getTotalRecord() >= goal) {
                             cp.setSuccess(true);
                         }
+                        challengeProgressRepository.save(cp);
                     }
                 }
             }

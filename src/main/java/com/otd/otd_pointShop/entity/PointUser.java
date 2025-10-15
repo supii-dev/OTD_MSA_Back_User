@@ -22,12 +22,12 @@ public class PointUser {
     // 유저 PK
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", referencedColumnName ="user_id", nullable = false
-                , foreignKey = @ForeignKey(name="fk_point_user")) // FK
+                , foreignKey = @ForeignKey(name="fk_point_user_user")) // FK
     private User user;
 
     // 현재 잔여 포인트
     @Column(name = "point_balance", nullable = false)
-    private Integer pointBalance = 0;
+    private Integer pointBalance;
 
     // 변동 포인트 (예: +1000, -500)
     @Column(name = "point_delta")
