@@ -43,7 +43,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u SET u.lastLogin = :lastLogin WHERE u.userId = :userId")
     void updateLastLoginByUserId(Long userId, LocalDateTime lastLogin);
 
-    String findNickNameByUserId(Long userId);
-
-    String findNameByUserId(Long userId);
+    @Modifying
+    @Query("UPDATE User u set u.xp = :xp WHERE u.userId = :userId")
+    void addXpByUserId(int xp, Long userId);
 }
