@@ -209,7 +209,7 @@ public class ChallengeService {
         return res;
     }
 
-    @Transactional
+//    @Transactional
     public ResultResponse<?> updateIsSuccess(Long cpId){
         int result = challengeProgressRepository.updateIsSuccess(cpId);
         return new ResultResponse<>("success", result);
@@ -274,7 +274,7 @@ public class ChallengeService {
     private final ChallengePointRepository challengePointRepository;
     private final TierService tierService;
     private final ChallengeRoleRepository challengeRoleRepository;
-    @Transactional
+//    @Transactional
     public ResultResponse<?> setSettlement(ChallengeSettlementDto dto){
         List<Long> userIds = challengeSettlementMapper.findByUserId(dto);
 
@@ -418,7 +418,7 @@ public class ChallengeService {
     }
 
     private final int goal = 15;
-    @Transactional
+//    @Transactional
     public int updateProgressEx(ExerciseDataReq req) {
         // 월간 개인챌린지 조회
         List<ChallengeProgress> personalProgresses =
@@ -515,7 +515,7 @@ public class ChallengeService {
         return 1;
     }
 
-    @Transactional
+//    @Transactional
     public int deleteRecord(ChallengeRecordDeleteReq req) {
 
         // 운동 이름과 같은 챌린지 조회
@@ -585,7 +585,7 @@ public class ChallengeService {
     }
 
 
-    @Transactional
+//    @Transactional
     public int updateProgressMeal(MealDataReq req) {
         List<ChallengeProgress> personalProgresses =
                 challengeProgressRepository.findActiveProgressByType(

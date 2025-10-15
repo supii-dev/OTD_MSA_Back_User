@@ -103,6 +103,10 @@ spring:
       connection-timeout: 30000
   jackson:
     default-property-inclusion: non_null # 응답 JSON에서 null인 속성은 제외
+    time-zone: Asia/Seoul
+    date-format: yyyy-MM-dd
+    serialization:
+      write-dates-as-timestamps: false
   jpa:
     database: mysql
     defer-datasource-initialization: false
