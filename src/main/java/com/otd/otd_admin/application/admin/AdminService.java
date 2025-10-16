@@ -251,7 +251,6 @@ public class AdminService {
         return dto;
     }
 
-    @Transactional
     public ResultResponse<?> putUserDetail(AdminUserPutReq req){
         User user = userRepository.findByUserId(req.getUserId());
         if (user == null) {
@@ -291,7 +290,6 @@ public class AdminService {
         return new ResultResponse<>("유저 정보가 수정되었습니다.", user.getUserId());
     }
 
-    @Transactional
     public AdminChallengeDto addChallenge(AdminChallengeDto dto) {
         ChallengeDefinition cd = ChallengeDefinition.builder()
                 .cdName(dto.getCdName())
@@ -316,7 +314,6 @@ public class AdminService {
         return myFileManager.saveChallengeImage(file);
     }
 
-    @Transactional
     public AdminChallengeDto modifyChallenge(AdminChallengeDto dto
             , MultipartFile file) {
         ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(dto.getCdId());
@@ -345,7 +342,6 @@ public class AdminService {
         return dto;
     }
 
-    @Transactional
     public ResultResponse<?> removeUser(Long userId) {
         User user = userRepository.findByUserId(userId);
         if (user == null) {
@@ -363,7 +359,6 @@ public class AdminService {
         );
     }
 
-    @Transactional
     public ResultResponse<?> removeChallenge(Long cdId) {
         ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(cdId);
         if (cd == null) {
