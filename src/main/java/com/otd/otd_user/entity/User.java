@@ -6,10 +6,10 @@ import com.otd.configuration.enumcode.model.EnumChallengeRole;
 import com.otd.configuration.enumcode.model.EnumUserRole;
 import com.otd.configuration.security.SignInProviderType;
 import com.otd.otd_challenge.entity.*;
-import com.otd.otd_pointShop.entity.Point;
-import com.otd.otd_pointShop.entity.PointBalance;
-import com.otd.otd_pointShop.entity.PointUser;
-import com.otd.otd_pointShop.entity.PurchaseHistory;
+import com.otd.otd_pointshop.entity.Point;
+import com.otd.otd_pointshop.entity.PointBalance;
+import com.otd.otd_pointshop.entity.PointUser;
+import com.otd.otd_pointshop.entity.PurchaseHistory;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -1,11 +1,9 @@
 package com.otd.otd_challenge.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.otd.otd_pointShop.entity.PurchaseHistory;
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDate;

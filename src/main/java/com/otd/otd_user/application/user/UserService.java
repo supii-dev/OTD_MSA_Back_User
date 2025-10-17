@@ -2,9 +2,9 @@ package com.otd.otd_user.application.user;
 
 import com.otd.configuration.util.MyFileManager;
 import com.otd.configuration.enumcode.model.EnumChallengeRole;
-import com.otd.otd_pointShop.entity.Point;
-import com.otd.otd_pointShop.entity.PointUser;
-import com.otd.otd_pointShop.repository.PointRepository;
+import com.otd.otd_pointshop.entity.Point;
+import com.otd.otd_pointshop.entity.PointUser;
+import com.otd.otd_pointshop.repository.PointRepository;
 import com.otd.otd_user.application.email.EmailService;
 import com.otd.otd_user.application.email.model.PasswordChangeReq;
 import com.otd.otd_user.application.email.model.PasswordResetReq;
@@ -17,7 +17,6 @@ import com.otd.configuration.util.ImgUploadManager;
 import com.otd.otd_user.entity.User;
 import com.otd.otd_user.entity.Terms;
 import com.otd.otd_user.entity.UserAgreement;
-import com.otd.otd_user.application.term.TermsRepository;
 import com.otd.otd_user.application.term.UserAgreementRepository;
 import com.otd.otd_user.entity.UserLoginLog;
 import jakarta.transaction.Transactional;
@@ -29,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 

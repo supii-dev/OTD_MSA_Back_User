@@ -1,94 +1,107 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.otd.otd_pointShop.application.point.PointshopMapper">
+<mapper namespace="com.otd.otd_pointshop.application.point.PointshopMapper">
 
-    <resultMap id="pointGetResMap"
-               type="com.otd.otd_pointShop.application.point.model.PointGetRes">
-        <id property="pointId" column="point_id" />
-        <result property="pointScore" column="point_score" />
-        <result property="pointItemName" column="point_item_name" />
-        <result property="pointItemContent" column="point_item_content" />
-        <result property="createdAt" column="created_at" />
-        <collection property="images"
-                    ofType="com.otd.otd_pointShop.application.point.model.PointImageRes"
-                    resultMap="pointImageResMap" />
-    </resultMap>
-
+    <!-- PointImageRes 매핑 -->
     <resultMap id="pointImageResMap"
-               type="com.otd.otd_pointShop.application.point.model.PointImageRes">
+               type="com.otd.otd_pointshop.application.point.model.PointImageRes">
         <id property="imageId" column="image_id" />
         <result property="imageUrl" column="image_url" />
         <result property="imageType" column="image_type" />
         <result property="altText" column="alt_text" />
     </resultMap>
 
-    <select id="countPointsByUserId" resultType="int">
-        SELECT COUNT(*) FROM point WHERE user_id = #{userId}
+    <!-- PointGetRes 매핑 -->
+    <resultMap id="pointGetResMap"
+               type="com.otd.otd_pointshop.application.point.model.PointGetRes">
+        <id property="pointId" column="point_id" />
+        <result property="pointScore" column="point_score" />
+        <result property="pointItemName" column="point_item_name" />
+        <result property="pointItemContent" column="point_item_content" />
+        <result property="createdAt" column="created_at" />
+        <collection property="images"
+                    ofType="com.otd.otd_pointshop.application.point.model.PointImageRes"
+                    resultMap="pointImageResMap" />
+    </resultMap>
+
+    <!-- 전체 포인트 아이템 목록 조회 (관리자/사용자 공용) -->
+    <select id="findAllPoints" resultMap="pointGetResMap">
+        SELECT
+        p.point_id,
+        p.point_score,
+        p.point_item_name,
+        p.point_item_content,
+        p.created_at,
+        i.image_id,
+        i.image_url,
+        i.image_type,
+        i.alt_text
+        FROM point p
+        LEFT JOIN point_image i ON p.point_id = i.point_id
+        ORDER BY p.point_id ASC
     </select>
 
-    <select id="findAllByUserId" resultMap="pointGetResMap">
+    <!-- 단일 아이템 조회 -->
+    <select id="findPointById" resultMap="pointGetResMap">
         SELECT
-            p.point_id, p.point_score, p.point_item_name, p.point_item_content,
-            p.point_item_images, p.created_at,
-            i.image_id, i.image_url, i.image_type, i.alt_text
+        p.point_id,
+        p.point_score,
+        p.point_item_name,
+        p.point_item_content,
+        p.created_at,
+        i.image_id,
+        i.image_url,
+        i.image_type,
+        i.alt_text
         FROM point p
-        LEFT JOIN point_item_image i ON p.point_id = i.point_id
-        WHERE p.user_id = #{userId}
-        ORDER BY p.created_at DESC
-        LIMIT #{offset}, #{pageSize}
-    </select>
-
-    <select id="findOneByUserIdAndPointId" resultMap="pointGetResMap">
-        SELECT
-            p.point_id, p.point_score, p.point_item_name, p.point_item_content,
-            p.point_item_images, p.created_at,
-            i.image_id, i.image_url, i.image_type, i.alt_text
-        FROM point p
-        LEFT JOIN point_item_image i ON p.point_id = i.point_id
+        LEFT JOIN point_image i ON p.point_id = i.point_id
         WHERE p.point_id = #{pointId}
-        AND p.user_id = #{userId}
     </select>
 
-    <select id="findPointListByUser" resultMap="pointGetResMap">
-        SELECT
-            p.point_id AS pointId,
-            p.point_score AS pointScore,
-            p.point_item_name AS pointItemName,
-            p.point_item_content AS pointItemContent,
-            p.point_item_images AS pointItemImages,
-            p.created_at AS createdAt,
-            i.image_id AS imageId,
-            i.image_url AS imageUrl,
-            i.image_type AS imageType,
-            i.alt_text AS altText
-        FROM point p
-        LEFT JOIN point_item_image i ON p.point_id = i.point_id
-        WHERE p.user_id = #{userId}
-        ORDER BY p.created_at DESC
-        LIMIT #{offset}, #{pageSize}
-    </select>
-
-    <insert id="savePoint">
+    <!-- 포인트 아이템 등록 -->
+    <insert id="savePoint" useGeneratedKeys="true" keyProperty="pointId">
         INSERT INTO point
-        (user_id, point_score, point_item_name, point_item_content, point_item_images)
+        (point_score, point_item_name, point_item_content, created_at, updated_at)
         VALUES
-        (#{userId}, #{pointScore}, #{pointItemName}, #{pointItemContent}, #{pointItemImages})
+        (#{pointScore}, #{pointItemName}, #{pointItemContent}, NOW(), NOW())
     </insert>
 
+    <!-- 포인트 아이템 수정 -->
     <update id="updatePoint">
         UPDATE point
-        SET point_score = #{pointScore},
+        SET
+        point_score = #{pointScore},
         point_item_name = #{pointItemName},
         point_item_content = #{pointItemContent},
-        point_item_images = #{pointItemImages}
+        updated_at = NOW()
         WHERE point_id = #{pointId}
-        AND user_id = #{userId}
     </update>
 
+    <!-- 포인트 아이템 삭제 -->
     <delete id="deletePoint">
         DELETE FROM point
         WHERE point_id = #{pointId}
-        AND user_id = #{userId}
     </delete>
+
+    <!-- 키워드 검색 -->
+    <select id="findPointsByKeyword" resultMap="pointGetResMap">
+        SELECT
+        p.point_id,
+        p.point_score,
+        p.point_item_name,
+        p.point_item_content,
+        p.created_at,
+        i.image_id,
+        i.image_url,
+        i.image_type,
+        i.alt_text
+        FROM point p
+        LEFT JOIN point_image i ON p.point_id = i.point_id
+        WHERE p.point_item_name LIKE CONCAT('%', #{keyword}, '%')
+        OR p.point_item_content LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY p.created_at DESC
+    </select>
+
+
 
 </mapper>

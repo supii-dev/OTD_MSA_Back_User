@@ -27,7 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 포인트 조회
     @Query("SELECT u.point FROM User u WHERE u.userId = :userId")
-    Optional<Integer> findPointByUserId(Long userId);
+    Integer findPointByUserId(@Param("userId") Long userId);
 
     // 포인트 등록
     @Query("update User u set u.point = :point where u.userId = :userId")
