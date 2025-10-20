@@ -75,9 +75,9 @@ public class AdminService {
         return adminPointRepository.findAll();
     }
 
-    public List<AdminChallengeProgress> getChallengeProgress(Long id) {
+    public List<AdminChallengeProgress> getChallengeProgress(Long cdId) {
         LocalDate date = LocalDate.now();
-        List<AdminChallengeProgress> result = adminMapper.findByCdId(id, date);
+        List<AdminChallengeProgress> result = adminMapper.findByCdId(cdId, date);
         for (AdminChallengeProgress acp : result) {
             String format =  acp.getCdGoal() + acp.getCdUnit();
             acp.setGoal(format);
@@ -263,9 +263,6 @@ public class AdminService {
         user.setXp(req.getXp());
         user.setUid(req.getUid());
         user.setPic(req.getPic());
-        if (req.getUpw() != null && !req.getUpw().isBlank()) {
-            user.setUpw(passwordEncoder.encode(req.getUpw()));
-        }
         // 기존 역할 조회
         UserRole exist = userRoleRepository.findByUserId(user.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_role 정보가 없습니다."));

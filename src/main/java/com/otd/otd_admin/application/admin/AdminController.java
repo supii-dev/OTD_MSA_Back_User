@@ -64,15 +64,20 @@ public class AdminController {
         return adminService.putUserDetail(req);
     }
 
+    @DeleteMapping("/user/{userId}")
+    public ResultResponse<?> deleteUser(@PathVariable Long userId){
+        return adminService.removeUser(userId);
+    }
+
     // 챌린지
     @GetMapping("/challenge")
     public List<ChallengeDefinition> getChallenges() {
         return adminService.getChallenges();
     }
 
-    @GetMapping("/challenge/progress/{id}")
-    public List<AdminChallengeProgress> getChallengeProgress(@PathVariable Long id){
-        return adminService.getChallengeProgress(id);
+    @GetMapping("/challenge/progress/{cdId}")
+    public List<AdminChallengeProgress> getChallengeProgress(@PathVariable Long cdId){
+        return adminService.getChallengeProgress(cdId);
     }
 
     @PostMapping("/challenge/add")
@@ -97,10 +102,7 @@ public class AdminController {
         return new ResultResponse<>("챌린지 수정 성공", update);
     }
 
-    @DeleteMapping("/user/{userId}")
-    public ResultResponse<?> deleteUser(@PathVariable Long userId){
-        return adminService.removeUser(userId);
-    }
+
 
     @DeleteMapping("/challenge/{cdId}")
     public ResultResponse<?> deleteChallenge(@PathVariable Long cdId) {

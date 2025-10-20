@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AdminChallengeProgress {
-    private Long id;
+    private Long cdId;
     private String cdName;
     private String cdGoal;
     private String cdType;

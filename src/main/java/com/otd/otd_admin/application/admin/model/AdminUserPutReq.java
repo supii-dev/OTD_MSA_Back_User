@@ -10,7 +10,6 @@ import lombok.Setter;
 public class AdminUserPutReq {
     private Long userId;
     private String uid;
-    private String upw;
     private String name;
     private String nickName;
     private int point;

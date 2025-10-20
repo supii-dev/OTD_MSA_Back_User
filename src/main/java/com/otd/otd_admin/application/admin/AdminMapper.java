@@ -29,5 +29,5 @@ public interface AdminMapper {
     List<Inquiry> findRecent5Inquiry();
     Double getAvgInquiryRepliedTime();
     Double getInquiryRepliedRate();
-    List<AdminChallengeProgress> findByCdId(Long id, LocalDate date);
+    List<AdminChallengeProgress> findByCdId(Long cdId, LocalDate date);
 }
