@@ -9,5 +9,5 @@ public class ChallengeSuccessRateCountRes {
     private String challengeType;
     private Long totalCount;
     private Long successCount;
-    private Long successRate;
+    private Double successRate;
 }

@@ -29,7 +29,7 @@ public class AdminController {
     private final AdminService adminService;
 
     // 대시보드
-    @GetMapping("dash/user")
+    @GetMapping("/dash/user")
     public AdminDashBoardUserDto getUserDashBoard(){
         return adminService.getUserDashBoard();
     }
@@ -137,18 +137,18 @@ public class AdminController {
     }
 
     // 문의
-    @GetMapping("/qna")
+    @GetMapping("/inquiry")
     public List<Inquiry> getInquiry() {
         return adminService.getInquiry();
     }
 
-    @PutMapping("/qna/modify")
+    @PutMapping("/inquiry/modify")
     public ResultResponse<?> modifyInquiry(@AuthenticationPrincipal UserPrincipal userPrincipal,
                                            @RequestBody AdminInquiryReq req) {
         req.setAdminId(userPrincipal.getSignedUserId());
         return adminService.putInquiry(req);
     }
-    @GetMapping("/qna/{inquiryId}")
+    @GetMapping("/inquiry/{inquiryId}")
     public Inquiry getInquiryDetail(@PathVariable Long inquiryId) {
         return adminService.getInquiryDetail(inquiryId);
     }

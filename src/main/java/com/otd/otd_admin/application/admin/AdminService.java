@@ -82,7 +82,6 @@ public class AdminService {
         return adminMapper.getAdminPurchaseHistory();
     }
 
-    public List<AdminChallengeProgress> getChallengeProgress(Long id) {
     public List<AdminChallengeProgress> getChallengeProgress(Long cdId) {
         LocalDate date = LocalDate.now();
         List<AdminChallengeProgress> result = adminMapper.findByCdId(cdId, date);
