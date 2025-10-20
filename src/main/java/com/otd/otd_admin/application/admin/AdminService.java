@@ -22,6 +22,8 @@ import com.otd.otd_challenge.application.challenge.Repository.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeProgress;
+import com.otd.otd_pointShop.entity.PurchaseHistory;
+import com.otd.otd_pointShop.repository.PurchaseHistoryRepository;
 import com.otd.otd_user.application.email.InquiryRepository;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.application.user.model.UserRoleRepository;
@@ -62,6 +64,7 @@ public class AdminService {
     private final ConstFile constFile;
     private final AdminUserLoginLogRepository adminUserLoginLogRepository;
     private final InquiryRepository inquiryRepository;
+    private final PurchaseHistoryRepository purchaseHistoryRepository;
 
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -73,6 +76,10 @@ public class AdminService {
 
     public List<ChallengePointHistory> getPointHistory() {
         return adminPointRepository.findAll();
+    }
+
+    public List<AdminPurchaseDto> getPurchaseHistory() {
+        return adminMapper.getAdminPurchaseHistory();
     }
 
     public List<AdminChallengeProgress> getChallengeProgress(Long id) {
@@ -190,11 +197,11 @@ public class AdminService {
     // 유저 챌린지 진행 기록, 포인트 지급 내역
     public AdminUserDetailGetRes getUserDetail(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
-        List<ChallengeProgress> cp = challengeProgressRepository.findByUserId(user.getUserId());
-        List<ChallengePointHistory> ch = challengePointRepository.findByUserId(user.getUserId());
-
+        List<ChallengeProgress> cp = challengeProgressRepository.findByUserId(userId);
+        List<ChallengePointHistory> ch = challengePointRepository.findByUserId(userId);
+        List<AdminPurchaseDto> pd = adminMapper.getUserPurchaseList(userId);
         return AdminUserDetailGetRes.builder().
-            challengeProgress(cp).challengePointHistory(ch).build();
+            challengeProgress(cp).challengePointHistory(ch).pointPurchases(pd).build();
     }
 
     // 통계 유저

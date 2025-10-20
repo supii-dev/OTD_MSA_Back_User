@@ -1,6 +1,7 @@
 package com.otd.otd_admin.application.admin;
 
 import com.otd.otd_admin.application.admin.model.AdminChallengeProgress;
+import com.otd.otd_admin.application.admin.model.AdminPurchaseDto;
 import com.otd.otd_admin.application.admin.model.statistics.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_user.entity.Inquiry;
@@ -19,9 +20,9 @@ public interface AdminMapper {
     List<ChallengeSuccessRateCountRes> countByChallengeType();
     List<ChallengeTypeCountRes> countByChallengeTypeRatio();
     List<ChallengeParticipationCountRes> countByChallengeParticipation();
-
+    List<AdminPurchaseDto> getUserPurchaseList(Long userId);
     List<InquiryCountRes> countByInquiry();
-
+    List<AdminPurchaseDto> getAdminPurchaseHistory();
     List<ChallengeDefinition> findTop3ByFailRate();
     List<ChallengeDefinition> findTop5ByParticipationRate();
     Double findAverageSuccessRate();
