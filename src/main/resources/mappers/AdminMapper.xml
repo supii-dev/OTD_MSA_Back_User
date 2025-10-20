@@ -51,6 +51,25 @@
         GROUP BY ageGroup
     </select>
 
+    <select id="getAdminPurchaseHistory">
+        SELECT ph.purchase_id, ph.purchase_at, u.user_id, u.nick_name, u.name
+        , u.email, p.point_item_content AS itemContent, p.point_score
+        FROM point_purchase_history ph
+        JOIN user u ON ph.user_id = u.user_id
+        JOIN point p ON ph.point_id = p.point_id
+        ORDER BY ph.purchase_at DESC
+    </select>
+
+    <select id="getUserPurchaseList">
+        SELECT ph.purchase_id, ph.purchase_at
+        , p.point_item_content AS itemContent, p.point_score
+        FROM point_purchase_history ph
+        JOIN user u ON ph.user_id = u.user_id
+        JOIN point p ON ph.point_id = p.point_id
+        WHERE u.user_id = #{userId}
+        ORDER BY ph.purchase_at DESC
+    </select>
+
     <select id="countBySignIn">
         WITH RECURSIVE month_seq AS (
             SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 6 MONTH), '%Y-%m-01') AS month_start
