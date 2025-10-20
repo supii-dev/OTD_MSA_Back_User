@@ -22,6 +22,8 @@ import com.otd.otd_challenge.application.challenge.Repository.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
 import com.otd.otd_challenge.entity.ChallengeProgress;
+import com.otd.otd_pointShop.entity.PurchaseHistory;
+import com.otd.otd_pointShop.repository.PurchaseHistoryRepository;
 import com.otd.otd_user.application.email.InquiryRepository;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.application.user.model.UserRoleRepository;
@@ -62,6 +64,7 @@ public class AdminService {
     private final ConstFile constFile;
     private final AdminUserLoginLogRepository adminUserLoginLogRepository;
     private final InquiryRepository inquiryRepository;
+    private final PurchaseHistoryRepository purchaseHistoryRepository;
 
     public List<User> getUsers() {
         return userRepository.findAll();
@@ -75,6 +78,11 @@ public class AdminService {
         return adminPointRepository.findAll();
     }
 
+    public List<AdminPurchaseDto> getPurchaseHistory() {
+        return adminMapper.getAdminPurchaseHistory();
+    }
+
+    public List<AdminChallengeProgress> getChallengeProgress(Long id) {
     public List<AdminChallengeProgress> getChallengeProgress(Long cdId) {
         LocalDate date = LocalDate.now();
         List<AdminChallengeProgress> result = adminMapper.findByCdId(cdId, date);
@@ -190,11 +198,11 @@ public class AdminService {
     // 유저 챌린지 진행 기록, 포인트 지급 내역
     public AdminUserDetailGetRes getUserDetail(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
-        List<ChallengeProgress> cp = challengeProgressRepository.findByUserId(user.getUserId());
-        List<ChallengePointHistory> ch = challengePointRepository.findByUserId(user.getUserId());
-
+        List<ChallengeProgress> cp = challengeProgressRepository.findByUserId(userId);
+        List<ChallengePointHistory> ch = challengePointRepository.findByUserId(userId);
+        List<AdminPurchaseDto> pd = adminMapper.getUserPurchaseList(userId);
         return AdminUserDetailGetRes.builder().
-            challengeProgress(cp).challengePointHistory(ch).build();
+            challengeProgress(cp).challengePointHistory(ch).pointPurchases(pd).build();
     }
 
     // 통계 유저
@@ -251,7 +259,6 @@ public class AdminService {
         return dto;
     }
 
-    @Transactional
     public ResultResponse<?> putUserDetail(AdminUserPutReq req){
         User user = userRepository.findByUserId(req.getUserId());
         if (user == null) {
@@ -288,7 +295,6 @@ public class AdminService {
         return new ResultResponse<>("유저 정보가 수정되었습니다.", user.getUserId());
     }
 
-    @Transactional
     public AdminChallengeDto addChallenge(AdminChallengeDto dto) {
         ChallengeDefinition cd = ChallengeDefinition.builder()
                 .cdName(dto.getCdName())
@@ -313,7 +319,6 @@ public class AdminService {
         return myFileManager.saveChallengeImage(file);
     }
 
-    @Transactional
     public AdminChallengeDto modifyChallenge(AdminChallengeDto dto
             , MultipartFile file) {
         ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(dto.getCdId());
@@ -342,7 +347,6 @@ public class AdminService {
         return dto;
     }
 
-    @Transactional
     public ResultResponse<?> removeUser(Long userId) {
         User user = userRepository.findByUserId(userId);
         if (user == null) {
@@ -360,7 +364,6 @@ public class AdminService {
         );
     }
 
-    @Transactional
     public ResultResponse<?> removeChallenge(Long cdId) {
         ChallengeDefinition cd = challengeDefinitionRepository.findByCdId(cdId);
         if (cd == null) {

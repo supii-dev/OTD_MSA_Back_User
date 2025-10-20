@@ -1,5 +1,6 @@
 package com.otd.otd_pointShop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
 import jdk.jfr.Enabled;
@@ -19,12 +20,15 @@ public class PurchaseHistory {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", referencedColumnName ="user_id", nullable = false
                 , foreignKey = @ForeignKey(name="fk_point_user")) // FK
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @JoinColumn(name = "point_id", nullable = false)
     private Point point;
 
+    @Column(name = "purchase_at")
     private LocalDateTime purchaseTime;
 
     @PrePersist
