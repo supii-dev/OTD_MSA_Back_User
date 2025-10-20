@@ -37,4 +37,6 @@ public interface PointshopMapper {
             @Param("offset") int offset,
             @Param("pageSize") int pageSize);
     int countPointByUserId(@Param("userId") Long userId);
+
+    List<PointGetRes> findAllPoints(@Param("categoryId") Long categoryId);
 }

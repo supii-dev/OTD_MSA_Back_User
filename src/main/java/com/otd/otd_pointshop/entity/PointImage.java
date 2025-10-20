@@ -23,7 +23,7 @@ public class PointImage {
     @Column(name = "image_id")
     private Long imageId;
 
-    // 실제 이미지 접근 URL (ex: /upload/pointshop/abc123.png)
+    // 이미지 파일 경로 or 파일명
     @Column(name = "image_url", nullable = false, length = 255)
     private String imageUrl;
 
@@ -31,17 +31,9 @@ public class PointImage {
     @Column(name = "image_type", length = 50)
     private String imageType;
 
-    // 대체 텍스트 (접근성 / SEO 용)
+    // 대체 텍스트 (상품명)
     @Column(name = "alt_text", length = 200)
     private String altText;
-
-    // 파일 원본 이름 (UUID 전 이름)
-    @Column(name = "original_file_name", length = 255)
-    private String originalFileName;
-
-    // 이미지 고유 UUID 파일명 (서버 내부용)
-    @Column(name = "uuid", length = 100)
-    private String uuid;
 
     // 연결된 포인트 상품
     @ManyToOne(fetch = FetchType.LAZY)

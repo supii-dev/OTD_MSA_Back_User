@@ -5,12 +5,13 @@ import com.otd.otd_pointshop.application.purchase.model.PurchaseHistoryRes;
 import com.otd.otd_pointshop.entity.*;
 import com.otd.otd_pointshop.repository.*;
 import com.otd.otd_user.application.user.UserRepository;
-import com.otd.otd_user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,8 @@ public class PointshopService {
     private final PointRepository pointRepository;
     private final PointImageRepository pointImageRepository;
     private final PurchaseHistoryRepository purchaseHistoryRepository;
+    private final PointCategoryRepository categoryRepository;
+    private final SqlSessionTemplate sqlSessionTemplate;
 
     // [GET] 전체 포인트 아이템 목록 조회 (모든 사용자 공용)
     public Page<PointGetRes> getAllPointItems(Pageable pageable) {
@@ -59,6 +62,19 @@ public class PointshopService {
                 .toList();
 
         return new PageImpl<>(content, pageable, pointPage.getTotalElements());
+    }
+
+    // [GET] 카테고리 기반 아이템 조회 (MyBatis)
+    public List<PointGetRes> getItemsByCategory(Long categoryId) {
+        var mapper = sqlSessionTemplate.getMapper(PointshopMapper.class);
+
+        if (categoryId != null && !categoryRepository.existsById(categoryId)) {
+            throw new IllegalArgumentException("존재하지 않는 카테고리 ID입니다: " + categoryId);
+        }
+
+        List<PointGetRes> list = mapper.findAllPoints(categoryId);
+        log.info("[카테고리별 목록 조회] categoryId={}, resultCount={}", categoryId, list.size());
+        return list;
     }
 
     // [POST] 포인트 아이템 등록 (관리자 전용)
@@ -187,9 +203,9 @@ public class PointshopService {
     private PointImageRes toImageDto(PointImage img) {
         return PointImageRes.builder()
                 .imageId(img.getImageId())
-                .imageUrl(img.getImageUrl())
-                .imageType(img.getImageType())
                 .altText(img.getAltText())
+                .imageType(img.getImageType())
+                .imageUrl(img.getImageUrl())
                 .build();
     }
 

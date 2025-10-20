@@ -31,7 +31,7 @@ public class PointCategory {
     @JsonIgnore
     private List<Point> items = new ArrayList<>();
 
-    // 🔹 편의 메서드
+    // 편의 메서드
     public void addItem(Point point) {
         if (items == null) items = new ArrayList<>();
         items.add(point);

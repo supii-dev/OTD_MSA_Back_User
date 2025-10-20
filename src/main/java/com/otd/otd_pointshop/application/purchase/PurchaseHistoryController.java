@@ -27,6 +27,7 @@ public class PurchaseHistoryController {
             @AuthenticationPrincipal UserPrincipal user,
             @PathVariable Long pointId
     ) {
+
         if (user == null) {
             log.warn("[구매 요청 거부] 로그인 필요 - pointId={}", pointId);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

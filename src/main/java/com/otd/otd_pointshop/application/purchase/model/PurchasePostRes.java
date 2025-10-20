@@ -1,5 +1,6 @@
 package com.otd.otd_pointshop.application.purchase.model;
 
+import com.otd.otd_pointshop.entity.Point;
 import com.otd.otd_pointshop.entity.PurchaseHistory;
 import lombok.*;
 
@@ -21,18 +22,18 @@ public class PurchasePostRes {
     public static PurchasePostRes fromEntity(PurchaseHistory entity) {
         if (entity == null) return null;
 
+        Point point = entity.getPoint();
         String imageUrl = null;
-        if (entity.getPoint() != null &&
-                entity.getPoint().getPointItemImages() != null &&
-                !entity.getPoint().getPointItemImages().isEmpty()) {
-            imageUrl = entity.getPoint().getPointItemImages().get(0).getImageUrl();
+
+        if (point != null && point.getPointItemImages() != null && !point.getPointItemImages().isEmpty()) {
+            imageUrl = point.getPointItemImages().get(0).getImageUrl();
         }
 
         return PurchasePostRes.builder()
                 .purchaseId(entity.getPurchaseId())
-                .pointId(entity.getPoint() != null ? entity.getPoint().getPointId() : null)
-                .pointItemName(entity.getPoint() != null ? entity.getPoint().getPointItemName() : "상품 정보 없음")
-                .pointScore(entity.getPoint() != null ? entity.getPoint().getPointScore() : 0)
+                .pointId(point != null ? point.getPointId() : null)
+                .pointItemName(point != null ? point.getPointItemName() : "상품 정보 없음")
+                .pointScore(point != null ? point.getPointScore() : 0)
                 .pointItemImage(imageUrl)
                 .purchaseAt(entity.getPurchaseAt())
                 .build();

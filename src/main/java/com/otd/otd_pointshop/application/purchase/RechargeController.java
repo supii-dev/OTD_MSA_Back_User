@@ -55,9 +55,18 @@ public class RechargeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new PointApiResponse<>(false, "로그인이 필요합니다."));
 
-        Long userId = user.getSignedUserId();
-        Integer balance = userRepository.findPointByUserId(userId);
-        if (balance == null) balance = 0;
-        return ResponseEntity.ok(new PointApiResponse<>(true, "포인트 잔액 조회 성공", balance));
+        try {
+            Long userId = user.getSignedUserId();
+            Integer balance = userRepository.findPointByUserId(userId);
+            if (balance == null) balance = 0;
+
+            log.info("[getMyBalance] userId={}, balance={}", userId, balance);
+            return ResponseEntity.ok(new PointApiResponse<>(true, "포인트 잔액 조회 성공", balance));
+
+        } catch (Exception e) {
+            log.error("[getMyBalance] 예외 발생", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new PointApiResponse<>(false, "포인트 잔액 조회 실패", 0));
+        }
     }
 }
