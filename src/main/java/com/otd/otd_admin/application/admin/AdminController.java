@@ -10,6 +10,7 @@ import com.otd.otd_admin.application.admin.model.dashboard.AdminDashBoardUserDto
 import com.otd.otd_admin.application.admin.model.statistics.*;
 import com.otd.otd_challenge.entity.ChallengeDefinition;
 import com.otd.otd_challenge.entity.ChallengePointHistory;
+import com.otd.otd_pointShop.entity.PurchaseHistory;
 import com.otd.otd_user.entity.Inquiry;
 import com.otd.otd_user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -113,6 +114,10 @@ public class AdminController {
         return adminService.getPointHistory();
     }
 
+    @GetMapping("/purchase")
+    public List<AdminPurchaseDto> getPurchaseHistory() {
+        return adminService.getPurchaseHistory();
+    }
     // 통계
     @GetMapping("/statistics/user")
     public AdminStatisticsUserDto getUserStatistics() {

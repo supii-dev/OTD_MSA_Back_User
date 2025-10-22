@@ -18,8 +18,8 @@ public class PurchaseHistory {
     private Long purchaseId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false
-            , foreignKey = @ForeignKey(name = "fk_point_user")) // FK
+    @JoinColumn(name = "user_id", referencedColumnName ="user_id", nullable = false
+                , foreignKey = @ForeignKey(name="fk_point_user")) // FK
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User user;
 

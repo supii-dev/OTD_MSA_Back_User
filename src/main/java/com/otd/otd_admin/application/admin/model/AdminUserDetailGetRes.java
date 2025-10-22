@@ -14,4 +14,5 @@ import java.util.List;
 public class AdminUserDetailGetRes {
   private List<ChallengeProgress> challengeProgress;
   private List<ChallengePointHistory> challengePointHistory;
+  private List<AdminPurchaseDto> pointPurchases;
 }
