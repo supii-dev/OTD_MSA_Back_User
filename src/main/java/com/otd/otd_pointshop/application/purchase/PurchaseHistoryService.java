@@ -113,7 +113,6 @@ public class PurchaseHistoryService {
         history.setPurchaseAt(LocalDateTime.now());
         purchaseHistoryRepository.save(history);
 
-        // 포인트 내역 차감 기록
         PointHistory pointHistory = new PointHistory();
         pointHistory.setUser(user);
         pointHistory.setChangePoint(-usedAmount);
@@ -141,7 +140,7 @@ public class PurchaseHistoryService {
 
     // [GET] (사용자) 개인 구매 이력 조회
     public List<PurchaseHistoryRes> getUserPurchaseHistory(Long userId) {
-        return purchaseHistoryRepository.findByUser_UserId(userId).stream()
+        return purchaseHistoryRepository.findByUser_UserIdOrderByPurchaseAtDesc(userId).stream()
                 .map(PurchaseHistoryRes::fromEntity)
                 .toList();
     }

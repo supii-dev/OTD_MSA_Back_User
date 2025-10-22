@@ -51,4 +51,5 @@ public interface PurchaseHistoryRepository extends JpaRepository<PurchaseHistory
     List<PurchaseHistory> findByPoint(Point point);
     List<PurchaseHistory> findByPurchaseAt(LocalDateTime purchaseAt);
     List<PurchaseHistory> findByPurchaseAtBetween(LocalDateTime start, LocalDateTime end);
+    List<PurchaseHistory> findByUser_UserIdOrderByPurchaseAtDesc(Long userId);
 }
