@@ -1,5 +1,6 @@
 package com.otd.otd_pointshop.repository;
 
+import com.otd.otd_pointshop.application.purchase.model.PurchaseHistoryRes;
 import com.otd.otd_pointshop.entity.Point;
 import com.otd.otd_pointshop.entity.PurchaseHistory;
 import com.otd.otd_user.entity.User;
@@ -51,5 +52,25 @@ public interface PurchaseHistoryRepository extends JpaRepository<PurchaseHistory
     List<PurchaseHistory> findByPoint(Point point);
     List<PurchaseHistory> findByPurchaseAt(LocalDateTime purchaseAt);
     List<PurchaseHistory> findByPurchaseAtBetween(LocalDateTime start, LocalDateTime end);
+
+    // 기본 조회
     List<PurchaseHistory> findByUser_UserIdOrderByPurchaseAtDesc(Long userId);
+
+    // 이미지까지 포함한 JOIN 조회 (사용자 구매 이력)
+    @Query("""
+        SELECT new com.otd.otd_pointshop.application.purchase.model.PurchaseHistoryRes(
+            ph.purchaseId,
+            p.pointId,
+            p.pointItemName,
+            p.pointScore,
+            i.imageUrl,
+            ph.purchaseAt
+        )
+        FROM PurchaseHistory ph
+        JOIN ph.point p
+        LEFT JOIN PointImage i ON p.pointId = i.point.pointId
+        WHERE ph.user.userId = :userId
+        ORDER BY ph.purchaseAt DESC
+    """)
+    List<PurchaseHistoryRes> findPurchaseHistoryWithImageByUserId(@Param("userId") Long userId);
 }

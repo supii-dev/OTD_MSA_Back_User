@@ -4,6 +4,8 @@ import com.otd.configuration.model.UserPrincipal;
 import com.otd.otd_pointshop.application.point.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -14,6 +16,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
 
 @Slf4j
@@ -96,6 +101,34 @@ public class PointshopController {
         Set<String> result = pointshopService.searchPointKeyword(keyword, pageable);
         log.info("[키워드 검색] keyword='{}', resultSize={}", keyword, result.size());
         return ResponseEntity.ok(new PointApiResponse<>(true, "키워드 검색 성공", result));
+    }
+
+    @GetMapping("/image/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) {
+        try {
+            // 업로드 디렉토리 (PointshopService에 설정된 것과 동일하게)
+            Path imagePath = Paths.get("C:/2025_swstudy/upload/pointshop")  // ← 실제 업로드 폴더 경로
+                    .resolve(filename)
+                    .normalize();
+
+            Resource resource = new UrlResource(imagePath.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // 확장자별 MIME 타입 지정
+            String contentType = Files.probeContentType(imagePath);
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(resource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     // 관리자 권한 검증

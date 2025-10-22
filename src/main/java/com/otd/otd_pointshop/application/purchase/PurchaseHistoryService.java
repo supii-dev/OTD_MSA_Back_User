@@ -140,9 +140,7 @@ public class PurchaseHistoryService {
 
     // [GET] (사용자) 개인 구매 이력 조회
     public List<PurchaseHistoryRes> getUserPurchaseHistory(Long userId) {
-        return purchaseHistoryRepository.findByUser_UserIdOrderByPurchaseAtDesc(userId).stream()
-                .map(PurchaseHistoryRes::fromEntity)
-                .toList();
+        return purchaseHistoryRepository.findPurchaseHistoryWithImageByUserId(userId);
     }
 
     // [GET] memberId 기반 중복 제거

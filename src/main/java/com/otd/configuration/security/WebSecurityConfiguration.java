@@ -52,6 +52,7 @@ public class WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/api/OTD/user/logout").authenticated()
                         .requestMatchers("/api/OTD/user/profile" , "/api/OTD/user/profile/pic").authenticated()
                         .requestMatchers("/api/OTD/email/sendMunhe").authenticated()
+                        .requestMatchers("/api/OTD/pointshop/image/**", "/OTD/pointshop/image/**" ).authenticated()
                         .requestMatchers( "/api/OTD/user/logout",
                                 "/api/OTD/user/reissue",
                                 "/api/OTD/user/join",

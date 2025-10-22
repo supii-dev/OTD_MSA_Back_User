@@ -22,12 +22,27 @@ public class PurchaseHistoryRes {
     private LocalDateTime purchaseAt; // 구매 시각
     private Integer userCurrentPoint; // 구매 후 유저 잔여 포인트
 
-    // 엔티티 → DTO 변환
-    // null 안전 처리 > 이미지 URL 추출 포함
+    // JPQL용 생성자 (Repository 쿼리에서 사용)
+    public PurchaseHistoryRes(
+            Long purchaseId,
+            Long pointId,
+            String pointItemName,
+            int pointScore,
+            String pointItemImage,
+            LocalDateTime purchaseAt
+    ) {
+        this.purchaseId = purchaseId;
+        this.pointId = pointId;
+        this.pointItemName = pointItemName;
+        this.pointScore = pointScore;
+        this.pointItemImage = pointItemImage;
+        this.purchaseAt = purchaseAt;
+    }
+
+    // 엔티티 → DTO 변환 (Service/Entity 기반)
     public static PurchaseHistoryRes fromEntity(PurchaseHistory entity) {
         if (entity == null) return null;
 
-        // 유저 및 포인트 존재 여부 확인
         Long userId = (entity.getUser() != null) ? entity.getUser().getUserId() : null;
         String userName = (entity.getUser() != null) ? entity.getUser().getName() : null;
         Integer currentPoint = (entity.getUser() != null) ? entity.getUser().getPoint() : null;
@@ -36,7 +51,6 @@ public class PurchaseHistoryRes {
         String pointItemName = (entity.getPoint() != null) ? entity.getPoint().getPointItemName() : "상품 정보 없음";
         int pointScore = (entity.getPoint() != null) ? entity.getPoint().getPointScore() : 0;
 
-        // 대표 이미지 추출
         String imageUrl = null;
         if (entity.getPoint() != null &&
                 entity.getPoint().getPointItemImages() != null &&
