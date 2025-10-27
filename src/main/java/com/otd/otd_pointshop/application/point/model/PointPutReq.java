@@ -15,4 +15,5 @@ public class PointPutReq {
     private String pointItemName;
     private String pointItemContent;
     private List<String> images;
+    private Long pointCategoryId;
 }
