@@ -26,4 +26,5 @@ public class PointGetRes {
     // 유저 현재 포인트
     private int userCurrentPoint;
 
+    private String category;
 }

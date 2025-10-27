@@ -79,12 +79,12 @@ public class PointshopController {
     // [GET] 전체 포인트 아이템 목록 조회 (모든 유저 가능)
     @GetMapping("/list")
     public ResponseEntity<?> getAllPointItems(
-            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long pointCategoryId,
             @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
-        if (categoryId != null) {
-            var list = pointshopService.getItemsByCategory(categoryId);
+        if (pointCategoryId != null) {
+            var list = pointshopService.getItemsByCategory(pointCategoryId);
             return ResponseEntity.ok(new PointApiResponse<>(true, "카테고리별 목록 조회 성공", list));
         } else {
             var page = pointshopService.getAllPointItems(pageable);

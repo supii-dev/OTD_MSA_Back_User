@@ -65,15 +65,15 @@ public class PointshopService {
     }
 
     // [GET] 카테고리 기반 아이템 조회 (MyBatis)
-    public List<PointGetRes> getItemsByCategory(Long categoryId) {
+    public List<PointGetRes> getItemsByCategory(Long pointCategoryId) {
         var mapper = sqlSessionTemplate.getMapper(PointshopMapper.class);
 
-        if (categoryId != null && !categoryRepository.existsById(categoryId)) {
-            throw new IllegalArgumentException("존재하지 않는 카테고리 ID입니다: " + categoryId);
+        if (pointCategoryId != null && !categoryRepository.existsById(pointCategoryId)) {
+            throw new IllegalArgumentException("존재하지 않는 카테고리 ID입니다: " + pointCategoryId);
         }
 
-        List<PointGetRes> list = mapper.findAllPoints(categoryId);
-        log.info("[카테고리별 목록 조회] categoryId={}, resultCount={}", categoryId, list.size());
+        List<PointGetRes> list = mapper.findAllPoints(pointCategoryId);
+        log.info("[카테고리별 목록 조회] pointCategoryId={}, resultCount={}", pointCategoryId, list.size());
         return list;
     }
 
@@ -84,6 +84,14 @@ public class PointshopService {
         point.setPointItemName(dto.getPointItemName());
         point.setPointItemContent(dto.getPointItemContent());
         point.setPointScore(dto.getPointScore() != null ? dto.getPointScore().intValue() : 0);
+
+        // 포인트 카테고리 연결
+        if (dto.getPointCategoryId() != null) {
+            PointCategory category = categoryRepository.findById(dto.getPointCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다."));
+            point.setPointCategory(category);
+        }
+
         pointRepository.save(point);
 
         if (images != null && images.length > 0) {
