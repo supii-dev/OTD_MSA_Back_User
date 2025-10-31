@@ -71,7 +71,6 @@
         WHERE p.point_id = #{pointId}
     </select>
 
-
     <!-- 포인트 아이템 등록 -->
     <insert id="savePoint" useGeneratedKeys="true" keyProperty="pointId">
         INSERT INTO point
@@ -79,7 +78,6 @@
         VALUES
         (#{pointScore}, #{pointItemName}, #{pointItemContent}, #{category}, NOW(), NOW())
     </insert>
-
 
     <!-- 포인트 아이템 수정 -->
     <update id="updatePoint">
@@ -92,7 +90,6 @@
         updated_at = NOW()
         WHERE point_id = #{pointId}
     </update>
-
 
     <!-- 포인트 아이템 삭제 -->
     <delete id="deletePoint">
