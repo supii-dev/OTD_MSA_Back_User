@@ -1,9 +1,11 @@
 package com.otd.otd_pointshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 
@@ -44,5 +46,28 @@ public class PurchaseHistory {
         if (this.usageType == null) {
             this.usageType = "GENERAL_USE";
         }
+    }
+
+    // 쿠폰 사용 여부 (기본 false)
+    @Column(name = "is_used", nullable = false)
+    private boolean isUsed = false;
+
+    public boolean isUsed() {
+        return isUsed;
+    }
+
+    public void setUsed(boolean used) {
+        this.isUsed = used;
+    }
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(name = "used_at")
+    private LocalDateTime usedAt;
+    
+    public LocalDateTime getUsedAt() {
+        return usedAt;
+    }
+
+    public void setUsedAt(LocalDateTime usedAt) {
+        this.usedAt = usedAt;
     }
 }

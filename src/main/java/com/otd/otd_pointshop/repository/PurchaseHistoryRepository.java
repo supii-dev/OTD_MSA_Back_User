@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface PurchaseHistoryRepository extends JpaRepository<PurchaseHistory,Long> {
     // 특정 유저 전체 구매 이력
@@ -58,19 +59,31 @@ public interface PurchaseHistoryRepository extends JpaRepository<PurchaseHistory
 
     // 이미지까지 포함한 JOIN 조회 (사용자 구매 이력)
     @Query("""
-        SELECT new com.otd.otd_pointshop.application.purchase.model.PurchaseHistoryRes(
-            ph.purchaseId,
-            p.pointId,
-            p.pointItemName,
-            p.pointScore,
-            i.imageUrl,
-            ph.purchaseAt
-        )
-        FROM PurchaseHistory ph
-        JOIN ph.point p
-        LEFT JOIN PointImage i ON p.pointId = i.point.pointId
-        WHERE ph.user.userId = :userId
-        ORDER BY ph.purchaseAt DESC
-    """)
+    SELECT new com.otd.otd_pointshop.application.purchase.model.PurchaseHistoryRes(
+        ph.purchaseId,
+        p.pointId,
+        p.pointItemName,
+        p.pointScore,
+        i.imageUrl,
+        ph.purchaseAt,
+        ph.isUsed,
+        ph.usedAt
+    )
+    FROM PurchaseHistory ph
+    JOIN ph.point p
+    LEFT JOIN PointImage i ON p.pointId = i.point.pointId
+    WHERE ph.user.userId = :userId
+    ORDER BY ph.purchaseAt DESC
+""")
     List<PurchaseHistoryRes> findPurchaseHistoryWithImageByUserId(@Param("userId") Long userId);
+
+    // 단일 구매 내역 (사용자 검증 포함)
+    @Query("""
+    SELECT p FROM PurchaseHistory p
+    WHERE p.purchaseId = :purchaseId
+      AND p.user.userId = :userId
+""")
+    Optional<PurchaseHistory> findByIdAndUserId(
+            @Param("purchaseId") Long purchaseId,
+            @Param("userId") Long userId);
 }

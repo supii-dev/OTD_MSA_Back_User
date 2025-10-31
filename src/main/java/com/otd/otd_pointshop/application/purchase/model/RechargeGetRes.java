@@ -17,6 +17,7 @@ public class RechargeGetRes {
     private String name;         // 유저 이름
     private Integer amount;      // 충전 금액
     private LocalDateTime rechargeAt; // 충전 시각
+    private Boolean isUsed;
 
     // DTO 변환
     public static RechargeGetRes fromEntity(RechargeHistory entity) {

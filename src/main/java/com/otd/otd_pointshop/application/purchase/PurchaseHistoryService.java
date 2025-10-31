@@ -2,6 +2,7 @@ package com.otd.otd_pointshop.application.purchase;
 
 import com.otd.otd_pointshop.application.purchase.model.PurchaseHistoryRes;
 import com.otd.otd_pointshop.application.purchase.model.PurchasePostRes;
+import com.otd.otd_pointshop.application.purchase.model.PurchaseUseRes;
 import com.otd.otd_pointshop.entity.Point;
 import com.otd.otd_pointshop.entity.PointImage;
 import com.otd.otd_pointshop.entity.PurchaseHistory;
@@ -12,9 +13,11 @@ import com.otd.otd_pointshop.repository.PointHistoryRepository;
 import com.otd.otd_user.application.user.UserRepository;
 import com.otd.otd_user.entity.User;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -128,6 +131,40 @@ public class PurchaseHistoryService {
                 .pointItemName("포인트 사용 (" + (usageType != null ? usageType : "기타") + ")")
                 .pointScore(usedAmount)
                 .purchaseAt(history.getPurchaseAt())
+                .build();
+    }
+
+    // [GET] 구매 상세 조회 (단건)
+    public PurchaseHistoryRes getPurchaseDetail(Long purchaseId, Long userId) {
+        PurchaseHistory entity = purchaseHistoryRepository.findByIdAndUserId(purchaseId, userId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 쿠폰을 찾을 수 없습니다."));
+        return new PurchaseHistoryRes(entity);
+    }
+
+    // [FETCH] 포인트 쿠폰 사용 여부 조회
+    @Transactional
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    public PurchaseUseRes markAsUsed(Long purchaseId, Long userId) {
+        PurchaseHistory purchase = purchaseHistoryRepository.findById(purchaseId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 쿠폰을 찾을 수 없습니다."));
+
+        // 아이템 본인 소유 검증
+        if (!purchase.getUser().getUserId().equals(userId)) {
+            throw new IllegalArgumentException("본인의 쿠폰만 사용할 수 있습니다.");
+        }
+
+        if (purchase.isUsed()) {
+            throw new EntityNotFoundException("이미 사용된 쿠폰입니다.");
+        }
+
+        purchase.setUsed(true);
+        purchase.setUsedAt(LocalDateTime.now());
+        purchaseHistoryRepository.save(purchase);
+
+        return PurchaseUseRes.builder()
+                .purchaseId(purchase.getPurchaseId())
+                .isUsed(true)
+                .usedAt(purchase.getUsedAt())
                 .build();
     }
 

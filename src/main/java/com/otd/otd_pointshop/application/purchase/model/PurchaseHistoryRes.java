@@ -22,6 +22,9 @@ public class PurchaseHistoryRes {
     private LocalDateTime purchaseAt; // 구매 시각
     private Integer userCurrentPoint; // 구매 후 유저 잔여 포인트
 
+    private boolean isUsed;           // 쿠폰 사용 여부
+    private LocalDateTime usedAt;     // 쿠폰 사용 시각
+
     // JPQL용 생성자 (Repository 쿼리에서 사용)
     public PurchaseHistoryRes(
             Long purchaseId,
@@ -29,7 +32,9 @@ public class PurchaseHistoryRes {
             String pointItemName,
             int pointScore,
             String pointItemImage,
-            LocalDateTime purchaseAt
+            LocalDateTime purchaseAt,
+            Boolean isUsed,
+            LocalDateTime usedAt
     ) {
         this.purchaseId = purchaseId;
         this.pointId = pointId;
@@ -37,6 +42,8 @@ public class PurchaseHistoryRes {
         this.pointScore = pointScore;
         this.pointItemImage = pointItemImage;
         this.purchaseAt = purchaseAt;
+        this.isUsed = (isUsed != null) && isUsed;
+        this.usedAt = usedAt;
     }
 
     // 엔티티 → DTO 변환 (Service/Entity 기반)
@@ -48,7 +55,9 @@ public class PurchaseHistoryRes {
         Integer currentPoint = (entity.getUser() != null) ? entity.getUser().getPoint() : null;
 
         Long pointId = (entity.getPoint() != null) ? entity.getPoint().getPointId() : null;
-        String pointItemName = (entity.getPoint() != null) ? entity.getPoint().getPointItemName() : "상품 정보 없음";
+        String pointItemName = (entity.getPoint() != null)
+                ? entity.getPoint().getPointItemName()
+                : "상품 정보 없음";
         int pointScore = (entity.getPoint() != null) ? entity.getPoint().getPointScore() : 0;
 
         String imageUrl = null;
@@ -68,6 +77,23 @@ public class PurchaseHistoryRes {
                 .pointItemImage(imageUrl)
                 .purchaseAt(entity.getPurchaseAt())
                 .userCurrentPoint(currentPoint)
+                .isUsed(entity.isUsed())
+                .usedAt(entity.getUsedAt())       
                 .build();
+    }
+
+    public PurchaseHistoryRes(PurchaseHistory entity) {
+        PurchaseHistoryRes res = PurchaseHistoryRes.fromEntity(entity);
+        this.purchaseId = res.getPurchaseId();
+        this.userId = res.getUserId();
+        this.userName = res.getUserName();
+        this.pointId = res.getPointId();
+        this.pointItemName = res.getPointItemName();
+        this.pointScore = res.getPointScore();
+        this.pointItemImage = res.getPointItemImage();
+        this.purchaseAt = res.getPurchaseAt();
+        this.userCurrentPoint = res.getUserCurrentPoint();
+        this.isUsed = res.isUsed();
+        this.usedAt = res.getUsedAt();
     }
 }
